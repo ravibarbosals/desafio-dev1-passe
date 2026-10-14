@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { corpoJsonMiddleware } from '@/core/http/corpo-json.middleware';
+import { logRequisicaoMiddleware } from '@/core/http/log-requisicao.middleware';
 import { criarErroValidacao } from '@/core/erros/erro-validacao';
 import { FiltroErroGlobal } from '@/core/erros/filtro-erro-global';
 
@@ -17,6 +18,7 @@ export function configurarApp(app: NestExpressApplication): void {
 
   app.disable('x-powered-by');
   app.setGlobalPrefix('api/v1');
+  app.use(logRequisicaoMiddleware);
   app.use(corpoJsonMiddleware);
   app.enableCors({ origin: [configService.getOrThrow<string>('aplicacao.origemCors')] });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true, exceptionFactory: criarErroValidacao }));
