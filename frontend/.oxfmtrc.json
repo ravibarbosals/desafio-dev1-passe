@@ -4,5 +4,5 @@
   "trailingComma": "all",
   "sortImports": {},
   "sortPackageJson": true,
-  "ignorePatterns": ["dist/**", "coverage/**", "node_modules/**"]
+  "ignorePatterns": ["dist/**", "coverage/**", "node_modules/**", "src/routeTree.gen.ts"]
 }

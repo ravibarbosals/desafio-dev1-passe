@@ -17,10 +17,13 @@
     "verificar": "npm run lint:check && npm run format:check && npm run typecheck && npm test"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.104.2",
+    "@tanstack/react-router": "^1.170.44",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@tanstack/router-plugin": "^1.168.46",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",

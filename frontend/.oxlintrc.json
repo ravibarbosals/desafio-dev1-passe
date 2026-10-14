@@ -9,7 +9,7 @@
     "correctness": "error",
     "suspicious": "warn"
   },
-  "ignorePatterns": ["dist/**", "coverage/**", "node_modules/**"],
+  "ignorePatterns": ["dist/**", "coverage/**", "node_modules/**", "src/routeTree.gen.ts"],
   "rules": {
     "no-var": "error",
     "no-console": "warn",
