@@ -3,6 +3,7 @@
   "sourceMaps": true,
   "exclude": [".*\\.spec\\.ts$"],
   "jsc": {
+    "baseUrl": "./",
     "parser": {
       "syntax": "typescript",
       "decorators": true,
