@@ -6,6 +6,7 @@ import configAplicacao from '@/core/config/aplicacao.config';
 import configBanco from '@/core/config/banco.config';
 import { validarEnv } from '@/core/config/validacao-env';
 import { SaudeModule } from '@/modulos/saude/saude.module';
+import { RelogioModule } from '@/core/comum/relogio/relogio.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { SaudeModule } from '@/modulos/saude/saude.module';
       useFactory: criarOpcoesTypeOrm,
     }),
     SaudeModule,
+    RelogioModule,
   ],
 })
 export class AppModule {}

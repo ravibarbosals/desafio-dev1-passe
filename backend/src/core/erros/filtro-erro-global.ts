@@ -1,7 +1,7 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { STATUS_CODES } from 'node:http';
-import { formatarDataHora } from '@/core/comum/data-hora';
+import { formatarDataHora } from '@/core/comum/data-hora/data-hora';
 import { DetalheErro, RegraNegocioException } from '@/core/erros/regra-negocio.exception';
 
 interface ErroResolvido {
