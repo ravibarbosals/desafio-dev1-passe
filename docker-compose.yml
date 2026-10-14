@@ -17,5 +17,38 @@ services:
       timeout: 5s
       retries: 10
 
+  migrate:
+    image: amacneil/dbmate:2.36.0
+    command: --wait --no-dump-schema up
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/passe?sslmode=disable
+    volumes:
+      - ./backend/db/migrations:/db/migrations:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    build: ./backend
+    environment:
+      TZ: America/Sao_Paulo
+      APP_PORT: 3000
+      CORS_ORIGIN: http://localhost:5173
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_NAME: passe
+    ports:
+      - '127.0.0.1:3000:3000'
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:3000/health']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
 volumes:
   pgdata:
