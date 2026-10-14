@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { criarOpcoesTypeOrm } from '@/core/banco/typeorm.config';
 import configAplicacao from '@/core/config/aplicacao.config';
 import configBanco from '@/core/config/banco.config';
 import { validarEnv } from '@/core/config/validacao-env';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { criarOpcoesTypeOrm } from '@/core/banco/typeorm.config';
+import { SaudeModule } from '@/modulos/saude/saude.module';
 
 @Module({
   imports: [
@@ -19,8 +18,7 @@ import { criarOpcoesTypeOrm } from '@/core/banco/typeorm.config';
       inject: [ConfigService],
       useFactory: criarOpcoesTypeOrm,
     }),
+    SaudeModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}

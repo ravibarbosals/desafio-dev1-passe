@@ -21,7 +21,8 @@ function resolverErro(excecao: unknown): ErroResolvido {
   if (excecao instanceof HttpException && excecao.getStatus() < HttpStatus.INTERNAL_SERVER_ERROR) {
     return { status: excecao.getStatus(), mensagem: 'Requisição inválida.', codigo: 'DADOS_INVALIDOS' };
   }
-  return { status: HttpStatus.INTERNAL_SERVER_ERROR, mensagem: 'Erro interno no servidor.', codigo: 'ERRO_INTERNO' };
+  const status = excecao instanceof HttpException ? excecao.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+  return { status, mensagem: 'Erro interno no servidor.', codigo: 'ERRO_INTERNO' };
 }
 
 // DEC-035: todo erro sai em JSON com message texto, sem stack trace

@@ -1,4 +1,4 @@
-import { ArgumentsHost, BadRequestException, HttpStatus, Logger, NotFoundException } from '@nestjs/common';
+import { ArgumentsHost, BadRequestException, HttpStatus, Logger, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { FiltroErroGlobal } from '@/core/erros/filtro-erro-global';
 import { RegraNegocioException } from '@/core/erros/regra-negocio.exception';
 
@@ -56,5 +56,14 @@ describe('FiltroErroGlobal', () => {
     expect(corpo).toMatchObject({ message: 'Erro interno no servidor.', error: 'Internal Server Error', codigoRegra: 'ERRO_INTERNO' });
     expect(JSON.stringify(corpo)).not.toContain('senha');
     expect(logError).toHaveBeenCalledOnce();
+  });
+
+  it('mantém o status de outro 5xx, como o 503 do healthcheck, com a mensagem genérica', () => {
+    vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
+
+    const { status, corpo } = capturar(new ServiceUnavailableException({ status: 'error', error: { banco: { status: 'down' } } }));
+
+    expect(status).toBe(503);
+    expect(corpo).toMatchObject({ message: 'Erro interno no servidor.', error: 'Service Unavailable', codigoRegra: 'ERRO_INTERNO' });
   });
 });

@@ -17,7 +17,7 @@ export function configurarApp(app: NestExpressApplication): void {
   const configService = app.get(ConfigService);
 
   app.disable('x-powered-by');
-  app.setGlobalPrefix('api/v1');
+  app.setGlobalPrefix('api/v1', { exclude: ['health'] });
   app.use(logRequisicaoMiddleware);
   app.use(corpoJsonMiddleware);
   app.enableCors({ origin: [configService.getOrThrow<string>('aplicacao.origemCors')] });
