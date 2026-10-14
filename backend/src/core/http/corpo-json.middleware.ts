@@ -1,5 +1,6 @@
-import { BadRequestException } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 import { json, NextFunction, Request, Response } from 'express';
+import { RegraNegocioException } from '@/core/erros/regra-negocio.exception';
 
 const metodosComCorpo = new Set(['POST', 'PUT', 'PATCH']);
 
@@ -23,7 +24,7 @@ export function corpoJsonMiddleware(req: Request, res: Response, next: NextFunct
   }
   lerJson(req, res, (erro?: unknown) => {
     if (erro !== undefined || !ehObjetoSimples(req.body)) {
-      next(new BadRequestException('O corpo da requisição deve ser um objeto JSON.'));
+      next(new RegraNegocioException('O corpo da requisição deve ser um objeto JSON.', 'CORPO_INVALIDO', HttpStatus.BAD_REQUEST));
       return;
     }
     next();
