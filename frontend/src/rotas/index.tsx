@@ -5,5 +5,5 @@ export const Route = createFileRoute("/")({
 });
 
 function PaginaInicial() {
-  return <h1>Gestão da liga, do mercado à classificação</h1>;
+  return <h1 className="text-2xl font-semibold">Gestão da liga, do mercado à classificação</h1>;
 }

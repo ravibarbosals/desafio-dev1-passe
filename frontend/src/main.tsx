@@ -4,8 +4,8 @@ import { RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
-import { criarClienteQuery } from "./lib/cliente-query";
-import { criarRoteador } from "./lib/roteador";
+import { criarClienteQuery } from "@/lib/cliente-query";
+import { criarRoteador } from "@/lib/roteador";
 
 const clienteQuery = criarClienteQuery();
 const roteador = criarRoteador();
