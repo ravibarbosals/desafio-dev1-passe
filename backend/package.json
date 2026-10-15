@@ -22,7 +22,7 @@
     "migrate": "dbmate --wait up",
     "rollback": "dbmate down",
     "new": "dbmate new",
-    "recriar-banco": "dbmate drop && dbmate --wait up"
+    "recriar-banco": "docker compose exec -T db psql -U postgres -c 'DROP DATABASE IF EXISTS passe WITH (FORCE)' && dbmate --wait up"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
