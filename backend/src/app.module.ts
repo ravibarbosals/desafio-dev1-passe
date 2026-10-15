@@ -7,8 +7,8 @@ import configBanco from '@/core/config/banco.config';
 import { validarEnv } from '@/core/config/validacao-env';
 import { SaudeModule } from '@/modulos/saude/saude.module';
 import { RelogioModule } from '@/core/comum/relogio/relogio.module';
-import { JogadoresModule } from './modulos/jogadores/module/jogador.module';
-import { ClubesModule } from './modulos/clubes/module/clube.module';
+import { JogadoresModule } from './modulos/jogadores/jogador.module';
+import { ClubesModule } from './modulos/clubes/clube.module';
 import { MercadoModule } from './modulos/mercado/mercado.module';
 
 @Module({

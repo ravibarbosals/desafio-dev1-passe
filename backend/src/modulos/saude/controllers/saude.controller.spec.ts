@@ -1,5 +1,5 @@
 import { HealthCheckService, TypeOrmHealthIndicator } from '@nestjs/terminus';
-import { SaudeController } from '@/modulos/saude/saude.controller';
+import { SaudeController } from '@/modulos/saude/controllers/saude.controller';
 
 describe('SaudeController', () => {
   it('confere a conexão com o banco', async () => {
