@@ -7,6 +7,8 @@ import configBanco from '@/core/config/banco.config';
 import { validarEnv } from '@/core/config/validacao-env';
 import { SaudeModule } from '@/modulos/saude/saude.module';
 import { RelogioModule } from '@/core/comum/relogio/relogio.module';
+import { JogadoresModule } from './modulos/jogadores/module/jogador.module';
+import { ClubesModule } from './modulos/clubes/module/clube.module';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { RelogioModule } from '@/core/comum/relogio/relogio.module';
     }),
     SaudeModule,
     RelogioModule,
+    JogadoresModule,
+    ClubesModule,
   ],
 })
 export class AppModule {}
