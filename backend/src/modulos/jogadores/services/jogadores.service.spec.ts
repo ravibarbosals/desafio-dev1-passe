@@ -248,36 +248,36 @@ describe('JogadoresService.alterarCondicao', () => {
     expect(jogador.condicao).toBe('DOENTE');
     expect(repositorios.manager.save).not.toHaveBeenCalled();
   });
+});
 
-  describe('JogadoresService.excluir', () => {
-    it('trava o jogador ativo e grava excluido_em com o agora do relógio (RN09)', async () => {
-      const repositorios = criarRepositorios();
-      const jogador = criarJogador(7, 'Meia Lua', 4000, { excluidoEm: null });
-      repositorios.manager.findOne.mockResolvedValue(jogador);
-      await expect(criarServico(repositorios).excluir(7)).resolves.toBeUndefined();
-      expect(repositorios.manager.findOne).toHaveBeenCalledWith(Jogador, { where: { id: 7, excluidoEm: IsNull() }, lock: { mode: 'pessimistic_write' } });
-      expect(repositorios.manager.save).toHaveBeenCalledWith(jogador);
-      expect(jogador.excluidoEm).toEqual(new Date('2026-11-02T13:15:00Z'));
-    });
+describe('JogadoresService.excluir', () => {
+  it('trava o jogador ativo e grava excluido_em com o agora do relógio (RN09)', async () => {
+    const repositorios = criarRepositorios();
+    const jogador = criarJogador(7, 'Meia Lua', 4000, { excluidoEm: null });
+    repositorios.manager.findOne.mockResolvedValue(jogador);
+    await expect(criarServico(repositorios).excluir(7)).resolves.toBeUndefined();
+    expect(repositorios.manager.findOne).toHaveBeenCalledWith(Jogador, { where: { id: 7, excluidoEm: IsNull() }, lock: { mode: 'pessimistic_write' } });
+    expect(repositorios.manager.save).toHaveBeenCalledWith(jogador);
+    expect(jogador.excluidoEm).toEqual(new Date('2026-11-02T13:15:00Z'));
+  });
 
-    it('responde 404 JOGADOR_NAO_ENCONTRADO para inexistente ou já excluído, sem gravar', async () => {
-      const repositorios = criarRepositorios();
-      repositorios.manager.findOne.mockResolvedValue(null);
-      await expect(criarServico(repositorios).excluir(7)).rejects.toMatchObject({ codigo: 'JOGADOR_NAO_ENCONTRADO', status: 404 });
-      expect(repositorios.manager.save).not.toHaveBeenCalled();
-    });
+  it('responde 404 JOGADOR_NAO_ENCONTRADO para inexistente ou já excluído, sem gravar', async () => {
+    const repositorios = criarRepositorios();
+    repositorios.manager.findOne.mockResolvedValue(null);
+    await expect(criarServico(repositorios).excluir(7)).rejects.toMatchObject({ codigo: 'JOGADOR_NAO_ENCONTRADO', status: 404 });
+    expect(repositorios.manager.save).not.toHaveBeenCalled();
+  });
 
-    it('recusa jogador com clube, com 409 JOGADOR_COM_CLUBE_NAO_PODE_SER_EXCLUIDO e excluido_em nulo', async () => {
-      const repositorios = criarRepositorios();
-      const jogador = criarJogador(7, 'Meia Lua', 4000, { clubeId: 3, excluidoEm: null });
-      repositorios.manager.findOne.mockResolvedValue(jogador);
-      await expect(criarServico(repositorios).excluir(7)).rejects.toMatchObject({
-        codigo: 'JOGADOR_COM_CLUBE_NAO_PODE_SER_EXCLUIDO',
-        status: 409,
-        message: 'Jogador com clube não pode ser excluído; venda-o antes.',
-      });
-      expect(jogador.excluidoEm).toBeNull();
-      expect(repositorios.manager.save).not.toHaveBeenCalled();
+  it('recusa jogador com clube, com 409 JOGADOR_COM_CLUBE_NAO_PODE_SER_EXCLUIDO e excluido_em nulo', async () => {
+    const repositorios = criarRepositorios();
+    const jogador = criarJogador(7, 'Meia Lua', 4000, { clubeId: 3, excluidoEm: null });
+    repositorios.manager.findOne.mockResolvedValue(jogador);
+    await expect(criarServico(repositorios).excluir(7)).rejects.toMatchObject({
+      codigo: 'JOGADOR_COM_CLUBE_NAO_PODE_SER_EXCLUIDO',
+      status: 409,
+      message: 'Jogador com clube não pode ser excluído; venda-o antes.',
     });
+    expect(jogador.excluidoEm).toBeNull();
+    expect(repositorios.manager.save).not.toHaveBeenCalled();
   });
 });

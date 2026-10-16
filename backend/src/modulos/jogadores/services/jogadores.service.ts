@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, DataSource, EntityManager, FindOptionsWhere, IsNull, Not, Repository } from 'typeorm';
 import { contemTexto } from '@/core/comum/texto/texto';
-import { criarErroNaoEncontrado } from '@/core/erros/nao-encontrado';
 import { Relogio } from '@/core/comum/relogio/relogio';
+import { criarErroNaoEncontrado } from '@/core/erros/nao-encontrado';
 import { RegraNegocioException } from '@/core/erros/regra-negocio.exception';
 import { Clube } from '@/modulos/clubes/entities/clube.entity';
 import { AlterarCondicaoDto } from '@/modulos/jogadores/dto/alterar-condicao.dto';
@@ -133,6 +133,7 @@ export class JogadoresService {
     });
   }
 
+  // RN09: exclusão lógica, só de jogador livre; depois disso ele é inexistente (404) em toda a API
   async excluir(id: number): Promise<void> {
     await this.dataSource.transaction(async (manager) => {
       const jogador = await this.travarJogador(manager, id);
