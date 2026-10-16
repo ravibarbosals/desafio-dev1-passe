@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Param, Patch, Post, Put, Query, Res } from '@nestjs/common';
-import { ApiBadRequestResponse, ApiConflictResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Put, Query, Res } from '@nestjs/common';
+import { ApiBadRequestResponse, ApiConflictResponse, ApiCreatedResponse, ApiNoContentResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { RECURSOS_NAO_ENCONTRADOS } from '@/core/erros/nao-encontrado';
 import { IdDaUrlPipe } from '@/core/http/id-da-url.pipe';
@@ -58,5 +58,14 @@ export class JogadoresController {
   @ApiConflictResponse({ description: 'De DOENTE direto para APTO (DOENTE_NAO_VAI_DIRETO_PARA_APTO)' })
   async alterarCondicao(@Param('id', idDoJogador) id: number, @Body() dados: AlterarCondicaoDto): Promise<JogadorRespostaDto> {
     return criarJogadorResposta(await this.jogadoresService.alterarCondicao(id, dados));
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiNoContentResponse({ description: 'Jogador excluído (exclusão lógica)' })
+  @ApiNotFoundResponse({ description: 'Id inexistente, fora do formato ou de jogador já excluído' })
+  @ApiConflictResponse({ description: 'Jogador com clube (JOGADOR_COM_CLUBE_NAO_PODE_SER_EXCLUIDO)' })
+  async excluir(@Param('id', idDoJogador) id: number): Promise<void> {
+    await this.jogadoresService.excluir(id);
   }
 }

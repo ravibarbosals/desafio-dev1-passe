@@ -29,6 +29,7 @@ function criarController() {
     consultar: vi.fn().mockResolvedValue(jogador),
     editar: vi.fn().mockResolvedValue(jogador),
     alterarCondicao: vi.fn().mockResolvedValue(jogador),
+    excluir: vi.fn().mockResolvedValue(undefined),
     listar: vi.fn().mockResolvedValue({ itens: [jogador], pagina: 1, limite: 10, totalDeItens: 1, totalDePaginas: 1 }),
   };
   return { servico, controller: new JogadoresController(servico as unknown as JogadoresService) };
@@ -68,5 +69,11 @@ describe('JogadoresController', () => {
     const { controller, servico } = criarController();
     await expect(controller.alterarCondicao(2, { condition: 'APTO' })).resolves.toMatchObject({ id: 2, condition: 'APTO', market_value: 40 });
     expect(servico.alterarCondicao).toHaveBeenCalledWith(2, { condition: 'APTO' });
+  });
+
+  it('exclui pelo id e não devolve corpo', async () => {
+    const { controller, servico } = criarController();
+    await expect(controller.excluir(2)).resolves.toBeUndefined();
+    expect(servico.excluir).toHaveBeenCalledWith(2);
   });
 });

@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Between, DataSource, EntityManager, FindOptionsWhere, IsNull, Not, Repository } from 'typeorm';
 import { contemTexto } from '@/core/comum/texto/texto';
 import { criarErroNaoEncontrado } from '@/core/erros/nao-encontrado';
+import { Relogio } from '@/core/comum/relogio/relogio';
 import { RegraNegocioException } from '@/core/erros/regra-negocio.exception';
 import { Clube } from '@/modulos/clubes/entities/clube.entity';
 import { AlterarCondicaoDto } from '@/modulos/jogadores/dto/alterar-condicao.dto';
@@ -46,6 +47,7 @@ export class JogadoresService {
     @InjectRepository(Jogador) private readonly jogadores: Repository<Jogador>,
     @InjectRepository(Clube) private readonly clubes: Repository<Clube>,
     private readonly dataSource: DataSource,
+    private readonly relogio: Relogio,
   ) {}
 
   // Nasce livre e APTO (default do banco); o valor base usa o overall da posição e a idade do cadastro e não é recalculado (RN06)
@@ -128,6 +130,17 @@ export class JogadoresService {
       }
       jogador.condicao = dados.condition;
       return manager.save(jogador);
+    });
+  }
+
+  async excluir(id: number): Promise<void> {
+    await this.dataSource.transaction(async (manager) => {
+      const jogador = await this.travarJogador(manager, id);
+      if (jogador.clubeId !== null) {
+        throw new RegraNegocioException('Jogador com clube não pode ser excluído; venda-o antes.', 'JOGADOR_COM_CLUBE_NAO_PODE_SER_EXCLUIDO');
+      }
+      jogador.excluidoEm = this.relogio.agora();
+      await manager.save(jogador);
     });
   }
 

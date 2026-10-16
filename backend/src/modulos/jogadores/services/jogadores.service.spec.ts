@@ -1,4 +1,5 @@
 import { Between, DataSource, IsNull, Not, Repository } from 'typeorm';
+import { Relogio } from '@/core/comum/relogio/relogio';
 import { RegraNegocioException } from '@/core/erros/regra-negocio.exception';
 import { Clube } from '@/modulos/clubes/entities/clube.entity';
 import { CriarJogadorDto } from '@/modulos/jogadores/dto/criar-jogador.dto';
@@ -20,11 +21,12 @@ function criarRepositorios() {
   // A transação simulada só executa o trabalho com o manager; save devolve o jogador recebido
   const manager = { findOne: vi.fn(), save: vi.fn((jogador: Jogador) => Promise.resolve(jogador)), delete: vi.fn() };
   const dataSource = { transaction: vi.fn((trabalho: (gerenciador: typeof manager) => Promise<unknown>) => trabalho(manager)) };
-  return { jogadores, clubes, manager, dataSource };
+  const relogio = { agora: vi.fn(() => new Date('2026-11-02T13:15:00Z')) };
+  return { jogadores, clubes, manager, dataSource, relogio };
 }
 
-function criarServico({ jogadores, clubes, dataSource }: ReturnType<typeof criarRepositorios>): JogadoresService {
-  return new JogadoresService(jogadores as unknown as Repository<Jogador>, clubes as unknown as Repository<Clube>, dataSource as unknown as DataSource);
+function criarServico({ jogadores, clubes, dataSource, relogio }: ReturnType<typeof criarRepositorios>): JogadoresService {
+  return new JogadoresService(jogadores as unknown as Repository<Jogador>, clubes as unknown as Repository<Clube>, dataSource as unknown as DataSource, relogio as Relogio);
 }
 
 // Jogador APTO de 25 anos: o valor de mercado é igual ao valor base
@@ -245,5 +247,37 @@ describe('JogadoresService.alterarCondicao', () => {
     });
     expect(jogador.condicao).toBe('DOENTE');
     expect(repositorios.manager.save).not.toHaveBeenCalled();
+  });
+
+  describe('JogadoresService.excluir', () => {
+    it('trava o jogador ativo e grava excluido_em com o agora do relógio (RN09)', async () => {
+      const repositorios = criarRepositorios();
+      const jogador = criarJogador(7, 'Meia Lua', 4000, { excluidoEm: null });
+      repositorios.manager.findOne.mockResolvedValue(jogador);
+      await expect(criarServico(repositorios).excluir(7)).resolves.toBeUndefined();
+      expect(repositorios.manager.findOne).toHaveBeenCalledWith(Jogador, { where: { id: 7, excluidoEm: IsNull() }, lock: { mode: 'pessimistic_write' } });
+      expect(repositorios.manager.save).toHaveBeenCalledWith(jogador);
+      expect(jogador.excluidoEm).toEqual(new Date('2026-11-02T13:15:00Z'));
+    });
+
+    it('responde 404 JOGADOR_NAO_ENCONTRADO para inexistente ou já excluído, sem gravar', async () => {
+      const repositorios = criarRepositorios();
+      repositorios.manager.findOne.mockResolvedValue(null);
+      await expect(criarServico(repositorios).excluir(7)).rejects.toMatchObject({ codigo: 'JOGADOR_NAO_ENCONTRADO', status: 404 });
+      expect(repositorios.manager.save).not.toHaveBeenCalled();
+    });
+
+    it('recusa jogador com clube, com 409 JOGADOR_COM_CLUBE_NAO_PODE_SER_EXCLUIDO e excluido_em nulo', async () => {
+      const repositorios = criarRepositorios();
+      const jogador = criarJogador(7, 'Meia Lua', 4000, { clubeId: 3, excluidoEm: null });
+      repositorios.manager.findOne.mockResolvedValue(jogador);
+      await expect(criarServico(repositorios).excluir(7)).rejects.toMatchObject({
+        codigo: 'JOGADOR_COM_CLUBE_NAO_PODE_SER_EXCLUIDO',
+        status: 409,
+        message: 'Jogador com clube não pode ser excluído; venda-o antes.',
+      });
+      expect(jogador.excluidoEm).toBeNull();
+      expect(repositorios.manager.save).not.toHaveBeenCalled();
+    });
   });
 });
