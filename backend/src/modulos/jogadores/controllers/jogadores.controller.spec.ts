@@ -23,7 +23,11 @@ const jogador = Object.assign(new Jogador(), {
 });
 
 function criarController() {
-  const servico = { cadastrar: vi.fn().mockResolvedValue(jogador), consultar: vi.fn().mockResolvedValue(jogador) };
+  const servico = {
+    cadastrar: vi.fn().mockResolvedValue(jogador),
+    consultar: vi.fn().mockResolvedValue(jogador),
+    listar: vi.fn().mockResolvedValue({ itens: [jogador], pagina: 1, limite: 10, totalDeItens: 1, totalDePaginas: 1 }),
+  };
   return { servico, controller: new JogadoresController(servico as unknown as JogadoresService) };
 }
 
@@ -40,5 +44,13 @@ describe('JogadoresController', () => {
     const { controller, servico } = criarController();
     await expect(controller.consultar(2)).resolves.toMatchObject({ id: 2, name: 'Meia Lua', condition: 'APTO' });
     expect(servico.consultar).toHaveBeenCalledWith(2);
+  });
+
+  it('lista com os filtros recebidos e responde com data e meta', async () => {
+    const { controller, servico } = criarController();
+    const resposta = await controller.listar({ position: 'MEI' });
+    expect(servico.listar).toHaveBeenCalledWith({ position: 'MEI' });
+    expect(resposta.meta).toEqual({ page: 1, limit: 10, total_items: 1, total_pages: 1 });
+    expect(resposta.data[0]).toMatchObject({ id: 2, name: 'Meia Lua' });
   });
 });

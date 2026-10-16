@@ -1,17 +1,28 @@
-import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
+import { RECURSOS_NAO_ENCONTRADOS } from '@/core/erros/nao-encontrado';
 import { IdDaUrlPipe } from '@/core/http/id-da-url.pipe';
 import { CriarJogadorDto } from '@/modulos/jogadores/dto/criar-jogador.dto';
 import { criarJogadorResposta, JogadorRespostaDto } from '@/modulos/jogadores/dto/jogador-resposta.dto';
-import { CODIGO_JOGADOR_NAO_ENCONTRADO, JogadoresService, MENSAGEM_JOGADOR_NAO_ENCONTRADO } from '@/modulos/jogadores/services/jogadores.service';
+import { criarListaDeJogadoresResposta, ListaDeJogadoresRespostaDto } from '@/modulos/jogadores/dto/lista-de-jogadores-resposta.dto';
+import { ListarJogadoresQueryDto } from '@/modulos/jogadores/dto/listar-jogadores-query.dto';
+import { JogadoresService } from '@/modulos/jogadores/services/jogadores.service';
 
-const idDoJogador = new IdDaUrlPipe(CODIGO_JOGADOR_NAO_ENCONTRADO, MENSAGEM_JOGADOR_NAO_ENCONTRADO);
+const idDoJogador = new IdDaUrlPipe(RECURSOS_NAO_ENCONTRADOS.jogador.codigo, RECURSOS_NAO_ENCONTRADOS.jogador.mensagem);
 
 @ApiTags('Jogadores')
 @Controller('players')
 export class JogadoresController {
   constructor(private readonly jogadoresService: JogadoresService) {}
+
+  @Get()
+  @ApiOkResponse({ type: ListaDeJogadoresRespostaDto })
+  @ApiBadRequestResponse({ description: 'Parâmetro fora do formato ou combinação contraditória' })
+  @ApiNotFoundResponse({ description: 'club_id de clube inexistente' })
+  async listar(@Query() filtros: ListarJogadoresQueryDto): Promise<ListaDeJogadoresRespostaDto> {
+    return criarListaDeJogadoresResposta(await this.jogadoresService.listar(filtros));
+  }
 
   @Post()
   @ApiCreatedResponse({ type: JogadorRespostaDto, description: 'Jogador criado, livre e APTO', headers: { Location: { description: '/api/v1/players/{id}' } } })
