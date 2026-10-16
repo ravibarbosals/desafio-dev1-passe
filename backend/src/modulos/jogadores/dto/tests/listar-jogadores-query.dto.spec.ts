@@ -1,5 +1,5 @@
 import { criarValidationPipe } from '@/core/validacao/criar-validation-pipe';
-import { ListarJogadoresQueryDto } from '@/modulos/jogadores/dto/lista-jogadores-query.dto';
+import { ListarJogadoresQueryDto } from '@/modulos/jogadores/dto/listar-jogadores-query.dto';
 
 function validar(query: object): Promise<ListarJogadoresQueryDto> {
   return criarValidationPipe().transform(query, { type: 'query', metatype: ListarJogadoresQueryDto }) as Promise<ListarJogadoresQueryDto>;
