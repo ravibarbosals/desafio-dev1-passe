@@ -78,10 +78,13 @@ describe('CriarJogadorDto', () => {
     ['35 anos com agilidade 86', { age: 35, agility: 86, potential: 82 }, 'agility'],
     ['idade 15', { age: 15 }, 'age'],
     ['idade 46', { age: 46, agility: 80, potential: 82 }, 'age'],
-    ['atributo 0', { pace: 0 }, 'pace'],
-    ['atributo 100', { pace: 100 }, 'pace'],
   ])('recusa %s', async (_caso, campos, campoRecusado) => {
     await expect(listarCamposRecusados(com(campos))).resolves.toContain(campoRecusado);
+  });
+
+  it.each(['pace', 'shooting', 'passing', 'dribbling', 'defending', 'physical', 'potential'])('recusa %s com 0 e com 100 (limite de 1 a 99)', async (campo) => {
+    await expect(listarCamposRecusados(com({ [campo]: 0 }))).resolves.toContain(campo);
+    await expect(listarCamposRecusados(com({ [campo]: 100 }))).resolves.toContain(campo);
   });
 
   it.each(['name', 'position', 'agility', 'age', 'pace', 'potential'])('recusa o corpo sem %s (V6)', async (campo) => {

@@ -56,6 +56,13 @@ describe('criarJogadorResposta', () => {
     expect(resposta).toMatchObject({ base_value: 40, market_value: 37 });
   });
 
+  it.each([
+    [21, 110],
+    [22, 100],
+  ])('usa a idade atual no valor de mercado: %d anos → %d', (idade, valorDeMercado) => {
+    expect(criarJogadorResposta(criarJogador({ valorBase: 10000, idade }))).toMatchObject({ base_value: 100, market_value: valorDeMercado });
+  });
+
   it('calcula o overall pela posição atual', () => {
     expect(criarJogadorResposta(criarJogador({ posicao: 'ATA' })).overall).toBe(72);
   });
