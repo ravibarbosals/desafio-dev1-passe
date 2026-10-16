@@ -1,6 +1,7 @@
 import type { Response } from 'express';
 import { JogadoresController } from '@/modulos/jogadores/controllers/jogadores.controller';
 import { CriarJogadorDto } from '@/modulos/jogadores/dto/criar-jogador.dto';
+import { EditarJogadorDto } from '@/modulos/jogadores/dto/editar-jogador.dto';
 import { Jogador } from '@/modulos/jogadores/entities/jogador.entity';
 import { JogadoresService } from '@/modulos/jogadores/services/jogadores.service';
 
@@ -26,6 +27,7 @@ function criarController() {
   const servico = {
     cadastrar: vi.fn().mockResolvedValue(jogador),
     consultar: vi.fn().mockResolvedValue(jogador),
+    editar: vi.fn().mockResolvedValue(jogador),
     listar: vi.fn().mockResolvedValue({ itens: [jogador], pagina: 1, limite: 10, totalDeItens: 1, totalDePaginas: 1 }),
   };
   return { servico, controller: new JogadoresController(servico as unknown as JogadoresService) };
@@ -52,5 +54,12 @@ describe('JogadoresController', () => {
     expect(servico.listar).toHaveBeenCalledWith({ position: 'MEI' });
     expect(resposta.meta).toEqual({ page: 1, limit: 10, total_items: 1, total_pages: 1 });
     expect(resposta.data[0]).toMatchObject({ id: 2, name: 'Meia Lua' });
+  });
+
+  it('edita pelo id com o corpo recebido e responde no formato da API', async () => {
+    const { controller, servico } = criarController();
+    const dados = { name: 'Meia Lua', position: 'MEI', agility: 85, age: 25 } satisfies EditarJogadorDto;
+    await expect(controller.editar(2, dados)).resolves.toMatchObject({ id: 2, name: 'Meia Lua', overall: 75, base_value: 40 });
+    expect(servico.editar).toHaveBeenCalledWith(2, dados);
   });
 });

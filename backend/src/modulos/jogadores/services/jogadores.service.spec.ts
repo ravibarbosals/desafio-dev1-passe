@@ -1,7 +1,8 @@
-import { Between, IsNull, Not, Repository } from 'typeorm';
+import { Between, DataSource, IsNull, Not, Repository } from 'typeorm';
 import { RegraNegocioException } from '@/core/erros/regra-negocio.exception';
 import { Clube } from '@/modulos/clubes/entities/clube.entity';
 import { CriarJogadorDto } from '@/modulos/jogadores/dto/criar-jogador.dto';
+import { EditarJogadorDto } from '@/modulos/jogadores/dto/editar-jogador.dto';
 import { Jogador } from '@/modulos/jogadores/entities/jogador.entity';
 import { JogadoresService } from '@/modulos/jogadores/services/jogadores.service';
 
@@ -14,11 +15,14 @@ function criarRepositorios() {
     find: vi.fn().mockResolvedValue([]),
   };
   const clubes = { existsBy: vi.fn().mockResolvedValue(true) };
-  return { jogadores, clubes };
+  // A transação simulada só executa o trabalho com o manager; save devolve o jogador recebido
+  const manager = { findOne: vi.fn(), save: vi.fn((jogador: Jogador) => Promise.resolve(jogador)) };
+  const dataSource = { transaction: vi.fn((trabalho: (gerenciador: typeof manager) => Promise<unknown>) => trabalho(manager)) };
+  return { jogadores, clubes, manager, dataSource };
 }
 
-function criarServico({ jogadores, clubes }: ReturnType<typeof criarRepositorios>): JogadoresService {
-  return new JogadoresService(jogadores as unknown as Repository<Jogador>, clubes as unknown as Repository<Clube>);
+function criarServico({ jogadores, clubes, dataSource }: ReturnType<typeof criarRepositorios>): JogadoresService {
+  return new JogadoresService(jogadores as unknown as Repository<Jogador>, clubes as unknown as Repository<Clube>, dataSource as unknown as DataSource);
 }
 
 // Jogador APTO de 25 anos: o valor de mercado é igual ao valor base
@@ -140,5 +144,51 @@ describe('JogadoresService.listar', () => {
     repositorios.jogadores.find.mockResolvedValue([criarJogador(1, 'Base Alta', 5000, { condicao: 'DOENTE' }), criarJogador(2, 'Base Baixa', 4000)]);
     const pagina = await criarServico(repositorios).listar({ sort: ['value_desc'] });
     expect(pagina.itens.map((jogador) => jogador.id)).toEqual([2, 1]);
+  });
+});
+
+describe('JogadoresService.editar', () => {
+  const edicao = { name: 'Davi Melo', position: 'ZAG', agility: 70, age: 26 } satisfies EditarJogadorDto;
+
+  it('trava o jogador ativo e grava só os quatro campos editáveis (RN08)', async () => {
+    const repositorios = criarRepositorios();
+    repositorios.manager.findOne.mockResolvedValue(criarJogador(7, 'Meia Lua', 4000, { potencial: 86, velocidade: 70 }));
+    const jogador = await criarServico(repositorios).editar(7, edicao);
+    expect(repositorios.manager.findOne).toHaveBeenCalledWith(Jogador, { where: { id: 7, excluidoEm: IsNull() }, lock: { mode: 'pessimistic_write' } });
+    expect(repositorios.manager.save).toHaveBeenCalledWith(jogador);
+    expect(jogador).toMatchObject({ id: 7, nome: 'Davi Melo', posicao: 'ZAG', agilidade: 70, idade: 26, valorBase: 4000, potencial: 86, velocidade: 70 });
+  });
+
+  it('responde 404 JOGADOR_NAO_ENCONTRADO para inexistente ou excluído, sem gravar', async () => {
+    const repositorios = criarRepositorios();
+    repositorios.manager.findOne.mockResolvedValue(null);
+    await expect(criarServico(repositorios).editar(7, edicao)).rejects.toMatchObject({ codigo: 'JOGADOR_NAO_ENCONTRADO', status: 404 });
+    expect(repositorios.manager.save).not.toHaveBeenCalled();
+  });
+
+  it('aceita a mesma posição em jogador com clube (PR-003)', async () => {
+    const repositorios = criarRepositorios();
+    repositorios.manager.findOne.mockResolvedValue(criarJogador(7, 'Meia Lua', 4000, { posicao: 'ZAG', clubeId: 3 }));
+    await expect(criarServico(repositorios).editar(7, edicao)).resolves.toMatchObject({ posicao: 'ZAG', clubeId: 3 });
+  });
+
+  it('recusa posição diferente em jogador com clube, com 409 POSICAO_BLOQUEADA_COM_CLUBE e nada gravado', async () => {
+    const repositorios = criarRepositorios();
+    repositorios.manager.findOne.mockResolvedValue(criarJogador(7, 'Meia Lua', 4000, { clubeId: 3 }));
+    await expect(criarServico(repositorios).editar(7, edicao)).rejects.toMatchObject({ codigo: 'POSICAO_BLOQUEADA_COM_CLUBE', status: 409 });
+    expect(repositorios.manager.save).not.toHaveBeenCalled();
+  });
+
+  it('aceita idade igual à atual', async () => {
+    const repositorios = criarRepositorios();
+    repositorios.manager.findOne.mockResolvedValue(criarJogador(7, 'Meia Lua', 4000, { idade: 26 }));
+    await expect(criarServico(repositorios).editar(7, edicao)).resolves.toMatchObject({ idade: 26 });
+  });
+
+  it('recusa idade menor que a atual, com 409 IDADE_NAO_PODE_DIMINUIR e nada gravado', async () => {
+    const repositorios = criarRepositorios();
+    repositorios.manager.findOne.mockResolvedValue(criarJogador(7, 'Meia Lua', 4000, { idade: 27 }));
+    await expect(criarServico(repositorios).editar(7, edicao)).rejects.toMatchObject({ codigo: 'IDADE_NAO_PODE_DIMINUIR', status: 409 });
+    expect(repositorios.manager.save).not.toHaveBeenCalled();
   });
 });

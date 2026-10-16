@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
-import { ApiBadRequestResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Post, Put, Query, Res } from '@nestjs/common';
+import { ApiBadRequestResponse, ApiConflictResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { RECURSOS_NAO_ENCONTRADOS } from '@/core/erros/nao-encontrado';
 import { IdDaUrlPipe } from '@/core/http/id-da-url.pipe';
 import { CriarJogadorDto } from '@/modulos/jogadores/dto/criar-jogador.dto';
+import { EditarJogadorDto } from '@/modulos/jogadores/dto/editar-jogador.dto';
 import { criarJogadorResposta, JogadorRespostaDto } from '@/modulos/jogadores/dto/jogador-resposta.dto';
 import { criarListaDeJogadoresResposta, ListaDeJogadoresRespostaDto } from '@/modulos/jogadores/dto/lista-de-jogadores-resposta.dto';
 import { ListarJogadoresQueryDto } from '@/modulos/jogadores/dto/listar-jogadores-query.dto';
@@ -38,5 +39,14 @@ export class JogadoresController {
   @ApiNotFoundResponse({ description: 'Id inexistente, fora do formato ou de jogador excluído' })
   async consultar(@Param('id', idDoJogador) id: number): Promise<JogadorRespostaDto> {
     return criarJogadorResposta(await this.jogadoresService.consultar(id));
+  }
+
+  @Put(':id')
+  @ApiOkResponse({ type: JogadorRespostaDto })
+  @ApiBadRequestResponse({ description: 'Corpo fora do formato ou dos limites; os quatro campos são obrigatórios' })
+  @ApiNotFoundResponse({ description: 'Id inexistente, fora do formato ou de jogador excluído' })
+  @ApiConflictResponse({ description: 'Posição diferente em jogador com clube (POSICAO_BLOQUEADA_COM_CLUBE) ou idade menor que a atual (IDADE_NAO_PODE_DIMINUIR)' })
+  async editar(@Param('id', idDoJogador) id: number, @Body() dados: EditarJogadorDto): Promise<JogadorRespostaDto> {
+    return criarJogadorResposta(await this.jogadoresService.editar(id, dados));
   }
 }
