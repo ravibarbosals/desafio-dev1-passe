@@ -28,6 +28,7 @@ function criarController() {
     cadastrar: vi.fn().mockResolvedValue(jogador),
     consultar: vi.fn().mockResolvedValue(jogador),
     editar: vi.fn().mockResolvedValue(jogador),
+    alterarCondicao: vi.fn().mockResolvedValue(jogador),
     listar: vi.fn().mockResolvedValue({ itens: [jogador], pagina: 1, limite: 10, totalDeItens: 1, totalDePaginas: 1 }),
   };
   return { servico, controller: new JogadoresController(servico as unknown as JogadoresService) };
@@ -61,5 +62,11 @@ describe('JogadoresController', () => {
     const dados = { name: 'Meia Lua', position: 'MEI', agility: 85, age: 25 } satisfies EditarJogadorDto;
     await expect(controller.editar(2, dados)).resolves.toMatchObject({ id: 2, name: 'Meia Lua', overall: 75, base_value: 40 });
     expect(servico.editar).toHaveBeenCalledWith(2, dados);
+  });
+
+  it('altera a condição pelo id e responde no formato da API', async () => {
+    const { controller, servico } = criarController();
+    await expect(controller.alterarCondicao(2, { condition: 'APTO' })).resolves.toMatchObject({ id: 2, condition: 'APTO', market_value: 40 });
+    expect(servico.alterarCondicao).toHaveBeenCalledWith(2, { condition: 'APTO' });
   });
 });

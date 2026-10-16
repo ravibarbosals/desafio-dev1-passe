@@ -4,7 +4,9 @@ import { Clube } from '@/modulos/clubes/entities/clube.entity';
 import { CriarJogadorDto } from '@/modulos/jogadores/dto/criar-jogador.dto';
 import { EditarJogadorDto } from '@/modulos/jogadores/dto/editar-jogador.dto';
 import { Jogador } from '@/modulos/jogadores/entities/jogador.entity';
+import type { CondicaoJogador } from '@/modulos/jogadores/entities/jogador.entity';
 import { JogadoresService } from '@/modulos/jogadores/services/jogadores.service';
+import { Escalacao } from '@/modulos/liga/entities/escalacao.entity';
 
 // Repositórios simulados: create devolve a entity, save devolve o que receberia do banco
 function criarRepositorios() {
@@ -16,7 +18,7 @@ function criarRepositorios() {
   };
   const clubes = { existsBy: vi.fn().mockResolvedValue(true) };
   // A transação simulada só executa o trabalho com o manager; save devolve o jogador recebido
-  const manager = { findOne: vi.fn(), save: vi.fn((jogador: Jogador) => Promise.resolve(jogador)) };
+  const manager = { findOne: vi.fn(), save: vi.fn((jogador: Jogador) => Promise.resolve(jogador)), delete: vi.fn() };
   const dataSource = { transaction: vi.fn((trabalho: (gerenciador: typeof manager) => Promise<unknown>) => trabalho(manager)) };
   return { jogadores, clubes, manager, dataSource };
 }
@@ -189,6 +191,59 @@ describe('JogadoresService.editar', () => {
     const repositorios = criarRepositorios();
     repositorios.manager.findOne.mockResolvedValue(criarJogador(7, 'Meia Lua', 4000, { idade: 27 }));
     await expect(criarServico(repositorios).editar(7, edicao)).rejects.toMatchObject({ codigo: 'IDADE_NAO_PODE_DIMINUIR', status: 409 });
+    expect(repositorios.manager.save).not.toHaveBeenCalled();
+  });
+});
+
+describe('JogadoresService.alterarCondicao', () => {
+  it('trava o jogador ativo e grava a nova condição', async () => {
+    const repositorios = criarRepositorios();
+    repositorios.manager.findOne.mockResolvedValue(criarJogador(7, 'Meia Lua', 4000));
+    const jogador = await criarServico(repositorios).alterarCondicao(7, { condition: 'MAL_CONDICIONADO' });
+    expect(repositorios.manager.findOne).toHaveBeenCalledWith(Jogador, { where: { id: 7, excluidoEm: IsNull() }, lock: { mode: 'pessimistic_write' } });
+    expect(repositorios.manager.save).toHaveBeenCalledWith(jogador);
+    expect(jogador.condicao).toBe('MAL_CONDICIONADO');
+  });
+
+  it('responde 404 JOGADOR_NAO_ENCONTRADO para inexistente ou excluído, sem gravar', async () => {
+    const repositorios = criarRepositorios();
+    repositorios.manager.findOne.mockResolvedValue(null);
+    await expect(criarServico(repositorios).alterarCondicao(7, { condition: 'DOENTE' })).rejects.toMatchObject({ codigo: 'JOGADOR_NAO_ENCONTRADO', status: 404 });
+    expect(repositorios.manager.delete).not.toHaveBeenCalled();
+    expect(repositorios.manager.save).not.toHaveBeenCalled();
+  });
+
+  // Tabela de transições de regras-negocio/jogadores.md; só DOENTE → APTO é recusada
+  it.each<[CondicaoJogador, CondicaoJogador]>([
+    ['APTO', 'APTO'],
+    ['APTO', 'MAL_CONDICIONADO'],
+    ['MAL_CONDICIONADO', 'APTO'],
+    ['MAL_CONDICIONADO', 'MAL_CONDICIONADO'],
+    ['DOENTE', 'MAL_CONDICIONADO'],
+  ])('de %s para %s: aceita, sem mexer na escalação', async (atual, nova) => {
+    const repositorios = criarRepositorios();
+    repositorios.manager.findOne.mockResolvedValue(criarJogador(7, 'Meia Lua', 4000, { condicao: atual }));
+    await expect(criarServico(repositorios).alterarCondicao(7, { condition: nova })).resolves.toMatchObject({ condicao: nova });
+    expect(repositorios.manager.delete).not.toHaveBeenCalled();
+  });
+
+  it.each<CondicaoJogador>(['APTO', 'MAL_CONDICIONADO', 'DOENTE'])('de %s para DOENTE: aceita e tira o jogador da escalação (RN19.5)', async (atual) => {
+    const repositorios = criarRepositorios();
+    repositorios.manager.findOne.mockResolvedValue(criarJogador(7, 'Meia Lua', 4000, { condicao: atual, clubeId: 3 }));
+    await expect(criarServico(repositorios).alterarCondicao(7, { condition: 'DOENTE' })).resolves.toMatchObject({ condicao: 'DOENTE', clubeId: 3 });
+    expect(repositorios.manager.delete).toHaveBeenCalledWith(Escalacao, { jogadorId: 7 });
+  });
+
+  it('recusa DOENTE direto para APTO, com 409 DOENTE_NAO_VAI_DIRETO_PARA_APTO e nada gravado', async () => {
+    const repositorios = criarRepositorios();
+    const jogador = criarJogador(7, 'Meia Lua', 4000, { condicao: 'DOENTE' });
+    repositorios.manager.findOne.mockResolvedValue(jogador);
+    await expect(criarServico(repositorios).alterarCondicao(7, { condition: 'APTO' })).rejects.toMatchObject({
+      codigo: 'DOENTE_NAO_VAI_DIRETO_PARA_APTO',
+      status: 409,
+      message: 'Jogador doente precisa passar por MAL_CONDICIONADO antes de voltar a APTO.',
+    });
+    expect(jogador.condicao).toBe('DOENTE');
     expect(repositorios.manager.save).not.toHaveBeenCalled();
   });
 });
