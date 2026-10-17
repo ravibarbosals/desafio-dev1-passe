@@ -1,4 +1,4 @@
-import { centavosParaNumero, decimalParaCentavos } from '@/core/comum/moeda/moeda';
+import { centavosParaNumero, decimalParaCentavos, formatarCentavos } from '@/core/comum/moeda/moeda';
 
 describe('centavosParaNumero', () => {
   it.each([
@@ -29,5 +29,18 @@ describe('decimalParaCentavos', () => {
 
   it.each(['', 'abc', '1.234', '1,50', '.5', '1e3'])('recusa %j', (texto) => {
     expect(() => decimalParaCentavos(texto)).toThrow(RangeError);
+  });
+});
+
+describe('formatarCentavos', () => {
+  it.each([
+    [5040, '50,40'],
+    [30000, '300,00'],
+    [5, '0,05'],
+    [0, '0,00'],
+    [-3885, '-38,85'],
+    [-39, '-0,39'],
+  ])('%d centavos → %s', (centavos, esperado) => {
+    expect(formatarCentavos(centavos)).toBe(esperado);
   });
 });

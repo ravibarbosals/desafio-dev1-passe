@@ -15,3 +15,10 @@ export function decimalParaCentavos(texto: string): number {
   const centavos = Number(inteiros) * 100 + Number(decimais.padEnd(2, '0'));
   return sinal === '-' && centavos !== 0 ? -centavos : centavos;
 }
+
+// Mensagens e CSV (RN18): 2 casas e vírgula decimal; o sinal fica mesmo com a parte inteira zero (-0,39)
+export function formatarCentavos(centavos: number): string {
+  const sinal = centavos < 0 ? '-' : '';
+  const absoluto = Math.abs(centavos);
+  return `${sinal}${Math.trunc(absoluto / 100)},${String(absoluto % 100).padStart(2, '0')}`;
+}
