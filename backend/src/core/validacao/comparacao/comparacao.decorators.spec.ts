@@ -1,5 +1,5 @@
 import { IsOptional } from 'class-validator';
-import { MenorOuIgualA, ProibidoJuntoCom } from '@/core/validacao/comparacao/comparacao.decorators';
+import { DiferenteDe, MenorOuIgualA, ProibidoJuntoCom } from '@/core/validacao/comparacao/comparacao.decorators';
 import { BooleanoDeQuery, InteiroDeQuery } from '@/core/validacao/query/query.decorators';
 import { criarValidationPipe } from '@/core/validacao/criar-validation-pipe';
 
@@ -44,5 +44,28 @@ describe('ProibidoJuntoCom', () => {
 
   it.each([{ free: 'false', club_id: '1' }, { free: 'true' }, { club_id: '1' }])('aceita %j', async (query) => {
     await expect(validar(query)).resolves.toBeDefined();
+  });
+});
+
+class ConfrontoDeTeste {
+  @IsOptional()
+  home?: unknown;
+
+  @IsOptional()
+  @DiferenteDe('home')
+  away?: unknown;
+}
+
+describe('DiferenteDe', () => {
+  function validarConfronto(corpo: object): Promise<ConfrontoDeTeste> {
+    return criarValidationPipe().transform(corpo, { type: 'body', metatype: ConfrontoDeTeste }) as Promise<ConfrontoDeTeste>;
+  }
+
+  it('recusa valores iguais', async () => {
+    await expect(validarConfronto({ home: 1, away: 1 })).rejects.toThrow('away deve ser diferente de home.');
+  });
+
+  it.each([{ home: 1, away: 2 }, { away: 1 }, { home: 1 }, { home: '1', away: 1 }])('aceita %j (só compara dois números)', async (corpo) => {
+    await expect(validarConfronto(corpo)).resolves.toBeDefined();
   });
 });

@@ -37,6 +37,14 @@ const CONFRONTOS = [
   [2, 2],
 ] as const;
 
+// RN20.6: quem marcou mais gols; também usada na resposta das partidas gravadas, que não guardam o result
+export function calcularResultado(golsMandante: number, golsVisitante: number): ResultadoDaPartida {
+  if (golsMandante > golsVisitante) {
+    return 'MANDANTE';
+  }
+  return golsVisitante > golsMandante ? 'VISITANTE' : 'EMPATE';
+}
+
 // RN20.3: MAL_CONDICIONADO joga com atributo × 0,85, meio para cima; DOENTE não chega aqui (RN19 e o 409 do service)
 function aplicarCondicao(titular: TitularDaPartida, atributo: number): number {
   if (titular.condicao === 'DOENTE') {
@@ -93,11 +101,5 @@ export function jogarPartida(mandante: TimeDaPartida, visitante: TimeDaPartida):
   const ataquesDoVisitante = CONFRONTOS.map(([atacante, defensor], i) => disputarDuelo(i + 4, visitante.clubeId, titularesDoVisitante[atacante], titularesDoMandante[defensor]));
   const golsMandante = contarGols(ataquesDoMandante);
   const golsVisitante = contarGols(ataquesDoVisitante);
-  let resultado: ResultadoDaPartida = 'EMPATE';
-  if (golsMandante > golsVisitante) {
-    resultado = 'MANDANTE';
-  } else if (golsVisitante > golsMandante) {
-    resultado = 'VISITANTE';
-  }
-  return { golsMandante, golsVisitante, resultado, duelos: [...ataquesDoMandante, ...ataquesDoVisitante] };
+  return { golsMandante, golsVisitante, resultado: calcularResultado(golsMandante, golsVisitante), duelos: [...ataquesDoMandante, ...ataquesDoVisitante] };
 }

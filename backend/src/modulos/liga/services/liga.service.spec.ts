@@ -5,7 +5,9 @@ import { Clube } from '@/modulos/clubes/entities/clube.entity';
 import { Jogador } from '@/modulos/jogadores/entities/jogador.entity';
 import type { CondicaoJogador, PosicaoJogador } from '@/modulos/jogadores/entities/jogador.entity';
 import type { EscalarDto } from '@/modulos/liga/dto/escalar.dto';
+import { DueloPartida } from '@/modulos/liga/entities/duelo-partida.entity';
 import { Escalacao } from '@/modulos/liga/entities/escalacao.entity';
+import { Partida } from '@/modulos/liga/entities/partida.entity';
 import { LigaService } from '@/modulos/liga/services/liga.service';
 
 const agora = new Date('2026-11-12T18:00:00Z');
@@ -167,5 +169,140 @@ describe('LigaService.consultarEscalacao', () => {
     const manager = criarManager();
     manager.find.mockResolvedValue([Object.assign(new Escalacao(), { clubeId: 1, jogadorId: 30 })]);
     await expect(criarServico(manager).consultarEscalacao(1)).rejects.toThrow('Escalação do clube 1 sem o jogador');
+  });
+});
+
+describe('LigaService.jogar', () => {
+  const aguias = Object.assign(new Clube(), { id: 1, nome: 'Águias FC', formacao: '2-1-1' });
+  const delta = Object.assign(new Clube(), { id: 2, nome: 'Delta FC', formacao: '2-1-1' });
+
+  function titularDoExemplo(clube: Clube, id: number, nome: string, posicao: PosicaoJogador, atributos: Partial<Jogador>, condicao: CondicaoJogador = 'APTO'): Escalacao {
+    const jogador = Object.assign(new Jogador(), { id, nome, posicao, condicao, clubeId: clube.id, finalizacao: 11, passe: 22, drible: 33, defesa: 44 }, atributos);
+    return Object.assign(new Escalacao(), { clubeId: clube.id, jogadorId: id, jogador, clube });
+  }
+
+  // Exemplo completo da RN20, em ordem de id do jogador (como a consulta devolve)
+  function criarEscalacoes(): Escalacao[] {
+    return [
+      titularDoExemplo(aguias, 30, 'Rui Prado', 'GOL', { defesa: 77 }),
+      titularDoExemplo(aguias, 31, 'Davi Lins', 'LAT', { drible: 74, defesa: 66 }, 'MAL_CONDICIONADO'),
+      titularDoExemplo(aguias, 32, 'Téo Brandão', 'ZAG', { defesa: 84 }),
+      titularDoExemplo(aguias, 33, 'Lauro Neves', 'MEI', { passe: 82 }),
+      titularDoExemplo(aguias, 34, 'Otto Rangel', 'ATA', { finalizacao: 75 }),
+      titularDoExemplo(delta, 40, 'Ivo Teles', 'GOL', { defesa: 72 }),
+      titularDoExemplo(delta, 41, 'Hugo Vaz', 'ZAG', { defesa: 84 }),
+      titularDoExemplo(delta, 42, 'Lino Matos', 'LAT', { drible: 79, defesa: 63 }),
+      titularDoExemplo(delta, 43, 'Nei Soares', 'MEI', { passe: 70 }),
+      titularDoExemplo(delta, 44, 'Ugo Falcão', 'ATA', { finalizacao: 81 }),
+    ];
+  }
+
+  function criarManagerDaPartida(escalacoes = criarEscalacoes(), clubes: (Clube | null)[] = [aguias, delta]) {
+    const consulta = {
+      innerJoinAndSelect: vi.fn().mockReturnThis(),
+      where: vi.fn().mockReturnThis(),
+      orderBy: vi.fn().mockReturnThis(),
+      setLock: vi.fn().mockReturnThis(),
+      getMany: vi.fn().mockResolvedValue(escalacoes),
+    };
+    const manager = Object.assign(criarManager(), {
+      findOneBy: vi.fn().mockResolvedValueOnce(clubes[0]).mockResolvedValueOnce(clubes[1]),
+      createQueryBuilder: vi.fn().mockReturnValue(consulta),
+      save: vi.fn((entidade: unknown) => Promise.resolve(entidade instanceof Partida ? Object.assign(entidade, { id: 7 }) : entidade)),
+    });
+    return { manager, consulta };
+  }
+
+  const dadosDaPartida = { home_club_id: 1, away_club_id: 2 };
+
+  it('lê os clubes sem trava e a escalação numa consulta que trava só os jogadores, em ordem de id', async () => {
+    const { manager, consulta } = criarManagerDaPartida();
+    await criarServico(manager).jogar(dadosDaPartida);
+    expect(manager.findOneBy.mock.calls).toEqual([
+      [Clube, { id: 1 }],
+      [Clube, { id: 2 }],
+    ]);
+    expect(manager.createQueryBuilder).toHaveBeenCalledWith(Escalacao, 'escalacao');
+    expect(consulta.where).toHaveBeenCalledWith('escalacao.clube_id IN (:...clubeIds)', { clubeIds: [1, 2] });
+    expect(consulta.orderBy).toHaveBeenCalledWith('jogador.id', 'ASC');
+    expect(consulta.setLock).toHaveBeenCalledWith('pessimistic_write', undefined, ['jogador']);
+  });
+
+  it('grava o exemplo da RN20: Águias FC 1 × 2 Delta FC, formações, agora e os 6 duelos da partida', async () => {
+    const { manager } = criarManagerDaPartida();
+    const partida = await criarServico(manager).jogar(dadosDaPartida);
+    expect(partida).toMatchObject({
+      id: 7,
+      mandanteId: 1,
+      visitanteId: 2,
+      golsMandante: 1,
+      golsVisitante: 2,
+      formacaoMandante: '2-1-1',
+      formacaoVisitante: '2-1-1',
+      jogadaEm: agora,
+      mandante: aguias,
+      visitante: delta,
+    });
+    const [duelos] = manager.save.mock.calls[1] as [DueloPartida[]];
+    expect(duelos.map((duelo) => [duelo.partidaId, duelo.ordem, duelo.atacanteId, duelo.defensorId, duelo.gol])).toEqual([
+      [7, 1, 34, 40, true],
+      [7, 2, 33, 41, false],
+      [7, 3, 31, 42, false],
+      [7, 4, 44, 30, true],
+      [7, 5, 43, 32, false],
+      [7, 6, 42, 31, true],
+    ]);
+    expect(duelos[0]).toBeInstanceOf(DueloPartida);
+    expect(partida.duelos).toBe(duelos);
+  });
+
+  it('cada lado grava a formação do próprio clube', async () => {
+    const deltaNoDoisDois = Object.assign(new Clube(), { id: 2, nome: 'Delta FC', formacao: '2-2' });
+    const escalacoes = criarEscalacoes().map((linha) => (linha.clubeId === 2 ? Object.assign(linha, { clube: deltaNoDoisDois }) : linha));
+    const { manager } = criarManagerDaPartida(escalacoes);
+    await expect(criarServico(manager).jogar(dadosDaPartida)).resolves.toMatchObject({ formacaoMandante: '2-1-1', formacaoVisitante: '2-2' });
+  });
+
+  it('mandante inexistente → 404, antes do visitante e sem ler escalação', async () => {
+    const { manager } = criarManagerDaPartida(criarEscalacoes(), [null, delta]);
+    const erro = await capturarErro(criarServico(manager).jogar(dadosDaPartida));
+    expect([erro.getStatus(), erro.codigo]).toEqual([404, 'CLUBE_NAO_ENCONTRADO']);
+    expect(manager.findOneBy).toHaveBeenCalledTimes(1);
+    expect(manager.createQueryBuilder).not.toHaveBeenCalled();
+  });
+
+  it('visitante inexistente → 404, sem ler escalação', async () => {
+    const { manager } = criarManagerDaPartida(criarEscalacoes(), [aguias, null]);
+    const erro = await capturarErro(criarServico(manager).jogar(dadosDaPartida));
+    expect([erro.getStatus(), erro.codigo]).toEqual([404, 'CLUBE_NAO_ENCONTRADO']);
+    expect(manager.createQueryBuilder).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['mandante nunca escalou', (escalacoes: Escalacao[]) => escalacoes.filter((linha) => linha.clubeId !== 1), 'Águias FC'],
+    ['visitante perdeu um titular', (escalacoes: Escalacao[]) => escalacoes.filter((linha) => linha.jogadorId !== 44), 'Delta FC'],
+    [
+      'titular vendido enquanto a partida esperava a trava',
+      (escalacoes: Escalacao[]) => escalacoes.map((linha) => (linha.jogadorId === 31 ? Object.assign(linha, { jogador: Object.assign(new Jogador(), linha.jogador, { clubeId: null }) }) : linha)),
+      'Águias FC',
+    ],
+    [
+      'titular virou DOENTE enquanto a partida esperava a trava',
+      (escalacoes: Escalacao[]) => escalacoes.map((linha) => (linha.jogadorId === 43 ? Object.assign(linha, { jogador: Object.assign(new Jogador(), linha.jogador, { condicao: 'DOENTE' }) }) : linha)),
+      'Delta FC',
+    ],
+  ])('%s → 409 ESCALACAO_INCOMPLETA, nada gravado', async (_caso, alterar, nome) => {
+    const { manager } = criarManagerDaPartida(alterar(criarEscalacoes()));
+    const erro = await capturarErro(criarServico(manager).jogar(dadosDaPartida));
+    expect([erro.getStatus(), erro.codigo, erro.message]).toEqual([409, 'ESCALACAO_INCOMPLETA', `O clube ${nome} não tem a escalação completa.`]);
+    expect(manager.save).not.toHaveBeenCalled();
+  });
+
+  it('escalação sem formação gravada é incompleta', async () => {
+    const semFormacao = Object.assign(new Clube(), { id: 1, nome: 'Águias FC', formacao: null });
+    const escalacoes = criarEscalacoes().map((linha) => (linha.clubeId === 1 ? Object.assign(linha, { clube: semFormacao }) : linha));
+    const { manager } = criarManagerDaPartida(escalacoes);
+    const erro = await capturarErro(criarServico(manager).jogar(dadosDaPartida));
+    expect(erro.codigo).toBe('ESCALACAO_INCOMPLETA');
   });
 });

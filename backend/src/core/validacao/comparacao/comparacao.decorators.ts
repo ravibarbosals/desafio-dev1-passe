@@ -28,3 +28,16 @@ export function ProibidoJuntoCom(outroCampo: string, quando: (valor: unknown) =>
     },
   });
 }
+
+export function DiferenteDe(outroCampo: string): PropertyDecorator {
+  return ValidateBy({
+    name: 'diferenteDe',
+    validator: {
+      validate: (valor: unknown, argumentos: ValidationArguments) => {
+        const outro = valorDe(argumentos, outroCampo);
+        return typeof valor !== 'number' || typeof outro !== 'number' || valor !== outro;
+      },
+      defaultMessage: () => `$property deve ser diferente de ${outroCampo}.`,
+    },
+  });
+}

@@ -1,5 +1,5 @@
 import type { CondicaoJogador, PosicaoJogador } from '@/modulos/jogadores/entities/jogador.entity';
-import { jogarPartida } from '@/modulos/liga/helpers/partida';
+import { calcularResultado, jogarPartida } from '@/modulos/liga/helpers/partida';
 import type { TimeDaPartida, TitularDaPartida } from '@/modulos/liga/helpers/partida';
 
 // Atributos fora do exemplo com valores distintos, para um atributo trocado mudar o resultado
@@ -130,5 +130,16 @@ describe('jogarPartida', () => {
     expect(() => jogarPartida(aguias, { clubeId: 2, titulares: semGoleiro })).toThrow('Escalação inválida na partida: clube 2');
     const doisGoleiros = delta.titulares.map((jogador) => (jogador.id === 41 ? { ...jogador, posicao: 'GOL' as const } : jogador));
     expect(() => jogarPartida(aguias, { clubeId: 2, titulares: doisGoleiros })).toThrow('Escalação inválida na partida: clube 2');
+  });
+});
+
+describe('calcularResultado', () => {
+  it.each([
+    [2, 1, 'MANDANTE'],
+    [1, 2, 'VISITANTE'],
+    [0, 0, 'EMPATE'],
+    [3, 3, 'EMPATE'],
+  ])('%d × %d → %s', (golsMandante, golsVisitante, resultado) => {
+    expect(calcularResultado(golsMandante, golsVisitante)).toBe(resultado);
   });
 });
