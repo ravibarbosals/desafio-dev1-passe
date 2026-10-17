@@ -5,6 +5,7 @@ import { RegraNegocioException } from '@/core/erros/regra-negocio.exception';
 export const RECURSOS_NAO_ENCONTRADOS = {
   jogador: { codigo: 'JOGADOR_NAO_ENCONTRADO', mensagem: 'Jogador não encontrado.' },
   clube: { codigo: 'CLUBE_NAO_ENCONTRADO', mensagem: 'Clube não encontrado.' },
+  partida: { codigo: 'PARTIDA_NAO_ENCONTRADA', mensagem: 'Partida não encontrada.' },
 } as const;
 
 export type RecursoNaoEncontrado = keyof typeof RECURSOS_NAO_ENCONTRADOS;

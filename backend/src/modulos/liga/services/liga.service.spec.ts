@@ -306,3 +306,47 @@ describe('LigaService.jogar', () => {
     expect(erro.codigo).toBe('ESCALACAO_INCOMPLETA');
   });
 });
+
+describe('LigaService.listarPartidas', () => {
+  const partidas = [Object.assign(new Partida(), { id: 8 }), Object.assign(new Partida(), { id: 7 })];
+
+  function criarManagerDaLista(clubeExiste = true) {
+    return Object.assign(criarManager(), { existsBy: vi.fn().mockResolvedValue(clubeExiste), find: vi.fn().mockResolvedValue(partidas) });
+  }
+
+  it('sem filtro: todas, com os clubes, da mais recente para a mais antiga (id desempata)', async () => {
+    const manager = criarManagerDaLista();
+    await expect(criarServico(manager).listarPartidas({})).resolves.toBe(partidas);
+    expect(manager.existsBy).not.toHaveBeenCalled();
+    expect(manager.find).toHaveBeenCalledWith(Partida, { where: {}, relations: { mandante: true, visitante: true }, order: { jogadaEm: 'DESC', id: 'DESC' } });
+  });
+
+  it('club_id: o clube como mandante ou visitante (RN21)', async () => {
+    const manager = criarManagerDaLista();
+    await criarServico(manager).listarPartidas({ club_id: 2 });
+    expect(manager.existsBy).toHaveBeenCalledWith(Clube, { id: 2 });
+    expect(manager.find).toHaveBeenCalledWith(Partida, expect.objectContaining({ where: [{ mandanteId: 2 }, { visitanteId: 2 }] }));
+  });
+
+  it('clube do filtro inexistente → 404, sem listar', async () => {
+    const manager = criarManagerDaLista(false);
+    const erro = await capturarErro(criarServico(manager).listarPartidas({ club_id: 99 }));
+    expect([erro.getStatus(), erro.codigo]).toEqual([404, 'CLUBE_NAO_ENCONTRADO']);
+    expect(manager.find).not.toHaveBeenCalled();
+  });
+});
+
+describe('LigaService.consultarPartida', () => {
+  it('traz a partida com os clubes e os duelos', async () => {
+    const partida = Object.assign(new Partida(), { id: 7 });
+    const manager = Object.assign(criarManager(), { findOne: vi.fn().mockResolvedValue(partida) });
+    await expect(criarServico(manager).consultarPartida(7)).resolves.toBe(partida);
+    expect(manager.findOne).toHaveBeenCalledWith(Partida, { where: { id: 7 }, relations: { mandante: true, visitante: true, duelos: true } });
+  });
+
+  it('partida inexistente → 404 PARTIDA_NAO_ENCONTRADA (nunca 200 vazio)', async () => {
+    const manager = Object.assign(criarManager(), { findOne: vi.fn().mockResolvedValue(null) });
+    const erro = await capturarErro(criarServico(manager).consultarPartida(999));
+    expect([erro.getStatus(), erro.codigo, erro.message]).toEqual([404, 'PARTIDA_NAO_ENCONTRADA', 'Partida não encontrada.']);
+  });
+});

@@ -5,6 +5,21 @@ import { Partida } from '@/modulos/liga/entities/partida.entity';
 import { LigaService } from '@/modulos/liga/services/liga.service';
 
 const clube = Object.assign(new Clube(), { id: 1, nome: 'Águias FC', formacao: '2-1-1' });
+const delta = Object.assign(new Clube(), { id: 2, nome: 'Delta FC' });
+
+function criarPartida(id: number): Partida {
+  return Object.assign(new Partida(), {
+    id,
+    mandante: clube,
+    visitante: delta,
+    golsMandante: 1,
+    golsVisitante: 2,
+    formacaoMandante: '2-1-1',
+    formacaoVisitante: '2-2',
+    jogadaEm: new Date('2026-11-12T18:00:00Z'),
+    duelos: [],
+  });
+}
 
 describe('LigaController', () => {
   it('escala pelo id da URL, com o corpo recebido', async () => {
@@ -23,24 +38,27 @@ describe('LigaController', () => {
   });
 
   it('joga a partida, aponta o Location para ela e responde com os duelos', async () => {
-    const delta = Object.assign(new Clube(), { id: 2, nome: 'Delta FC' });
-    const partida = Object.assign(new Partida(), {
-      id: 7,
-      mandante: clube,
-      visitante: delta,
-      golsMandante: 1,
-      golsVisitante: 2,
-      formacaoMandante: '2-1-1',
-      formacaoVisitante: '2-2',
-      jogadaEm: new Date('2026-11-12T18:00:00Z'),
-      duelos: [],
-    });
-    const servico = { jogar: vi.fn().mockResolvedValue(partida) };
+    const servico = { jogar: vi.fn().mockResolvedValue(criarPartida(7)) };
     const resposta = { location: vi.fn() };
     const dados = { home_club_id: 1, away_club_id: 2 };
     const corpo = await new LigaController(servico as unknown as LigaService).jogar(dados, resposta as unknown as Response);
     expect(servico.jogar).toHaveBeenCalledWith(dados);
     expect(resposta.location).toHaveBeenCalledWith('/api/v1/matches/7');
     expect(corpo).toMatchObject({ id: 7, result: 'VISITANTE', home: { club_id: 1, goals: 1 }, away: { club_id: 2, formation: '2-2' }, duels: [] });
+  });
+
+  it('lista as partidas com o filtro recebido, sem os duelos', async () => {
+    const servico = { listarPartidas: vi.fn().mockResolvedValue([criarPartida(8), criarPartida(7)]) };
+    const corpo = await new LigaController(servico as unknown as LigaService).listarPartidas({ club_id: 2 });
+    expect(servico.listarPartidas).toHaveBeenCalledWith({ club_id: 2 });
+    expect(corpo.map((partida) => partida.id)).toEqual([8, 7]);
+    expect(corpo[0]).not.toHaveProperty('duels');
+  });
+
+  it('consulta a partida pelo id da URL, com os duelos', async () => {
+    const servico = { consultarPartida: vi.fn().mockResolvedValue(criarPartida(7)) };
+    const corpo = await new LigaController(servico as unknown as LigaService).consultarPartida(7);
+    expect(servico.consultarPartida).toHaveBeenCalledWith(7);
+    expect(corpo).toMatchObject({ id: 7, result: 'VISITANTE', duels: [] });
   });
 });

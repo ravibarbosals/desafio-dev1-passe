@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put, Res } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query, Res } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiConflictResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { RECURSOS_NAO_ENCONTRADOS } from '@/core/erros/nao-encontrado';
@@ -6,10 +6,12 @@ import { IdDaUrlPipe } from '@/core/http/id-da-url.pipe';
 import { criarEscalacaoResposta, EscalacaoRespostaDto } from '@/modulos/liga/dto/escalacao-resposta.dto';
 import { EscalarDto } from '@/modulos/liga/dto/escalar.dto';
 import { JogarPartidaDto } from '@/modulos/liga/dto/jogar-partida.dto';
-import { criarPartidaResposta, PartidaRespostaDto } from '@/modulos/liga/dto/partida-resposta.dto';
+import { ListarPartidasQueryDto } from '@/modulos/liga/dto/listar-partidas-query.dto';
+import { criarPartidaResposta, criarPartidaResumoResposta, PartidaRespostaDto, PartidaResumoRespostaDto } from '@/modulos/liga/dto/partida-resposta.dto';
 import { LigaService } from '@/modulos/liga/services/liga.service';
 
 const idDoClube = new IdDaUrlPipe(RECURSOS_NAO_ENCONTRADOS.clube.codigo, RECURSOS_NAO_ENCONTRADOS.clube.mensagem);
+const idDaPartida = new IdDaUrlPipe(RECURSOS_NAO_ENCONTRADOS.partida.codigo, RECURSOS_NAO_ENCONTRADOS.partida.mensagem);
 
 @ApiTags('Liga')
 @Controller()
@@ -41,5 +43,21 @@ export class LigaController {
     const partida = await this.ligaService.jogar(dados);
     resposta.location(`/api/v1/matches/${partida.id}`);
     return criarPartidaResposta(partida);
+  }
+
+  @Get('matches')
+  @ApiOkResponse({ type: [PartidaResumoRespostaDto], description: 'Da mais recente para a mais antiga, sem os duelos' })
+  @ApiBadRequestResponse({ description: 'club_id fora do formato' })
+  @ApiNotFoundResponse({ description: 'Clube do filtro inexistente' })
+  async listarPartidas(@Query() filtros: ListarPartidasQueryDto): Promise<PartidaResumoRespostaDto[]> {
+    const partidas = await this.ligaService.listarPartidas(filtros);
+    return partidas.map(criarPartidaResumoResposta);
+  }
+
+  @Get('matches/:id')
+  @ApiOkResponse({ type: PartidaRespostaDto })
+  @ApiNotFoundResponse({ description: 'Partida inexistente ou id fora do formato' })
+  async consultarPartida(@Param('id', idDaPartida) id: number): Promise<PartidaRespostaDto> {
+    return criarPartidaResposta(await this.ligaService.consultarPartida(id));
   }
 }

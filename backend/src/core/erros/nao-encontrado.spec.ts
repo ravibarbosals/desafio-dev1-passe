@@ -5,6 +5,7 @@ describe('criarErroNaoEncontrado', () => {
   it.each([
     ['jogador', 'JOGADOR_NAO_ENCONTRADO', 'Jogador não encontrado.'],
     ['clube', 'CLUBE_NAO_ENCONTRADO', 'Clube não encontrado.'],
+    ['partida', 'PARTIDA_NAO_ENCONTRADA', 'Partida não encontrada.'],
   ] as const)('responde 404 com o código do catálogo para %s', (recurso, codigo, mensagem) => {
     const erro = criarErroNaoEncontrado(recurso);
     expect(erro).toBeInstanceOf(RegraNegocioException);

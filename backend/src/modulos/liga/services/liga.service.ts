@@ -8,6 +8,7 @@ import { Jogador } from '@/modulos/jogadores/entities/jogador.entity';
 import { compararOrdemDoElenco } from '@/modulos/jogadores/helpers/ordem-do-elenco';
 import { EscalarDto } from '@/modulos/liga/dto/escalar.dto';
 import { JogarPartidaDto } from '@/modulos/liga/dto/jogar-partida.dto';
+import { ListarPartidasQueryDto } from '@/modulos/liga/dto/listar-partidas-query.dto';
 import { DueloPartida } from '@/modulos/liga/entities/duelo-partida.entity';
 import { Escalacao } from '@/modulos/liga/entities/escalacao.entity';
 import { Partida } from '@/modulos/liga/entities/partida.entity';
@@ -122,6 +123,30 @@ export class LigaService {
     });
     return { clube, titulares: titulares.sort(compararOrdemDoElenco) };
   }
+
+  // RN21: da mais recente para a mais antiga (id desempata a mesma jogada_em); o filtro pega o clube como mandante ou visitante
+  async listarPartidas(filtros: ListarPartidasQueryDto): Promise<Partida[]> {
+    const { manager } = this.dataSource;
+    const clubeId = filtros.club_id;
+    if (clubeId !== undefined && !(await manager.existsBy(Clube, { id: clubeId }))) {
+      throw criarErroNaoEncontrado('clube');
+    }
+    return manager.find(Partida, {
+      where: clubeId === undefined ? {} : [{ mandanteId: clubeId }, { visitanteId: clubeId }],
+      relations: { mandante: true, visitante: true },
+      order: { jogadaEm: 'DESC', id: 'DESC' },
+    });
+  }
+
+  // RN21: a partida com os clubes e os 6 duelos; id inexistente → 404 (nunca 200 vazio)
+  async consultarPartida(id: number): Promise<Partida> {
+    const partida = await this.dataSource.manager.findOne(Partida, { where: { id }, relations: { mandante: true, visitante: true, duelos: true } });
+    if (!partida) {
+      throw criarErroNaoEncontrado('partida');
+    }
+    return partida;
+  }
+
   // FOR UPDATE OF jogadores: em ordem de id, sem travar escalacoes nem clubes, para não fechar ciclo com o PUT /lineup e a venda (RN20)
   private lerEscalacoesTravandoJogadores(manager: EntityManager, clubeIds: number[]): Promise<Escalacao[]> {
     return manager
