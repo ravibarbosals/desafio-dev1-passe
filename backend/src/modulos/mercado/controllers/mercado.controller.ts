@@ -4,6 +4,7 @@ import { RECURSOS_NAO_ENCONTRADOS } from '@/core/erros/nao-encontrado';
 import { IdDaUrlPipe } from '@/core/http/id-da-url.pipe';
 import { CompraRespostaDto, criarCompraResposta } from '@/modulos/mercado/dto/compra-resposta.dto';
 import { ComprarJogadorDto } from '@/modulos/mercado/dto/comprar-jogador.dto';
+import { criarVendaResposta, VendaRespostaDto } from '@/modulos/mercado/dto/venda-resposta.dto';
 import { MercadoService } from '@/modulos/mercado/services/mercado.service';
 
 const idDoJogador = new IdDaUrlPipe(RECURSOS_NAO_ENCONTRADOS.jogador.codigo, RECURSOS_NAO_ENCONTRADOS.jogador.mensagem);
@@ -22,5 +23,15 @@ export class MercadoController {
   @ApiConflictResponse({ description: 'JOGADOR_NAO_ESTA_LIVRE, RECOMPRA_PELO_CLUBE_VENDEDOR, ELENCO_CHEIO ou CUSTO_ACIMA_DO_LIMITE_DE_CAIXA' })
   async comprar(@Param('id', idDoJogador) id: number, @Body() dados: ComprarJogadorDto): Promise<CompraRespostaDto> {
     return criarCompraResposta(await this.mercadoService.comprar(id, dados));
+  }
+
+  // E 2.3.2: sem corpo; um corpo enviado é ignorado (AM-005, corpo-json.middleware)
+  @Post('players/:id/sell')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: VendaRespostaDto })
+  @ApiNotFoundResponse({ description: 'Id inexistente, fora do formato ou de jogador excluído' })
+  @ApiConflictResponse({ description: 'Jogador livre (JOGADOR_LIVRE_NAO_PODE_SER_VENDIDO)' })
+  async vender(@Param('id', idDoJogador) id: number): Promise<VendaRespostaDto> {
+    return criarVendaResposta(await this.mercadoService.vender(id));
   }
 }

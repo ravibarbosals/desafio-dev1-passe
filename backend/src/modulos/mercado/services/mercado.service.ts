@@ -7,10 +7,13 @@ import { RegraNegocioException } from '@/core/erros/regra-negocio.exception';
 import { Clube } from '@/modulos/clubes/entities/clube.entity';
 import { Jogador } from '@/modulos/jogadores/entities/jogador.entity';
 import { calcularValorDeMercado } from '@/modulos/jogadores/helpers/valor-de-mercado';
+import { Escalacao } from '@/modulos/liga/entities/escalacao.entity';
 import { ComprarJogadorDto } from '@/modulos/mercado/dto/comprar-jogador.dto';
 import { Contrato } from '@/modulos/mercado/entities/contrato.entity';
 import { Transacao } from '@/modulos/mercado/entities/transacao.entity';
+import { calcularComissao } from '@/modulos/mercado/helpers/comissao';
 import { fidelidadeDentroDoPrazo } from '@/modulos/mercado/helpers/fidelidade';
+import { calcularDiasRestantes, calcularMulta, percentualDeMulta } from '@/modulos/mercado/helpers/multa';
 import { calcularTaxaDeCompra } from '@/modulos/mercado/helpers/taxa-de-compra';
 
 const LIMITE_DO_ELENCO = 12;
@@ -19,6 +22,15 @@ export interface Compra {
   transacao: Transacao;
   contrato: Contrato;
   caixaDoClube: number;
+}
+
+export interface Venda extends Compra {
+  diasRestantes: number;
+  percentualDeMulta: number;
+}
+
+function valorDeMercadoDe(jogador: Jogador): number {
+  return calcularValorDeMercado({ valorBaseCentavos: jogador.valorBase, condicao: jogador.condicao, agilidade: jogador.agilidade, idade: jogador.idade });
 }
 
 @Injectable()
@@ -46,7 +58,7 @@ export class MercadoService {
       if ((await manager.countBy(Jogador, { clubeId: clube.id })) >= LIMITE_DO_ELENCO) {
         throw new RegraNegocioException(`O elenco já tem o máximo de ${LIMITE_DO_ELENCO} jogadores.`, 'ELENCO_CHEIO');
       }
-      const valor = calcularValorDeMercado({ valorBaseCentavos: jogador.valorBase, condicao: jogador.condicao, agilidade: jogador.agilidade, idade: jogador.idade });
+      const valor = valorDeMercadoDe(jogador);
       const taxa = calcularTaxaDeCompra(valor);
       const custo = valor + taxa;
       // RN13: custo ≤ metade exata do caixa, comparado em inteiros (caixa 261,15 → limite 130,575)
@@ -64,6 +76,42 @@ export class MercadoService {
         manager.create(Transacao, { clubeId: clube.id, jogadorId, nomeJogador: jogador.nome, tipo: 'COMPRA', valor, taxa, multa: 0, lucro: null, variacaoCaixa: -custo, criadoEm: agora }),
       );
       return { transacao, contrato, caixaDoClube: clube.caixa };
+    });
+  }
+
+  // RN15, RN16 e RN19.5: tudo numa transação, com um só "agora"; o corpo do pedido é ignorado (AM-005)
+  async vender(jogadorId: number): Promise<Venda> {
+    const agora = this.relogio.agora();
+    return this.dataSource.transaction(async (manager) => {
+      const jogador = await this.travarJogador(manager, jogadorId);
+      if (jogador.clubeId === null) {
+        throw new RegraNegocioException('Jogador livre não pode ser vendido.', 'JOGADOR_LIVRE_NAO_PODE_SER_VENDIDO');
+      }
+      const clube = await this.travarClube(manager, jogador.clubeId);
+      const contrato = await manager.findOneBy(Contrato, { jogadorId, clubeId: clube.id, situacao: 'ATIVO' });
+      // Compra e venda gravam clube e contrato juntos (RN12, RN16): faltar o contrato é dado corrompido, e não regra de negócio
+      if (!contrato) {
+        throw new Error(`Jogador ${jogadorId} do clube ${clube.id} sem contrato ATIVO`);
+      }
+      const valor = valorDeMercadoDe(jogador);
+      const diasRestantes = calcularDiasRestantes(contrato.fidelidadeAte, agora);
+      const percentual = percentualDeMulta(diasRestantes);
+      const multa = calcularMulta(valor, percentual);
+      const lucro = valor - contrato.valorCompra;
+      const comissao = calcularComissao(lucro);
+      const credito = valor - multa - comissao;
+      clube.caixa += credito;
+      jogador.clubeId = null;
+      contrato.situacao = multa > 0 ? 'RESCINDIDO' : 'ENCERRADO';
+      contrato.encerradoEm = agora;
+      await manager.save(clube);
+      await manager.save(jogador);
+      await manager.save(contrato);
+      await manager.delete(Escalacao, { jogadorId });
+      const transacao = await manager.save(
+        manager.create(Transacao, { clubeId: clube.id, jogadorId, nomeJogador: jogador.nome, tipo: 'VENDA', valor, taxa: comissao, multa, lucro, variacaoCaixa: credito, criadoEm: agora }),
+      );
+      return { transacao, contrato, caixaDoClube: clube.caixa, diasRestantes, percentualDeMulta: percentual };
     });
   }
 

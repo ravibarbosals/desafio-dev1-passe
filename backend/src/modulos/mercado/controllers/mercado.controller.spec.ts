@@ -25,4 +25,25 @@ describe('MercadoController', () => {
     expect(servico.comprar).toHaveBeenCalledWith(2, dados);
     expect(corpo).toMatchObject({ id: 10, type: 'COMPRA', cash_change: -38.85, contract: { status: 'ATIVO' }, club_cash: 261.15 });
   });
+
+  it('vende pelo id da URL e responde com a transação, o contrato e o caixa', async () => {
+    const transacao = Object.assign(new Transacao(), {
+      id: 11,
+      clubeId: 1,
+      jogadorId: 2,
+      nomeJogador: 'Meia Lua',
+      tipo: 'VENDA',
+      valor: 4000,
+      taxa: 30,
+      multa: 400,
+      lucro: 300,
+      variacaoCaixa: 3570,
+      criadoEm: new Date('2026-11-05T19:40:00Z'),
+    });
+    const contrato = Object.assign(new Contrato(), { valorCompra: 3700, situacao: 'RESCINDIDO' });
+    const servico = { vender: vi.fn().mockResolvedValue({ transacao, contrato, caixaDoClube: 29685, diasRestantes: 117, percentualDeMulta: 10 }) };
+    const corpo = await new MercadoController(servico as unknown as MercadoService).vender(2);
+    expect(servico.vender).toHaveBeenCalledWith(2);
+    expect(corpo).toMatchObject({ id: 11, type: 'VENDA', cash_change: 35.7, remaining_days: 117, penalty_rate: 10, contract_status: 'RESCINDIDO', club_cash: 296.85 });
+  });
 });

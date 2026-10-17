@@ -3,6 +3,7 @@ import { Relogio } from '@/core/comum/relogio/relogio';
 import { RegraNegocioException } from '@/core/erros/regra-negocio.exception';
 import { Clube } from '@/modulos/clubes/entities/clube.entity';
 import { Jogador } from '@/modulos/jogadores/entities/jogador.entity';
+import { Escalacao } from '@/modulos/liga/entities/escalacao.entity';
 import { Contrato } from '@/modulos/mercado/entities/contrato.entity';
 import { Transacao } from '@/modulos/mercado/entities/transacao.entity';
 import { MercadoService } from '@/modulos/mercado/services/mercado.service';
@@ -25,16 +26,18 @@ function criarClube(caixa = 30000): Clube {
 function criarManager(jogador: Jogador | null = criarJogador(), clube: Clube | null = criarClube()) {
   return {
     findOne: vi.fn().mockResolvedValueOnce(jogador).mockResolvedValueOnce(clube),
+    findOneBy: vi.fn().mockResolvedValue(null),
     existsBy: vi.fn().mockResolvedValue(false),
     countBy: vi.fn().mockResolvedValue(0),
     create: vi.fn((entidade: new () => object, dados: object) => Object.assign(new entidade(), dados)),
+    delete: vi.fn().mockResolvedValue({}),
     save: vi.fn((entidade: object) => Promise.resolve(entidade instanceof Transacao ? Object.assign(entidade, { id: 10 }) : entidade)),
   };
 }
 
-function criarServico(manager = criarManager()): MercadoService {
+function criarServico(manager = criarManager(), instante = agora): MercadoService {
   const dataSource = { transaction: vi.fn((trabalho: (gerenciador: typeof manager) => Promise<unknown>) => trabalho(manager)) };
-  return new MercadoService(dataSource as unknown as DataSource, { agora: () => agora } as Relogio);
+  return new MercadoService(dataSource as unknown as DataSource, { agora: () => instante } as Relogio);
 }
 
 async function capturarErro(promessa: Promise<unknown>): Promise<RegraNegocioException> {
@@ -153,6 +156,91 @@ describe('MercadoService.comprar', () => {
     const erro = await capturarErro(criarServico(manager).comprar(2, { club_id: 1, loyalty_until: fidelidade }));
     expect(erro.codigo).toBe('CUSTO_ACIMA_DO_LIMITE_DE_CAIXA');
     expect(erro.message).toBe(mensagem);
+    expect(manager.save).not.toHaveBeenCalled();
+  });
+});
+
+describe('MercadoService.vender', () => {
+  // Exemplo 2.3.2: venda em 05/11/2026, 16h40 em Brasília, do contrato da compra do 2.3.1
+  const momentoDaVenda = new Date('2026-11-05T19:40:00Z');
+
+  function criarContrato(valorCompra = 3700, fidelidadeAte = fidelidade): Contrato {
+    return Object.assign(new Contrato(), { id: 1, jogadorId: 2, clubeId: 1, valorCompra, fidelidadeAte, situacao: 'ATIVO', iniciadoEm: agora, encerradoEm: null });
+  }
+
+  function criarManagerDaVenda(jogador: Jogador | null, contrato: Contrato | null = criarContrato(), clube = criarClube(26115)) {
+    const manager = criarManager(jogador, clube);
+    manager.findOneBy.mockResolvedValue(contrato);
+    return manager;
+  }
+
+  it('vende no exemplo 2.3.2: caixa, jogador livre, contrato RESCINDIDO, escalação e transação VENDA com o mesmo "agora"', async () => {
+    const jogador = criarJogador({ condicao: 'APTO', clubeId: 1 });
+    const clube = criarClube(26115);
+    const contrato = criarContrato();
+    const manager = criarManagerDaVenda(jogador, contrato, clube);
+    const venda = await criarServico(manager, momentoDaVenda).vender(2);
+    expect(manager.findOne).toHaveBeenNthCalledWith(1, Jogador, expect.objectContaining({ where: expect.objectContaining({ id: 2 }), lock: { mode: 'pessimistic_write' } }));
+    expect(manager.findOne).toHaveBeenNthCalledWith(2, Clube, { where: { id: 1 }, lock: { mode: 'pessimistic_write' } });
+    expect(manager.findOneBy).toHaveBeenCalledWith(Contrato, { jogadorId: 2, clubeId: 1, situacao: 'ATIVO' });
+    expect(manager.save).toHaveBeenCalledWith(clube);
+    expect(manager.save).toHaveBeenCalledWith(jogador);
+    expect(manager.save).toHaveBeenCalledWith(contrato);
+    expect(manager.delete).toHaveBeenCalledWith(Escalacao, { jogadorId: 2 });
+    expect(clube.caixa).toBe(29685);
+    expect(jogador.clubeId).toBeNull();
+    expect(contrato).toMatchObject({ situacao: 'RESCINDIDO', encerradoEm: momentoDaVenda });
+    expect(venda).toMatchObject({ caixaDoClube: 29685, diasRestantes: 117, percentualDeMulta: 10 });
+    expect(venda.transacao).toEqual(
+      Object.assign(new Transacao(), {
+        id: 10,
+        clubeId: 1,
+        jogadorId: 2,
+        nomeJogador: 'Meia Lua',
+        tipo: 'VENDA',
+        valor: 4000,
+        taxa: 30,
+        multa: 400,
+        lucro: 300,
+        variacaoCaixa: 3570,
+        criadoEm: momentoDaVenda,
+      }),
+    );
+  });
+
+  // Tabela de venda da RN16; APTO com 25 anos: valor de mercado = valor base; os dias até o fim da fidelidade dão o percentual
+  it.each([
+    [3700, 4000, 100, 400, 300, 30, 3570, 'RESCINDIDO'],
+    [5000, 4250, 200, 850, -750, 0, 3400, 'RESCINDIDO'],
+    [2615, 3000, 10, 150, 385, 39, 2811, 'RESCINDIDO'],
+    [2500, 2500, 0, 0, 0, 0, 2500, 'ENCERRADO'],
+    [6000, 7500, 200, 1000, 1500, 200, 6300, 'RESCINDIDO'],
+  ])('compra %d, venda %d, %d dias → multa %d, lucro %d, comissão %d, crédito %d, %s', async (valorCompra, valorBase, dias, multa, lucro, comissao, credito, situacao) => {
+    const contrato = criarContrato(valorCompra, new Date(agora.getTime() + dias * umDia));
+    const manager = criarManagerDaVenda(criarJogador({ condicao: 'APTO', valorBase, clubeId: 1 }), contrato, criarClube(10000));
+    const venda = await criarServico(manager).vender(2);
+    expect(venda.transacao).toMatchObject({ valor: valorBase, multa, lucro, taxa: comissao, variacaoCaixa: credito });
+    expect(venda.caixaDoClube).toBe(10000 + credito);
+    expect(contrato.situacao).toBe(situacao);
+  });
+
+  it('jogador inexistente ou excluído → 404', async () => {
+    const erro = await capturarErro(criarServico(criarManagerDaVenda(null)).vender(99));
+    expect(erro.codigo).toBe('JOGADOR_NAO_ENCONTRADO');
+  });
+
+  it('jogador livre → 409 JOGADOR_LIVRE_NAO_PODE_SER_VENDIDO, sem travar clube nem gravar', async () => {
+    const manager = criarManagerDaVenda(criarJogador());
+    const erro = await capturarErro(criarServico(manager).vender(2));
+    expect(erro.codigo).toBe('JOGADOR_LIVRE_NAO_PODE_SER_VENDIDO');
+    expect(manager.findOne).toHaveBeenCalledTimes(1);
+    expect(manager.save).not.toHaveBeenCalled();
+    expect(manager.delete).not.toHaveBeenCalled();
+  });
+
+  it('jogador com clube e sem contrato ATIVO é dado corrompido: erro interno, sem gravar', async () => {
+    const manager = criarManagerDaVenda(criarJogador({ clubeId: 1 }), null);
+    await expect(criarServico(manager).vender(2)).rejects.toThrow('Jogador 2 do clube 1 sem contrato ATIVO');
     expect(manager.save).not.toHaveBeenCalled();
   });
 });
