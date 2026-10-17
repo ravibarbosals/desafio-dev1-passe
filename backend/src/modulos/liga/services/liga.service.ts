@@ -12,6 +12,8 @@ import { ListarPartidasQueryDto } from '@/modulos/liga/dto/listar-partidas-query
 import { DueloPartida } from '@/modulos/liga/entities/duelo-partida.entity';
 import { Escalacao } from '@/modulos/liga/entities/escalacao.entity';
 import { Partida } from '@/modulos/liga/entities/partida.entity';
+import { calcularClassificacao } from '@/modulos/liga/helpers/classificacao';
+import type { LinhaDaClassificacao } from '@/modulos/liga/helpers/classificacao';
 import { posicoesFechamAFormacao } from '@/modulos/liga/helpers/formacao';
 import { jogarPartida } from '@/modulos/liga/helpers/partida';
 import type { TimeDaPartida } from '@/modulos/liga/helpers/partida';
@@ -145,6 +147,14 @@ export class LigaService {
       throw criarErroNaoEncontrado('partida');
     }
     return partida;
+  }
+
+  // RN21: calculada a cada consulta, nunca gravada. Partidas antes dos clubes: todo clube de uma partida já lida aparece na leitura seguinte (clube nunca é apagado)
+  async consultarClassificacao(): Promise<LinhaDaClassificacao[]> {
+    const { manager } = this.dataSource;
+    const partidas = await manager.find(Partida, { select: { mandanteId: true, visitanteId: true, golsMandante: true, golsVisitante: true } });
+    const clubes = await manager.find(Clube, { select: { id: true, nome: true } });
+    return calcularClassificacao(clubes, partidas);
   }
 
   // FOR UPDATE OF jogadores: em ordem de id, sem travar escalacoes nem clubes, para não fechar ciclo com o PUT /lineup e a venda (RN20)

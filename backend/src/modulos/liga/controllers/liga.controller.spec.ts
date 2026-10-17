@@ -61,4 +61,14 @@ describe('LigaController', () => {
     expect(servico.consultarPartida).toHaveBeenCalledWith(7);
     expect(corpo).toMatchObject({ id: 7, result: 'VISITANTE', duels: [] });
   });
+
+  it('responde a classificação na ordem calculada', async () => {
+    const linha = { posicao: 1, clubeId: 2, nomeClube: 'Delta FC', jogos: 1, vitorias: 1, empates: 0, derrotas: 0, golsPro: 2, golsContra: 1, saldo: 1, pontos: 3 };
+    const servico = { consultarClassificacao: vi.fn().mockResolvedValue([linha, { ...linha, posicao: 2, clubeId: 3, nomeClube: 'Gama SC' }]) };
+    const corpo = await new LigaController(servico as unknown as LigaService).consultarClassificacao();
+    expect(corpo.map((linhaDaResposta) => [linhaDaResposta.position, linhaDaResposta.club_id])).toEqual([
+      [1, 2],
+      [2, 3],
+    ]);
+  });
 });

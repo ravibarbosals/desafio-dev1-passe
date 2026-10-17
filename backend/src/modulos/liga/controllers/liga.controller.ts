@@ -4,6 +4,7 @@ import type { Response } from 'express';
 import { RECURSOS_NAO_ENCONTRADOS } from '@/core/erros/nao-encontrado';
 import { IdDaUrlPipe } from '@/core/http/id-da-url.pipe';
 import { criarEscalacaoResposta, EscalacaoRespostaDto } from '@/modulos/liga/dto/escalacao-resposta.dto';
+import { criarLinhaDaClassificacaoResposta, LinhaDaClassificacaoRespostaDto } from '@/modulos/liga/dto/classificacao-resposta.dto';
 import { EscalarDto } from '@/modulos/liga/dto/escalar.dto';
 import { JogarPartidaDto } from '@/modulos/liga/dto/jogar-partida.dto';
 import { ListarPartidasQueryDto } from '@/modulos/liga/dto/listar-partidas-query.dto';
@@ -59,5 +60,12 @@ export class LigaController {
   @ApiNotFoundResponse({ description: 'Partida inexistente ou id fora do formato' })
   async consultarPartida(@Param('id', idDaPartida) id: number): Promise<PartidaRespostaDto> {
     return criarPartidaResposta(await this.ligaService.consultarPartida(id));
+  }
+
+  @Get('standings')
+  @ApiOkResponse({ type: [LinhaDaClassificacaoRespostaDto], description: 'Todos os clubes, inclusive os que não jogaram, na ordem da RN21' })
+  async consultarClassificacao(): Promise<LinhaDaClassificacaoRespostaDto[]> {
+    const linhas = await this.ligaService.consultarClassificacao();
+    return linhas.map(criarLinhaDaClassificacaoResposta);
   }
 }

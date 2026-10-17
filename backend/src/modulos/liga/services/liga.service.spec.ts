@@ -350,3 +350,26 @@ describe('LigaService.consultarPartida', () => {
     expect([erro.getStatus(), erro.codigo, erro.message]).toEqual([404, 'PARTIDA_NAO_ENCONTRADA', 'Partida não encontrada.']);
   });
 });
+
+describe('LigaService.consultarClassificacao', () => {
+  it('lê as partidas antes dos clubes, só as colunas usadas, e devolve o exemplo 2.4.3', async () => {
+    const clubes = [Object.assign(new Clube(), { id: 1, nome: 'Águias FC' }), Object.assign(new Clube(), { id: 2, nome: 'Delta FC' }), Object.assign(new Clube(), { id: 3, nome: 'Gama SC' })];
+    const partidas = [Object.assign(new Partida(), { mandanteId: 1, visitanteId: 2, golsMandante: 1, golsVisitante: 2 })];
+    const manager = Object.assign(criarManager(), { find: vi.fn().mockResolvedValueOnce(partidas).mockResolvedValueOnce(clubes) });
+    const linhas = await criarServico(manager).consultarClassificacao();
+    expect(manager.find.mock.calls).toEqual([
+      [Partida, { select: { mandanteId: true, visitanteId: true, golsMandante: true, golsVisitante: true } }],
+      [Clube, { select: { id: true, nome: true } }],
+    ]);
+    expect(linhas.map((linha) => [linha.posicao, linha.nomeClube, linha.pontos])).toEqual([
+      [1, 'Delta FC', 3],
+      [2, 'Gama SC', 0],
+      [3, 'Águias FC', 0],
+    ]);
+  });
+
+  it('sem clubes: lista vazia', async () => {
+    const manager = Object.assign(criarManager(), { find: vi.fn().mockResolvedValue([]) });
+    await expect(criarServico(manager).consultarClassificacao()).resolves.toEqual([]);
+  });
+});
