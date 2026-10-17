@@ -1,5 +1,6 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query } from '@nestjs/common';
-import { ApiBadRequestResponse, ApiConflictResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query, Res } from '@nestjs/common';
+import { ApiBadRequestResponse, ApiConflictResponse, ApiNotFoundResponse, ApiOkResponse, ApiProduces, ApiTags } from '@nestjs/swagger';
+import type { Response } from 'express';
 import { RECURSOS_NAO_ENCONTRADOS } from '@/core/erros/nao-encontrado';
 import { IdDaUrlPipe } from '@/core/http/id-da-url.pipe';
 import { CompraRespostaDto, criarCompraResposta } from '@/modulos/mercado/dto/compra-resposta.dto';
@@ -7,6 +8,7 @@ import { ComprarJogadorDto } from '@/modulos/mercado/dto/comprar-jogador.dto';
 import { HistoricoQueryDto } from '@/modulos/mercado/dto/historico-query.dto';
 import { criarHistoricoResposta, HistoricoRespostaDto } from '@/modulos/mercado/dto/historico-resposta.dto';
 import { criarVendaResposta, VendaRespostaDto } from '@/modulos/mercado/dto/venda-resposta.dto';
+import { gerarCsvDoHistorico } from '@/modulos/mercado/helpers/csv-do-historico';
 import { MercadoService } from '@/modulos/mercado/services/mercado.service';
 
 const idDoJogador = new IdDaUrlPipe(RECURSOS_NAO_ENCONTRADOS.jogador.codigo, RECURSOS_NAO_ENCONTRADOS.jogador.mensagem);
@@ -44,5 +46,18 @@ export class MercadoController {
   @ApiNotFoundResponse({ description: 'Clube inexistente, ou jogador do filtro inexistente ou excluído' })
   async consultarHistorico(@Param('id', idDoClube) id: number, @Query() filtros: HistoricoQueryDto): Promise<HistoricoRespostaDto> {
     return criarHistoricoResposta(await this.mercadoService.consultarHistorico(id, filtros));
+  }
+
+  // RN18: mesma consulta do histórico; os erros continuam em JSON (filtro de exceções global)
+  @Get('clubs/:id/transactions/export')
+  @ApiProduces('text/csv')
+  @ApiOkResponse({ description: 'CSV da RN18, UTF-8 sem BOM, linhas terminadas em \\n', schema: { type: 'string' } })
+  @ApiBadRequestResponse({ description: 'type ou player_id fora do formato' })
+  @ApiNotFoundResponse({ description: 'Clube inexistente, ou jogador do filtro inexistente ou excluído' })
+  async exportarHistorico(@Param('id', idDoClube) id: number, @Query() filtros: HistoricoQueryDto, @Res({ passthrough: true }) resposta: Response): Promise<string> {
+    const { transacoes } = await this.mercadoService.consultarHistorico(id, filtros);
+    resposta.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    resposta.setHeader('Content-Disposition', `attachment; filename="historico-clube-${id}.csv"`);
+    return gerarCsvDoHistorico(transacoes);
   }
 }

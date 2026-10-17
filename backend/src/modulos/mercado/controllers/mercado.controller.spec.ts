@@ -1,3 +1,4 @@
+import type { Response } from 'express';
 import { MercadoController } from '@/modulos/mercado/controllers/mercado.controller';
 import { Contrato } from '@/modulos/mercado/entities/contrato.entity';
 import { Transacao } from '@/modulos/mercado/entities/transacao.entity';
@@ -53,5 +54,16 @@ describe('MercadoController', () => {
     const corpo = await new MercadoController(servico as unknown as MercadoService).consultarHistorico(1, { type: ['VENDA'] });
     expect(servico.consultarHistorico).toHaveBeenCalledWith(1, { type: ['VENDA'] });
     expect(corpo).toEqual({ data: [], summary: { total_spent: 0, total_received: 0, total_fees: 0, total_penalties: 0, total_profit: 0 } });
+  });
+
+  it('exporta o histórico em CSV, com os filtros recebidos e os cabeçalhos da RN18', async () => {
+    const resumo = { totalGasto: 0, totalRecebido: 0, totalTaxas: 0, totalMultas: 0, totalLucro: 0 };
+    const servico = { consultarHistorico: vi.fn().mockResolvedValue({ transacoes: [], resumo }) };
+    const resposta = { setHeader: vi.fn() };
+    const corpo = await new MercadoController(servico as unknown as MercadoService).exportarHistorico(1, { type: ['VENDA'] }, resposta as unknown as Response);
+    expect(servico.consultarHistorico).toHaveBeenCalledWith(1, { type: ['VENDA'] });
+    expect(resposta.setHeader).toHaveBeenCalledWith('Content-Type', 'text/csv; charset=utf-8');
+    expect(resposta.setHeader).toHaveBeenCalledWith('Content-Disposition', 'attachment; filename="historico-clube-1.csv"');
+    expect(corpo).toBe('data_hora;tipo;jogador;valor;taxa_ou_comissao;multa;lucro;variacao_caixa\n');
   });
 });
