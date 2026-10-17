@@ -46,4 +46,12 @@ describe('MercadoController', () => {
     expect(servico.vender).toHaveBeenCalledWith(2);
     expect(corpo).toMatchObject({ id: 11, type: 'VENDA', cash_change: 35.7, remaining_days: 117, penalty_rate: 10, contract_status: 'RESCINDIDO', club_cash: 296.85 });
   });
+
+  it('consulta o histórico pelo id da URL, com os filtros recebidos', async () => {
+    const resumo = { totalGasto: 0, totalRecebido: 0, totalTaxas: 0, totalMultas: 0, totalLucro: 0 };
+    const servico = { consultarHistorico: vi.fn().mockResolvedValue({ transacoes: [], resumo }) };
+    const corpo = await new MercadoController(servico as unknown as MercadoService).consultarHistorico(1, { type: ['VENDA'] });
+    expect(servico.consultarHistorico).toHaveBeenCalledWith(1, { type: ['VENDA'] });
+    expect(corpo).toEqual({ data: [], summary: { total_spent: 0, total_received: 0, total_fees: 0, total_penalties: 0, total_profit: 0 } });
+  });
 });

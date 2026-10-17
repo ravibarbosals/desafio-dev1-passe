@@ -1,13 +1,16 @@
-import { Body, Controller, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiConflictResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { RECURSOS_NAO_ENCONTRADOS } from '@/core/erros/nao-encontrado';
 import { IdDaUrlPipe } from '@/core/http/id-da-url.pipe';
 import { CompraRespostaDto, criarCompraResposta } from '@/modulos/mercado/dto/compra-resposta.dto';
 import { ComprarJogadorDto } from '@/modulos/mercado/dto/comprar-jogador.dto';
+import { HistoricoQueryDto } from '@/modulos/mercado/dto/historico-query.dto';
+import { criarHistoricoResposta, HistoricoRespostaDto } from '@/modulos/mercado/dto/historico-resposta.dto';
 import { criarVendaResposta, VendaRespostaDto } from '@/modulos/mercado/dto/venda-resposta.dto';
 import { MercadoService } from '@/modulos/mercado/services/mercado.service';
 
 const idDoJogador = new IdDaUrlPipe(RECURSOS_NAO_ENCONTRADOS.jogador.codigo, RECURSOS_NAO_ENCONTRADOS.jogador.mensagem);
+const idDoClube = new IdDaUrlPipe(RECURSOS_NAO_ENCONTRADOS.clube.codigo, RECURSOS_NAO_ENCONTRADOS.clube.mensagem);
 
 @ApiTags('Mercado')
 @Controller()
@@ -33,5 +36,13 @@ export class MercadoController {
   @ApiConflictResponse({ description: 'Jogador livre (JOGADOR_LIVRE_NAO_PODE_SER_VENDIDO)' })
   async vender(@Param('id', idDoJogador) id: number): Promise<VendaRespostaDto> {
     return criarVendaResposta(await this.mercadoService.vender(id));
+  }
+
+  @Get('clubs/:id/transactions')
+  @ApiOkResponse({ type: HistoricoRespostaDto })
+  @ApiBadRequestResponse({ description: 'type ou player_id fora do formato' })
+  @ApiNotFoundResponse({ description: 'Clube inexistente, ou jogador do filtro inexistente ou excluído' })
+  async consultarHistorico(@Param('id', idDoClube) id: number, @Query() filtros: HistoricoQueryDto): Promise<HistoricoRespostaDto> {
+    return criarHistoricoResposta(await this.mercadoService.consultarHistorico(id, filtros));
   }
 }

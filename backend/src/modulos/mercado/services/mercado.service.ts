@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { DataSource, EntityManager, IsNull } from 'typeorm';
+import { DataSource, EntityManager, FindOptionsWhere, In, IsNull } from 'typeorm';
 import { formatarCentavos } from '@/core/comum/moeda/moeda';
 import { Relogio } from '@/core/comum/relogio/relogio';
 import { criarErroNaoEncontrado } from '@/core/erros/nao-encontrado';
@@ -9,11 +9,14 @@ import { Jogador } from '@/modulos/jogadores/entities/jogador.entity';
 import { calcularValorDeMercado } from '@/modulos/jogadores/helpers/valor-de-mercado';
 import { Escalacao } from '@/modulos/liga/entities/escalacao.entity';
 import { ComprarJogadorDto } from '@/modulos/mercado/dto/comprar-jogador.dto';
+import { HistoricoQueryDto } from '@/modulos/mercado/dto/historico-query.dto';
 import { Contrato } from '@/modulos/mercado/entities/contrato.entity';
 import { Transacao } from '@/modulos/mercado/entities/transacao.entity';
 import { calcularComissao } from '@/modulos/mercado/helpers/comissao';
 import { fidelidadeDentroDoPrazo } from '@/modulos/mercado/helpers/fidelidade';
 import { calcularDiasRestantes, calcularMulta, percentualDeMulta } from '@/modulos/mercado/helpers/multa';
+import { resumirHistorico } from '@/modulos/mercado/helpers/resumo-do-historico';
+import type { ResumoDoHistorico } from '@/modulos/mercado/helpers/resumo-do-historico';
 import { calcularTaxaDeCompra } from '@/modulos/mercado/helpers/taxa-de-compra';
 
 const LIMITE_DO_ELENCO = 12;
@@ -27,6 +30,11 @@ export interface Compra {
 export interface Venda extends Compra {
   diasRestantes: number;
   percentualDeMulta: number;
+}
+
+export interface Historico {
+  transacoes: Transacao[];
+  resumo: ResumoDoHistorico;
 }
 
 function valorDeMercadoDe(jogador: Jogador): number {
@@ -113,6 +121,26 @@ export class MercadoService {
       );
       return { transacao, contrato, caixaDoClube: clube.caixa, diasRestantes, percentualDeMulta: percentual };
     });
+  }
+
+  // RN17: só leitura; clube e jogador do filtro conferidos antes (404), da mais recente para a mais antiga, valores como foram gravados
+  async consultarHistorico(clubeId: number, filtros: HistoricoQueryDto): Promise<Historico> {
+    const { manager } = this.dataSource;
+    if (!(await manager.existsBy(Clube, { id: clubeId }))) {
+      throw criarErroNaoEncontrado('clube');
+    }
+    if (filtros.player_id !== undefined && !(await manager.existsBy(Jogador, { id: filtros.player_id, excluidoEm: IsNull() }))) {
+      throw criarErroNaoEncontrado('jogador');
+    }
+    const filtro: FindOptionsWhere<Transacao> = { clubeId };
+    if (filtros.type !== undefined) {
+      filtro.tipo = In(filtros.type);
+    }
+    if (filtros.player_id !== undefined) {
+      filtro.jogadorId = filtros.player_id;
+    }
+    const transacoes = await manager.find(Transacao, { where: filtro, order: { criadoEm: 'DESC', id: 'DESC' } });
+    return { transacoes, resumo: resumirHistorico(transacoes) };
   }
 
   // DEC-039: jogador primeiro, depois o clube, com SELECT ... FOR UPDATE; jogador excluído é inexistente (RN09)

@@ -1,4 +1,4 @@
-import { DataSource } from 'typeorm';
+import { DataSource, In, IsNull } from 'typeorm';
 import { Relogio } from '@/core/comum/relogio/relogio';
 import { RegraNegocioException } from '@/core/erros/regra-negocio.exception';
 import { Clube } from '@/modulos/clubes/entities/clube.entity';
@@ -29,6 +29,7 @@ function criarManager(jogador: Jogador | null = criarJogador(), clube: Clube | n
     findOneBy: vi.fn().mockResolvedValue(null),
     existsBy: vi.fn().mockResolvedValue(false),
     countBy: vi.fn().mockResolvedValue(0),
+    find: vi.fn().mockResolvedValue([]),
     create: vi.fn((entidade: new () => object, dados: object) => Object.assign(new entidade(), dados)),
     delete: vi.fn().mockResolvedValue({}),
     save: vi.fn((entidade: object) => Promise.resolve(entidade instanceof Transacao ? Object.assign(entidade, { id: 10 }) : entidade)),
@@ -36,7 +37,7 @@ function criarManager(jogador: Jogador | null = criarJogador(), clube: Clube | n
 }
 
 function criarServico(manager = criarManager(), instante = agora): MercadoService {
-  const dataSource = { transaction: vi.fn((trabalho: (gerenciador: typeof manager) => Promise<unknown>) => trabalho(manager)) };
+  const dataSource = { manager, transaction: vi.fn((trabalho: (gerenciador: typeof manager) => Promise<unknown>) => trabalho(manager)) };
   return new MercadoService(dataSource as unknown as DataSource, { agora: () => instante } as Relogio);
 }
 
@@ -242,5 +243,48 @@ describe('MercadoService.vender', () => {
     const manager = criarManagerDaVenda(criarJogador({ clubeId: 1 }), null);
     await expect(criarServico(manager).vender(2)).rejects.toThrow('Jogador 2 do clube 1 sem contrato ATIVO');
     expect(manager.save).not.toHaveBeenCalled();
+  });
+});
+
+describe('MercadoService.consultarHistorico', () => {
+  const venda = Object.assign(new Transacao(), { id: 11, tipo: 'VENDA', valor: 4000, taxa: 30, multa: 400, lucro: 300, variacaoCaixa: 3570 });
+  const compra = Object.assign(new Transacao(), { id: 10, tipo: 'COMPRA', valor: 3700, taxa: 185, multa: 0, lucro: null, variacaoCaixa: -3885 });
+
+  function criarManagerDoHistorico(clubeExiste = true, jogadorExiste = true) {
+    const manager = criarManager();
+    manager.existsBy.mockImplementation((entidade: unknown) => Promise.resolve(entidade === Clube ? clubeExiste : jogadorExiste));
+    manager.find.mockResolvedValue([venda, compra]);
+    return manager;
+  }
+
+  it('sem filtros: só o clube, da mais recente para a mais antiga, com o summary (observação do 2.3.3)', async () => {
+    const manager = criarManagerDoHistorico();
+    const historico = await criarServico(manager).consultarHistorico(1, {});
+    expect(manager.existsBy).toHaveBeenCalledTimes(1);
+    expect(manager.existsBy).toHaveBeenCalledWith(Clube, { id: 1 });
+    expect(manager.find).toHaveBeenCalledWith(Transacao, { where: { clubeId: 1 }, order: { criadoEm: 'DESC', id: 'DESC' } });
+    expect(historico).toEqual({ transacoes: [venda, compra], resumo: { totalGasto: 3885, totalRecebido: 3570, totalTaxas: 215, totalMultas: 400, totalLucro: 300 } });
+  });
+
+  it('com type e player_id: confere o jogador ativo e filtra no banco', async () => {
+    const manager = criarManagerDoHistorico();
+    await criarServico(manager).consultarHistorico(1, { type: ['VENDA'], player_id: 2 });
+    expect(manager.existsBy).toHaveBeenCalledWith(Jogador, { id: 2, excluidoEm: IsNull() });
+    expect(manager.find).toHaveBeenCalledWith(Transacao, { where: { clubeId: 1, tipo: In(['VENDA']), jogadorId: 2 }, order: { criadoEm: 'DESC', id: 'DESC' } });
+  });
+
+  it('clube inexistente → 404, antes de olhar o jogador', async () => {
+    const manager = criarManagerDoHistorico(false, false);
+    const erro = await capturarErro(criarServico(manager).consultarHistorico(99, { player_id: 2 }));
+    expect(erro.codigo).toBe('CLUBE_NAO_ENCONTRADO');
+    expect(manager.existsBy).toHaveBeenCalledTimes(1);
+    expect(manager.find).not.toHaveBeenCalled();
+  });
+
+  it('jogador do filtro inexistente ou excluído → 404', async () => {
+    const manager = criarManagerDoHistorico(true, false);
+    const erro = await capturarErro(criarServico(manager).consultarHistorico(1, { player_id: 99 }));
+    expect(erro.codigo).toBe('JOGADOR_NAO_ENCONTRADO');
+    expect(manager.find).not.toHaveBeenCalled();
   });
 });
