@@ -1,5 +1,7 @@
-import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
+import { createRootRoute, Outlet } from "@tanstack/react-router";
 
+import { Cabecalho } from "@/componentes/layout/Cabecalho";
+import { MenuLateral } from "@/componentes/layout/MenuLateral";
 import { PaginaErro } from "@/componentes/PaginaErro";
 import { PaginaNaoEncontrada } from "@/componentes/PaginaNaoEncontrada";
 import { Toaster } from "@/componentes/ui/sonner";
@@ -10,18 +12,19 @@ export const Route = createRootRoute({
   errorComponent: PaginaErro,
 });
 
-// Esqueleto do layout; o menu lateral do mockup entra com as telas (TASK-045 em diante)
+// Menu lateral à esquerda e a página num painel com a trilha no topo, como no mockup
 function LayoutRaiz() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b px-6 py-4">
-        <Link to="/" className="text-lg font-semibold">
-          Passe
-        </Link>
-      </header>
-      <main className="p-6">
-        <Outlet />
-      </main>
+    <div className="flex min-h-screen bg-muted/40 text-foreground">
+      <MenuLateral />
+      <div className="flex min-w-0 flex-1 flex-col py-2 pr-2">
+        <div className="flex flex-1 flex-col rounded-xl border bg-background">
+          <Cabecalho />
+          <main className="flex-1 p-6">
+            <Outlet />
+          </main>
+        </div>
+      </div>
       <Toaster theme="light" position="top-right" />
     </div>
   );
