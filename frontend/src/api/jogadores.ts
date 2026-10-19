@@ -131,3 +131,7 @@ export type NovoJogador = Pick<
 export async function cadastrarJogador(novoJogador: NovoJogador): Promise<Jogador> {
   return (await api.post<Jogador>("/players", novoJogador)).data;
 }
+
+export async function excluirJogador(id: number): Promise<void> {
+  await api.delete(`/players/${id}`);
+}
