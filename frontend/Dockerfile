@@ -11,6 +11,7 @@ RUN npm run build
 
 # Etapa 2: nginx servindo só o dist
 FROM nginx:1.28-alpine
+RUN sed -i 's#error.log notice;#error.log warn;#' /etc/nginx/nginx.conf
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 80
