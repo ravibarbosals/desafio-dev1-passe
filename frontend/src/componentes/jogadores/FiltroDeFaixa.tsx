@@ -1,7 +1,7 @@
 import { ChevronDown, type LucideIcon } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
-import { Button, buttonVariants } from "@/componentes/ui/button";
+import { Button } from "@/componentes/ui/button";
 import { Input } from "@/componentes/ui/input";
 import { Label } from "@/componentes/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/componentes/ui/popover";
@@ -69,10 +69,12 @@ export function FiltroDeFaixa({
   return (
     <Popover open={aberto} onOpenChange={mudarAberto}>
       {/* Sem asChild: o Button do shadcn não repassa a ref no React 18, e o popover perderia a âncora */}
-      <PopoverTrigger className={buttonVariants({ variant: "outline" })}>
-        <Icone />
-        {resumo ? `${rotulo}: ${resumo}` : rotulo}
-        <ChevronDown />
+      <PopoverTrigger asChild>
+        <Button type="button" variant="outline">
+          <Icone />
+          {resumo ? `${rotulo}: ${resumo}` : rotulo}
+          <ChevronDown />
+        </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-72">
         <form onSubmit={aplicar} className="flex flex-col gap-3" noValidate>
