@@ -8,12 +8,14 @@ import { consultaDosClubes } from "@/api/clube";
 import {
   consultaDosJogadores,
   type FiltrosDosJogadores,
+  type Jogador,
   type OrdemDosJogadores,
   type SituacaoDosJogadores,
 } from "@/api/jogadores";
 import { BarraDeFiltros } from "@/componentes/jogadores/BarraDeFiltros";
 import { listarFiltrosAtivos } from "@/componentes/jogadores/filtros-ativos";
 import { FiltrosAtivos } from "@/componentes/jogadores/FiltrosAtivos";
+import { ModalExcluirJogador } from "@/componentes/jogadores/ModalExcluirJogador";
 import { ModalNovoJogador } from "@/componentes/jogadores/ModalNovoJogador";
 import { TabelaDeJogadores } from "@/componentes/jogadores/TabelaDeJogadores";
 import { TituloPagina } from "@/componentes/layout/TituloPagina";
@@ -58,6 +60,7 @@ function PaginaJogadores() {
   const jogadores = useQuery(consultaDosJogadores(filtros));
   const clubes = useQuery(consultaDosClubes());
   const [novoJogadorAberto, setNovoJogadorAberto] = useState(false);
+  const [jogadorParaExcluir, setJogadorParaExcluir] = useState<Jogador>();
 
   // Filtro novo volta para a página 1: a página atual pode não existir no resultado novo
   function mudarFiltros(novos: Partial<FiltrosDosJogadores>) {
@@ -92,6 +95,10 @@ function PaginaJogadores() {
         }
       />
       <ModalNovoJogador aberto={novoJogadorAberto} aoMudarAberto={setNovoJogadorAberto} />
+      <ModalExcluirJogador
+        jogador={jogadorParaExcluir}
+        aoFechar={() => setJogadorParaExcluir(undefined)}
+      />
 
       <BarraDeFiltros filtros={filtros} clubes={clubes.data} aoMudar={mudarFiltros} />
       <FiltrosAtivos
@@ -153,6 +160,7 @@ function PaginaJogadores() {
           )
         }
         aoMudarPagina={mudarPagina}
+        acoes={{ aoExcluir: setJogadorParaExcluir }}
       />
 
       <p className="mt-3 text-xs text-muted-foreground">

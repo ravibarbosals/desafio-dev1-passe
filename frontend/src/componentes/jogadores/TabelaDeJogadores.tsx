@@ -9,13 +9,18 @@ import { Badge } from "@/componentes/ui/badge";
 import { formatarMoeda } from "@/lib/formatacao";
 import { nomesDasCondicoes, nomesDasPosicoes } from "@/lib/rotulos";
 
+import { MenuDoJogador, type AcoesDoJogador } from "./MenuDoJogador";
+
 const coresDasCondicoes: Record<Jogador["condition"], string> = {
   APTO: "border-green-200 bg-green-50 text-green-700",
   MAL_CONDICIONADO: "border-amber-200 bg-amber-50 text-amber-700",
   DOENTE: "border-red-200 bg-red-50 text-red-700",
 };
 
-function montarColunas(clubesPorId: Map<number, ResumoDoClube>): ColunaDaTabela<Jogador>[] {
+function montarColunas(
+  clubesPorId: Map<number, ResumoDoClube>,
+  acoes: AcoesDoJogador,
+): ColunaDaTabela<Jogador>[] {
   return [
     {
       titulo: "Jogador",
@@ -61,6 +66,11 @@ function montarColunas(clubesPorId: Map<number, ResumoDoClube>): ColunaDaTabela<
       titulo: "Clube",
       celula: (jogador) => celulaDoClube(jogador.club_id, clubesPorId),
     },
+    {
+      titulo: "Ações",
+      celula: (jogador) => <MenuDoJogador jogador={jogador} {...acoes} />,
+      alinharADireita: true,
+    },
   ];
 }
 
@@ -87,6 +97,7 @@ interface PropriedadesTabelaDeJogadores {
   textoVazio: string;
   acaoVazio?: ReactNode;
   aoMudarPagina: (pagina: number) => void;
+  acoes: AcoesDoJogador;
 }
 
 export function TabelaDeJogadores({
@@ -95,13 +106,14 @@ export function TabelaDeJogadores({
   textoVazio,
   acaoVazio,
   aoMudarPagina,
+  acoes,
 }: PropriedadesTabelaDeJogadores) {
   const clubesPorId = new Map(clubes?.map((clube) => [clube.id, clube]));
   const meta = consulta.data?.meta;
 
   return (
     <TabelaComEstados
-      colunas={montarColunas(clubesPorId)}
+      colunas={montarColunas(clubesPorId, acoes)}
       linhas={consulta.data?.data}
       chave={(jogador) => jogador.id}
       consulta={consulta}
