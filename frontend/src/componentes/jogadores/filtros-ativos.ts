@@ -8,8 +8,8 @@ export interface FiltroAtivo {
   limpar: Partial<FiltrosDosJogadores>;
 }
 
-// "Idade: 18 a 30", "a partir de 18", "até 30"
-function descreverFaixa(minimo: string | undefined, maximo: string | undefined): string {
+// "18 a 30", "a partir de 18", "até 30"; também no botão do filtro de faixa
+export function descreverFaixa(minimo: string | undefined, maximo: string | undefined): string {
   if (minimo !== undefined && maximo !== undefined) {
     return `${minimo} a ${maximo}`;
   }

@@ -1,4 +1,4 @@
-import { Search } from "lucide-react";
+import { Coins, Search, User } from "lucide-react";
 import { useRef, useState } from "react";
 
 import type { ResumoDoClube } from "@/api/clube";
@@ -11,12 +11,45 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/componentes/ui/select";
+import { formatarMoeda } from "@/lib/formatacao";
 import { nomesDasCondicoes, nomesDasPosicoes } from "@/lib/rotulos";
+
+import type { RegrasDaFaixa } from "./faixa";
+import { FiltroDeFaixa } from "./FiltroDeFaixa";
+import { descreverFaixa } from "./filtros-ativos";
 
 // O Select do Radix não aceita valor vazio: "todos" quer dizer sem filtro
 const semFiltro = "todos";
 // Espera a pessoa parar de digitar para não pedir uma lista a cada letra
 const esperaDaBusca = 400;
+
+// Limites de min_age/max_age e min_value/max_value no GET /players (API.md, Jogadores 5.3)
+const regrasDaIdade: RegrasDaFaixa = {
+  rotulos: { minimo: "Idade mínima", maximo: "Idade máxima" },
+  piso: 16,
+  teto: 45,
+  casas: 0,
+};
+const regrasDoValor: RegrasDaFaixa = {
+  rotulos: { minimo: "Valor mínimo", maximo: "Valor máximo" },
+  piso: 0,
+  teto: 550,
+  casas: 2,
+};
+
+function resumirFaixa(
+  minimo: number | undefined,
+  maximo: number | undefined,
+  formatar: (valor: number) => string,
+): string | undefined {
+  if (minimo === undefined && maximo === undefined) {
+    return undefined;
+  }
+  return descreverFaixa(
+    minimo === undefined ? undefined : formatar(minimo),
+    maximo === undefined ? undefined : formatar(maximo),
+  );
+}
 
 interface PropriedadesBarraDeFiltros {
   filtros: FiltrosDosJogadores;
@@ -91,6 +124,27 @@ export function BarraDeFiltros({ filtros, clubes, aoMudar }: PropriedadesBarraDe
           </SelectContent>
         </Select>
       </span>
+      <FiltroDeFaixa
+        id="filtro-idade"
+        rotulo="Idade"
+        icone={User}
+        minimo={filtros.idadeMinima}
+        maximo={filtros.idadeMaxima}
+        regras={regrasDaIdade}
+        resumo={resumirFaixa(filtros.idadeMinima, filtros.idadeMaxima, String)}
+        aoAplicar={(idadeMinima, idadeMaxima) => aoMudar({ idadeMinima, idadeMaxima })}
+      />
+
+      <FiltroDeFaixa
+        id="filtro-valor"
+        rotulo="Valor de mercado"
+        icone={Coins}
+        minimo={filtros.valorMinimo}
+        maximo={filtros.valorMaximo}
+        regras={regrasDoValor}
+        resumo={resumirFaixa(filtros.valorMinimo, filtros.valorMaximo, formatarMoeda)}
+        aoAplicar={(valorMinimo, valorMaximo) => aoMudar({ valorMinimo, valorMaximo })}
+      />
     </div>
   );
 }
