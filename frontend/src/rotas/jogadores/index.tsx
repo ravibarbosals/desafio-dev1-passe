@@ -10,6 +10,9 @@ import {
   type OrdemDosJogadores,
   type SituacaoDosJogadores,
 } from "@/api/jogadores";
+import { BarraDeFiltros } from "@/componentes/jogadores/BarraDeFiltros";
+import { listarFiltrosAtivos } from "@/componentes/jogadores/filtros-ativos";
+import { FiltrosAtivos } from "@/componentes/jogadores/FiltrosAtivos";
 import { TabelaDeJogadores } from "@/componentes/jogadores/TabelaDeJogadores";
 import { TituloPagina } from "@/componentes/layout/TituloPagina";
 import { Button } from "@/componentes/ui/button";
@@ -62,8 +65,13 @@ function PaginaJogadores() {
     void navegar({ search: (atuais) => ({ ...atuais, pagina }) });
   }
 
-  const temFiltro = Object.entries(filtros).some(
-    ([campo, valor]) => valor !== undefined && campo !== "ordem" && campo !== "pagina",
+  function limparFiltros() {
+    void navegar({ search: {} });
+  }
+
+  const filtrosAtivos = listarFiltrosAtivos(
+    filtros,
+    (clubeId) => clubes.data?.find((clube) => clube.id === clubeId)?.name,
   );
   const busca = filtros.busca?.trim();
 
@@ -75,12 +83,21 @@ function PaginaJogadores() {
         descricao="Cadastre jogadores, acompanhe os indicadores e compre os que estão livres."
       />
 
+      <BarraDeFiltros filtros={filtros} clubes={clubes.data} aoMudar={mudarFiltros} />
+      <FiltrosAtivos
+        filtros={filtrosAtivos}
+        aoRemover={(filtro) => mudarFiltros(filtro.limpar)}
+        aoLimparTodos={limparFiltros}
+      />
+
       <div className="mb-3 flex items-center justify-between gap-4">
         <Tabs
           value={filtros.situacao ?? "todos"}
           onValueChange={(valor) =>
             mudarFiltros({
               situacao: valor === "todos" ? undefined : (valor as SituacaoDosJogadores),
+              // "Livres" desabilita o filtro de clube (J04)
+              ...(valor === "livres" && { clubeId: undefined }),
             })
           }
         >
@@ -118,8 +135,8 @@ function PaginaJogadores() {
           busca ? `Nenhum jogador encontrado para “${busca}”` : "Nenhum jogador encontrado"
         }
         acaoVazio={
-          temFiltro && (
-            <Button type="button" variant="outline" onClick={() => void navegar({ search: {} })}>
+          filtrosAtivos.length > 0 && (
+            <Button type="button" variant="outline" onClick={limparFiltros}>
               <X />
               Limpar filtros
             </Button>
