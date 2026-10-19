@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { ArrowUpDown, Users, X } from "lucide-react";
+import { ArrowUpDown, Plus, Users, X } from "lucide-react";
+import { useState } from "react";
 import { z } from "zod";
 
 import { consultaDosClubes } from "@/api/clube";
@@ -13,6 +14,7 @@ import {
 import { BarraDeFiltros } from "@/componentes/jogadores/BarraDeFiltros";
 import { listarFiltrosAtivos } from "@/componentes/jogadores/filtros-ativos";
 import { FiltrosAtivos } from "@/componentes/jogadores/FiltrosAtivos";
+import { ModalNovoJogador } from "@/componentes/jogadores/ModalNovoJogador";
 import { TabelaDeJogadores } from "@/componentes/jogadores/TabelaDeJogadores";
 import { TituloPagina } from "@/componentes/layout/TituloPagina";
 import { Button } from "@/componentes/ui/button";
@@ -55,6 +57,7 @@ function PaginaJogadores() {
   const navegar = Route.useNavigate();
   const jogadores = useQuery(consultaDosJogadores(filtros));
   const clubes = useQuery(consultaDosClubes());
+  const [novoJogadorAberto, setNovoJogadorAberto] = useState(false);
 
   // Filtro novo volta para a página 1: a página atual pode não existir no resultado novo
   function mudarFiltros(novos: Partial<FiltrosDosJogadores>) {
@@ -81,7 +84,14 @@ function PaginaJogadores() {
         icone={Users}
         titulo="Jogadores"
         descricao="Cadastre jogadores, acompanhe os indicadores e compre os que estão livres."
+        acao={
+          <Button type="button" onClick={() => setNovoJogadorAberto(true)}>
+            <Plus />
+            Novo jogador
+          </Button>
+        }
       />
+      <ModalNovoJogador aberto={novoJogadorAberto} aoMudarAberto={setNovoJogadorAberto} />
 
       <BarraDeFiltros filtros={filtros} clubes={clubes.data} aoMudar={mudarFiltros} />
       <FiltrosAtivos

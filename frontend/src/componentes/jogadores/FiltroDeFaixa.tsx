@@ -68,7 +68,6 @@ export function FiltroDeFaixa({
 
   return (
     <Popover open={aberto} onOpenChange={mudarAberto}>
-      {/* Sem asChild: o Button do shadcn não repassa a ref no React 18, e o popover perderia a âncora */}
       <PopoverTrigger asChild>
         <Button type="button" variant="outline">
           <Icone />

@@ -111,3 +111,23 @@ export function consultaDosJogadores(filtros: FiltrosDosJogadores) {
     placeholderData: keepPreviousData,
   });
 }
+
+// Corpo do POST /players (API.md, Jogadores 5.1)
+export type NovoJogador = Pick<
+  Jogador,
+  | "name"
+  | "position"
+  | "age"
+  | "agility"
+  | "pace"
+  | "shooting"
+  | "passing"
+  | "dribbling"
+  | "defending"
+  | "physical"
+  | "potential"
+>;
+
+export async function cadastrarJogador(novoJogador: NovoJogador): Promise<Jogador> {
+  return (await api.post<Jogador>("/players", novoJogador)).data;
+}
