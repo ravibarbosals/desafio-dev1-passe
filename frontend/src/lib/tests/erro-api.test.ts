@@ -2,8 +2,8 @@ import { http, HttpResponse } from "msw";
 
 import { servidor } from "@/testes/servidor";
 
-import { api } from "./api";
-import { extrairMensagemErro, mensagemErroPadrao, mensagemSemConexao } from "./erro-api";
+import { api } from "../api";
+import { extrairMensagemErro, mensagemErroPadrao, mensagemSemConexao } from "../erro-api";
 
 async function capturarErro(caminho: string): Promise<unknown> {
   try {

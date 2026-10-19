@@ -1,7 +1,7 @@
 import { createMemoryHistory, RouterProvider } from "@tanstack/react-router";
 import { render, screen } from "@testing-library/react";
 
-import { criarRoteador } from "./roteador";
+import { criarRoteador } from "../roteador";
 
 function abrir(caminho: string) {
   const roteador = criarRoteador(createMemoryHistory({ initialEntries: [caminho] }));

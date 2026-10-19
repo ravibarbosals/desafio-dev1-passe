@@ -1,4 +1,4 @@
-import { criarClienteQuery } from "./cliente-query";
+import { criarClienteQuery } from "../cliente-query";
 
 describe("criarClienteQuery", () => {
   it("não repete mutation que falhou (DEC-007)", () => {
