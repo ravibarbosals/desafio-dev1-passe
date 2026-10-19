@@ -14,7 +14,7 @@ Instalados pelos próprios comandos abaixo, sem instalação manual:
 - PostgreSQL 16 (imagem `postgres:16-alpine`, pelo Docker Compose)
 - dbmate 2.36.0, para as migrations (pelo `npm ci` do backend; no Docker, imagem `amacneil/dbmate:2.36.0`)
 
-As portas 3000 (API), 5173 (interface) e 5432 (banco) precisam estar livres.
+As portas 3000 (API), 5173 (interface) e 5435 (banco) precisam estar livres.
 
 ## Instalar e executar
 
@@ -79,10 +79,10 @@ Os valores do `.env.example` funcionam sem alteração.
 |---|---|---|
 | `APP_PORT` | `3000` | Porta da API |
 | `CORS_ORIGIN` | `http://localhost:5173` | Origem da interface liberada no CORS |
-| `DATABASE_HOST`, `DATABASE_PORT` | `localhost`, `5432` | Endereço do PostgreSQL |
+| `DATABASE_HOST`, `DATABASE_PORT` | `localhost`, `5435` | Endereço do PostgreSQL |
 | `DATABASE_USER`, `DATABASE_PASSWORD` | `postgres`, `postgres` | Usuário e senha do banco local (só desenvolvimento) |
 | `DATABASE_NAME` | `passe` | Nome do banco |
-| `DATABASE_URL` | `postgres://postgres:postgres@localhost:5432/passe?sslmode=disable` | Conexão usada pelo dbmate nas migrations |
+| `DATABASE_URL` | `postgres://postgres:postgres@localhost:5435/passe?sslmode=disable` | Conexão usada pelo dbmate nas migrations |
 | `DBMATE_NO_DUMP_SCHEMA` | `true` | Impede o dbmate de gerar um `schema.sql` a cada migration |
 
 `frontend/.env`:
