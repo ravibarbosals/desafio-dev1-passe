@@ -8,6 +8,7 @@ import { consultaDoClube, limiteDoElenco, type JogadorDoElenco } from "@/api/clu
 import { consultaDoHistorico } from "@/api/mercado";
 import { Aviso } from "@/componentes/Aviso";
 import { CartoesDoClube } from "@/componentes/clubes/CartoesDoClube";
+import { EscalacaoDoClube } from "@/componentes/clubes/EscalacaoDoClube";
 import { HistoricoDoClube } from "@/componentes/clubes/HistoricoDoClube";
 import { ModalVenderJogador } from "@/componentes/clubes/ModalVenderJogador";
 import { TabelaDoElenco } from "@/componentes/clubes/TabelaDoElenco";
@@ -148,9 +149,8 @@ function PaginaDoClube() {
             10,00.
           </p>
         </TabsContent>
-        {/* A escalação entra na TASK-052 */}
         <TabsContent value="escalacao" className="mt-4">
-          <p className="text-sm text-muted-foreground">Em construção.</p>
+          <EscalacaoDoClube clube={clube.data} />
         </TabsContent>
         <TabsContent value="historico" className="mt-4">
           <HistoricoDoClube clubeId={clube.data.id} />

@@ -13,10 +13,13 @@ export interface ResumoDoClube {
   net_worth: number;
 }
 
+// As 4 formações: jogadores de linha de trás para frente; o goleiro fica fora da conta (RN19)
+export type Formacao = "3-1" | "2-2" | "2-1-1" | "1-2-1";
+
 // GET /clubs/{id}/lineup (API.md, Liga 5.2); sem escalação, players vem vazio
 export interface EscalacaoDoClube {
   club_id: number;
-  formation: string | null;
+  formation: Formacao | null;
   complete: boolean;
   players: Jogador[];
 }
@@ -29,8 +32,10 @@ export interface ContratoDoJogador {
   penalty_rate: number;
 }
 
-// RN14: no máximo 12 jogadores no elenco
-export const limiteDoElenco = 12;
+export interface NovaEscalacao {
+  formation: Formacao;
+  player_ids: number[];
+}
 
 export interface JogadorDoElenco extends Jogador {
   contract: ContratoDoJogador;
@@ -42,6 +47,9 @@ export interface ClubeDetalhado extends ResumoDoClube {
 }
 
 export type OrdemDosClubes = "name" | "net_worth_asc" | "net_worth_desc";
+
+// RN14: no máximo 12 jogadores no elenco
+export const limiteDoElenco = 12;
 
 export function consultaDosClubes(ordem: OrdemDosClubes = "name") {
   const parametros = ordem === "name" ? {} : { sort: ordem };
@@ -71,4 +79,11 @@ export type NovoClube = Pick<ResumoDoClube, "name" | "acronym">;
 
 export async function criarClube(novoClube: NovoClube): Promise<ResumoDoClube> {
   return (await api.post<ResumoDoClube>("/clubs", novoClube)).data;
+}
+
+export async function salvarEscalacao(
+  clubeId: number,
+  escalacao: NovaEscalacao,
+): Promise<EscalacaoDoClube> {
+  return (await api.put<EscalacaoDoClube>(`/clubs/${clubeId}/lineup`, escalacao)).data;
 }

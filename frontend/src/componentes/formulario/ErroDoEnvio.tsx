@@ -1,5 +1,4 @@
-import { CircleAlert } from "lucide-react";
-
+import { Alerta } from "@/componentes/Alerta";
 import { extrairMensagemErro, semResposta } from "@/lib/erro-api";
 
 interface PropriedadesErroDoEnvio {
@@ -10,20 +9,13 @@ interface PropriedadesErroDoEnvio {
   textoSemConexao?: string;
 }
 
-// Erro da API dentro do quadro (M03, M04, V04, H05): o message da API ou "Sem conexão"
+// Erro da API dentro do quadro (M03, M04, V04, H05, C10): o message da API ou "Sem conexão"
 export function ErroDoEnvio({ erro, tituloRecusa, textoSemConexao }: PropriedadesErroDoEnvio) {
   const semConexao = semResposta(erro);
 
   return (
-    <div
-      role="alert"
-      className="flex gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
-    >
-      <CircleAlert className="mt-0.5 size-4 shrink-0" />
-      <div>
-        <p className="font-medium">{semConexao ? "Sem conexão" : tituloRecusa}</p>
-        <p>{semConexao && textoSemConexao ? textoSemConexao : extrairMensagemErro(erro)}</p>
-      </div>
-    </div>
+    <Alerta tom="erro" titulo={semConexao ? "Sem conexão" : tituloRecusa}>
+      <p>{semConexao && textoSemConexao ? textoSemConexao : extrairMensagemErro(erro)}</p>
+    </Alerta>
   );
 }

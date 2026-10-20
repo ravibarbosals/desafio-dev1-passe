@@ -1,4 +1,4 @@
-import { TriangleAlert } from "lucide-react";
+import { Alerta } from "@/componentes/Alerta";
 
 interface PropriedadesAvisoDeTitular {
   nomeDoJogador: string;
@@ -10,20 +10,14 @@ interface PropriedadesAvisoDeTitular {
 // RN19.5: o titular vendido ou que fica Doente sai da escalação, e o clube não joga até escalar de novo
 export function AvisoDeTitular({ nomeDoJogador, nomeDoClube, acao }: PropriedadesAvisoDeTitular) {
   return (
-    <div
-      role="alert"
-      className="flex gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800"
+    <Alerta
+      tom="atencao"
+      titulo={`${nomeDoJogador} é titular${nomeDoClube ? ` do ${nomeDoClube}` : ""}`}
     >
-      <TriangleAlert className="mt-0.5 size-4 shrink-0" />
-      <div>
-        <p className="font-medium">
-          {nomeDoJogador} é titular{nomeDoClube && ` do ${nomeDoClube}`}
-        </p>
-        <p>
-          {acao}, o jogador sai da escalação, e o clube só volta a jogar partidas depois de escalar
-          de novo os 5 titulares.
-        </p>
-      </div>
-    </div>
+      <p>
+        {acao}, o jogador sai da escalação, e o clube só volta a jogar partidas depois de escalar de
+        novo os 5 titulares.
+      </p>
+    </Alerta>
   );
 }
