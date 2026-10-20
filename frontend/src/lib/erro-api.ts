@@ -34,3 +34,8 @@ export function NaoEncontrado(erro: unknown): boolean {
 export function semResposta(erro: unknown): boolean {
   return isAxiosError(erro) && !erro.response;
 }
+
+// A API respondeu e recusou o pedido (4xx): a tela mostra o message no lugar, sem "Tentar de novo" (H05)
+export function recusadoPelaApi(erro: unknown): boolean {
+  return isAxiosError(erro) && erro.response !== undefined && erro.response.status < 500;
+}

@@ -19,7 +19,7 @@ export function configurarApp(app: NestExpressApplication): void {
   app.setGlobalPrefix('api/v1', { exclude: ['health'] });
   app.use(logRequisicaoMiddleware);
   app.use(corpoJsonMiddleware);
-  app.enableCors({ origin: [configService.getOrThrow<string>('aplicacao.origemCors')] });
+  app.enableCors({ origin: [configService.getOrThrow<string>('aplicacao.origemCors')], exposedHeaders: ['Content-Disposition'] });
   app.useGlobalPipes(criarValidationPipe());
   app.useGlobalFilters(new FiltroErroGlobal());
   configurarSwagger(app);

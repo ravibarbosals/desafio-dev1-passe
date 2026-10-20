@@ -4,13 +4,13 @@ import { extrairMensagemErro, semResposta } from "@/lib/erro-api";
 
 interface PropriedadesErroDoEnvio {
   erro: unknown;
-  // Título da recusa da API: "Compra recusada", "A venda foi recusada"
+  // Título da recusa da API: "Compra recusada", "A venda foi recusada", "O filtro foi recusado"
   tituloRecusa: string;
   // Texto sem conexão: "A compra não foi confirmada. Verifique a conexão e tente de novo."
-  textoSemConexao: string;
+  textoSemConexao?: string;
 }
 
-// Erro do envio dentro do modal, acima dos dados (M03, M04, V04): o message da API ou "Sem conexão"
+// Erro da API dentro do quadro (M03, M04, V04, H05): o message da API ou "Sem conexão"
 export function ErroDoEnvio({ erro, tituloRecusa, textoSemConexao }: PropriedadesErroDoEnvio) {
   const semConexao = semResposta(erro);
 
@@ -22,7 +22,7 @@ export function ErroDoEnvio({ erro, tituloRecusa, textoSemConexao }: Propriedade
       <CircleAlert className="mt-0.5 size-4 shrink-0" />
       <div>
         <p className="font-medium">{semConexao ? "Sem conexão" : tituloRecusa}</p>
-        <p>{semConexao ? textoSemConexao : extrairMensagemErro(erro)}</p>
+        <p>{semConexao && textoSemConexao ? textoSemConexao : extrairMensagemErro(erro)}</p>
       </div>
     </div>
   );

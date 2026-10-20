@@ -8,6 +8,7 @@ import {
   extrairMensagemErro,
   mensagemErroPadrao,
   mensagemSemConexao,
+  recusadoPelaApi,
   semResposta,
 } from "../erro-api";
 
@@ -86,5 +87,23 @@ describe("semResposta", () => {
     expect(semResposta(await capturarErro("/clubs"))).toBe(true);
     expect(semResposta(await capturarErro("/clubs/1"))).toBe(false);
     expect(semResposta(new Error("outro"))).toBe(false);
+  });
+});
+
+describe("recusadoPelaApi", () => {
+  it("é verdade só quando a API respondeu com 4xx", async () => {
+    servidor.use(
+      http.get("http://localhost:3000/api/v1/clubs/1", () =>
+        HttpResponse.json({ message: "Jogador não encontrado." }, { status: 404 }),
+      ),
+      http.get("http://localhost:3000/api/v1/clubs/2", () =>
+        HttpResponse.json({ message: "Erro." }, { status: 500 }),
+      ),
+      http.get("http://localhost:3000/api/v1/clubs", () => HttpResponse.error()),
+    );
+
+    expect(recusadoPelaApi(await capturarErro("/clubs/1"))).toBe(true);
+    expect(recusadoPelaApi(await capturarErro("/clubs/2"))).toBe(false);
+    expect(recusadoPelaApi(await capturarErro("/clubs"))).toBe(false);
   });
 });

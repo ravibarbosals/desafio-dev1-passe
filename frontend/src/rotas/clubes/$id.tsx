@@ -5,8 +5,10 @@ import { useState } from "react";
 import { z } from "zod";
 
 import { consultaDoClube, limiteDoElenco, type JogadorDoElenco } from "@/api/clube";
+import { consultaDoHistorico } from "@/api/mercado";
 import { Aviso } from "@/componentes/Aviso";
 import { CartoesDoClube } from "@/componentes/clubes/CartoesDoClube";
+import { HistoricoDoClube } from "@/componentes/clubes/HistoricoDoClube";
 import { ModalVenderJogador } from "@/componentes/clubes/ModalVenderJogador";
 import { TabelaDoElenco } from "@/componentes/clubes/TabelaDoElenco";
 import { Badge } from "@/componentes/ui/badge";
@@ -33,6 +35,8 @@ function PaginaDoClube() {
   const navegar = Route.useNavigate();
   // Id fora do formato também volta 404 da API (V8)
   const clube = useQuery(consultaDoClube(Number(id)));
+  // Só para a contagem na aba; a aba usa a mesma consulta para as opções do filtro de jogador
+  const historico = useQuery(consultaDoHistorico(Number(id)));
   const [jogadorParaVender, setJogadorParaVender] = useState<JogadorDoElenco>();
 
   if (clube.isError) {
@@ -131,7 +135,10 @@ function PaginaDoClube() {
             Elenco <Badge variant="secondary">{players.length}</Badge>
           </TabsTrigger>
           <TabsTrigger value="escalacao">Escalação</TabsTrigger>
-          <TabsTrigger value="historico">Histórico</TabsTrigger>
+          <TabsTrigger value="historico">
+            Histórico
+            {historico.data && <Badge variant="secondary">{historico.data.data.length}</Badge>}
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="elenco" className="mt-4">
           <TabelaDoElenco jogadores={players} consulta={clube} aoVender={setJogadorParaVender} />
@@ -141,12 +148,12 @@ function PaginaDoClube() {
             10,00.
           </p>
         </TabsContent>
-        {/* A escalação entra na TASK-052 e o histórico na TASK-051 */}
+        {/* A escalação entra na TASK-052 */}
         <TabsContent value="escalacao" className="mt-4">
           <p className="text-sm text-muted-foreground">Em construção.</p>
         </TabsContent>
         <TabsContent value="historico" className="mt-4">
-          <p className="text-sm text-muted-foreground">Em construção.</p>
+          <HistoricoDoClube clubeId={clube.data.id} />
         </TabsContent>
       </Tabs>
     </>

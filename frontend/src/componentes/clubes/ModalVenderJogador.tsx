@@ -12,10 +12,10 @@ import { ModalResultado } from "@/componentes/ModalResultado";
 import { Nota } from "@/componentes/Nota";
 import { Badge } from "@/componentes/ui/badge";
 import { Button } from "@/componentes/ui/button";
+import { ValorComSinal } from "@/componentes/ValorComSinal";
 import { useEnvio } from "@/hooks/useEnvio";
 import { semResposta } from "@/lib/erro-api";
 import { formatarDataHora, formatarMoeda, formatarMoedaComSinal } from "@/lib/formatacao";
-import { cn } from "@/lib/utils";
 
 import { AvisoDeTitular } from "./AvisoDeTitular";
 import { SeloDaMulta } from "./SeloDaMulta";
@@ -54,7 +54,6 @@ export function ModalVenderJogador({
   }
 
   if (resultado) {
-    const lucro = resultado.profit ?? 0;
     return (
       <ModalResultado
         titulo="Venda concluída"
@@ -74,11 +73,7 @@ export function ModalVenderJogador({
           },
           {
             rotulo: "Lucro",
-            valor: (
-              <span className={cn(lucro > 0 && "text-green-700", lucro < 0 && "text-destructive")}>
-                {formatarMoedaComSinal(lucro)}
-              </span>
-            ),
+            valor: <ValorComSinal valor={resultado.profit ?? 0} />,
           },
           {
             rotulo: "Comissão",

@@ -37,7 +37,7 @@ export function ModalConfirmacao({
   enviando,
   aoConfirmar,
   destrutivo = false,
-  textoEnviando = "Enviando...",
+  textoEnviando = "Enviando…",
   children,
 }: PropriedadesModalConfirmacao) {
   return (
