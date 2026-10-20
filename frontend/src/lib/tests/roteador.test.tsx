@@ -1,11 +1,20 @@
+import { QueryClientProvider } from "@tanstack/react-query";
 import { createMemoryHistory, RouterProvider } from "@tanstack/react-router";
 import { render, screen } from "@testing-library/react";
+import { http, HttpResponse } from "msw";
 
+import { servidor } from "../../testes/servidor";
+import { criarClienteQuery } from "../cliente-query";
 import { criarRoteador } from "../roteador";
 
+// Como no main.tsx: as páginas buscam dados com o React Query
 function abrir(caminho: string) {
   const roteador = criarRoteador(createMemoryHistory({ initialEntries: [caminho] }));
-  render(<RouterProvider router={roteador} />);
+  render(
+    <QueryClientProvider client={criarClienteQuery()}>
+      <RouterProvider router={roteador} />
+    </QueryClientProvider>,
+  );
 }
 
 describe("criarRoteador", () => {
@@ -25,6 +34,7 @@ describe("criarRoteador", () => {
   });
 
   it("abre a página escolhida no menu e marca o item como atual", async () => {
+    servidor.use(http.get("http://localhost:3000/api/v1/clubs", () => HttpResponse.json([])));
     abrir("/clubes");
     expect(await screen.findByRole("heading", { name: "Clubes" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Clubes" })).toHaveAttribute("aria-current", "page");

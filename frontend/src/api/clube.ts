@@ -37,3 +37,10 @@ export function consultaDaEscalacao(clubeId: number) {
     queryFn: async () => (await api.get<EscalacaoDoClube>(`/clubs/${clubeId}/lineup`)).data,
   });
 }
+
+// Corpo do POST /clubs (API.md, Clubes 5.1); o clube nasce com 300,00 de caixa
+export type NovoClube = Pick<ResumoDoClube, "name" | "acronym">;
+
+export async function criarClube(novoClube: NovoClube): Promise<ResumoDoClube> {
+  return (await api.post<ResumoDoClube>("/clubs", novoClube)).data;
+}
