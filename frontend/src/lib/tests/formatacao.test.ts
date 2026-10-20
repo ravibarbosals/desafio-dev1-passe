@@ -1,4 +1,21 @@
-import { formatarDataHora, formatarMoeda, montarDataHoraBrasilia } from "../formatacao";
+import {
+  formatarDataHora,
+  formatarMoeda,
+  formatarMoedaComSinal,
+  montarDataHoraBrasilia,
+} from "../formatacao";
+
+describe("formatarMoedaComSinal", () => {
+  it.each([
+    [7.8, "+7,80"],
+    [46.02, "+46,02"],
+    [0, "0,00"],
+    [-4.8, "-4,80"],
+    [-0.39, "-0,39"],
+  ])("%s → %s", (valor, esperado) => {
+    expect(formatarMoedaComSinal(valor)).toBe(esperado);
+  });
+});
 
 describe("formatarMoeda", () => {
   it.each([

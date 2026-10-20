@@ -19,6 +19,11 @@ export function formatarMoeda(valor: number): string {
   return formatoMoeda.format(valor);
 }
 
+// Variação com sinal, como no histórico e no resultado da venda: 7.8 → "+7,80"; -4.8 → "-4,80"
+export function formatarMoedaComSinal(valor: number): string {
+  return valor > 0 ? `+${formatarMoeda(valor)}` : formatarMoeda(valor);
+}
+
 // "2026-11-12T15:00:00-03:00" → "12/11/2026 15:00", sempre no horário de Brasília (RN01)
 export function formatarDataHora(dataHora: string): string {
   return formatoDataHora.format(new Date(dataHora)).replace(", ", " ");

@@ -1,16 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
-import { Lock, TriangleAlert } from "lucide-react";
+import { Lock } from "lucide-react";
 import { useState } from "react";
 
 import { consultaDaEscalacao, consultaDosClubes } from "@/api/clube";
 import { alterarCondicao, type Condicao, type Jogador } from "@/api/jogadores";
+import { AvisoDeTitular } from "@/componentes/clubes/AvisoDeTitular";
 import { ModalFormulario } from "@/componentes/formulario/ModalFormulario";
 import { Badge } from "@/componentes/ui/badge";
 import { useEnvio } from "@/hooks/useEnvio";
 import { formatarMoeda } from "@/lib/formatacao";
-import { nomesDasCondicoes, nomesDasPosicoes } from "@/lib/rotulos";
+import { nomesDasCondicoes } from "@/lib/rotulos";
 import { cn } from "@/lib/utils";
 
+import { CartaoDoJogador } from "./CartaoDoJogador";
 import { descricoesDasCondicoes, podeMudarDeCondicao, saiDaEscalacao } from "./condicao";
 import { SeloDeCondicao } from "./SeloDeCondicao";
 
@@ -51,15 +53,10 @@ export function ModalAlterarCondicao({ jogador, aoFechar }: PropriedadesModalAlt
       textoEnviar="Salvar condição"
       podeEnviar={escolhida !== jogador.condition}
     >
-      <div className="flex items-center justify-between gap-3 rounded-lg border bg-muted/40 p-3">
-        <div>
-          <p className="font-medium">{jogador.name}</p>
-          <p className="text-xs text-muted-foreground">
-            {jogador.position} · {nomesDasPosicoes[jogador.position]} · {jogador.age} anos
-          </p>
-        </div>
-        <SeloDeCondicao condicao={jogador.condition} />
-      </div>
+      <CartaoDoJogador
+        jogador={jogador}
+        lateral={<SeloDeCondicao condicao={jogador.condition} />}
+      />
 
       <fieldset className="flex flex-col gap-2">
         <legend className="sr-only">Nova condição</legend>
@@ -104,21 +101,11 @@ export function ModalAlterarCondicao({ jogador, aoFechar }: PropriedadesModalAlt
       </fieldset>
 
       {avisarTitular && (
-        <div
-          role="alert"
-          className="flex gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800"
-        >
-          <TriangleAlert className="mt-0.5 size-4 shrink-0" />
-          <div>
-            <p className="font-medium">
-              {jogador.name} é titular{clube && ` do ${clube.name}`}
-            </p>
-            <p>
-              Ao passar a Doente, o jogador sai da escalação, e o clube só volta a jogar partidas
-              depois de escalar de novo os 5 titulares.
-            </p>
-          </div>
-        </div>
+        <AvisoDeTitular
+          nomeDoJogador={jogador.name}
+          nomeDoClube={clube?.name}
+          acao="Ao passar a Doente"
+        />
       )}
       {escolhida === "DOENTE" && escalacao.isError && (
         <p className="text-xs text-muted-foreground">

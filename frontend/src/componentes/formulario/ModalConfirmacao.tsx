@@ -17,11 +17,14 @@ interface PropriedadesModalConfirmacao {
   titulo: string;
   descricao: ReactNode;
   textoConfirmar: string;
+  textoEnviando?: string;
   // Enquanto envia, os botões ficam desabilitados: um clique, um pedido (REQ-042)
   enviando: boolean;
   aoConfirmar: () => void;
-  // Ação que não se desfaz (excluir, vender): botão vermelho
+  // Ação que não se desfaz (ex.: excluir): botão vermelho
   destrutivo?: boolean;
+  // Detalhes entre a descrição e os botões (ex.: o contrato na venda, V01)
+  children?: ReactNode;
 }
 
 // O botão de confirmar não fecha o modal sozinho: quem chama fecha no sucesso e deixa aberto no erro
@@ -34,6 +37,8 @@ export function ModalConfirmacao({
   enviando,
   aoConfirmar,
   destrutivo = false,
+  textoEnviando = "Enviando...",
+  children,
 }: PropriedadesModalConfirmacao) {
   return (
     <AlertDialog open={aberto} onOpenChange={(valor) => !enviando && aoMudarAberto(valor)}>
@@ -42,6 +47,7 @@ export function ModalConfirmacao({
           <AlertDialogTitle>{titulo}</AlertDialogTitle>
           <AlertDialogDescription>{descricao}</AlertDialogDescription>
         </AlertDialogHeader>
+        {children}
         <AlertDialogFooter>
           <AlertDialogCancel disabled={enviando}>Cancelar</AlertDialogCancel>
           <Button
@@ -50,7 +56,7 @@ export function ModalConfirmacao({
             disabled={enviando}
             onClick={aoConfirmar}
           >
-            {enviando ? "Enviando…" : textoConfirmar}
+            {enviando ? textoEnviando : textoConfirmar}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

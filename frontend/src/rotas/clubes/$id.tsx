@@ -1,11 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, CloudOff, RotateCw, SearchX, ShoppingCart } from "lucide-react";
+import { useState } from "react";
 import { z } from "zod";
 
-import { consultaDoClube, limiteDoElenco } from "@/api/clube";
+import { consultaDoClube, limiteDoElenco, type JogadorDoElenco } from "@/api/clube";
 import { Aviso } from "@/componentes/Aviso";
 import { CartoesDoClube } from "@/componentes/clubes/CartoesDoClube";
+import { ModalVenderJogador } from "@/componentes/clubes/ModalVenderJogador";
 import { TabelaDoElenco } from "@/componentes/clubes/TabelaDoElenco";
 import { Badge } from "@/componentes/ui/badge";
 import { Button } from "@/componentes/ui/button";
@@ -31,6 +33,7 @@ function PaginaDoClube() {
   const navegar = Route.useNavigate();
   // Id fora do formato também volta 404 da API (V8)
   const clube = useQuery(consultaDoClube(Number(id)));
+  const [jogadorParaVender, setJogadorParaVender] = useState<JogadorDoElenco>();
 
   if (clube.isError) {
     return NaoEncontrado(clube.error) ? (
@@ -103,6 +106,18 @@ function PaginaDoClube() {
       </div>
 
       <CartoesDoClube clube={clube.data} />
+      {jogadorParaVender && (
+        <ModalVenderJogador
+          key={jogadorParaVender.id}
+          jogador={jogadorParaVender}
+          clube={clube.data}
+          aoFechar={() => setJogadorParaVender(undefined)}
+          aoVerHistorico={() => {
+            setJogadorParaVender(undefined);
+            void navegar({ search: { aba: "historico" } });
+          }}
+        />
+      )}
 
       <Tabs
         className="mt-6"
@@ -119,7 +134,7 @@ function PaginaDoClube() {
           <TabsTrigger value="historico">Histórico</TabsTrigger>
         </TabsList>
         <TabsContent value="elenco" className="mt-4">
-          <TabelaDoElenco jogadores={players} consulta={clube} />
+          <TabelaDoElenco jogadores={players} consulta={clube} aoVender={setJogadorParaVender} />
           <p className="mt-3 text-xs text-muted-foreground">
             Ordem por posição (GOL, ZAG, LAT, MEI, ATA), depois pelo nome. Valor de mercado, dias
             restantes e % de multa calculados pela API para uma venda agora; a multa tem teto de

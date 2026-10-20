@@ -6,6 +6,7 @@ import { Controller, useForm } from "react-hook-form";
 import { cadastrarJogador, type Jogador } from "@/api/jogadores";
 import { CampoFormulario } from "@/componentes/formulario/CampoFormulario";
 import { ModalFormulario } from "@/componentes/formulario/ModalFormulario";
+import { ListaDeValores } from "@/componentes/ListaDeValores";
 import { Button } from "@/componentes/ui/button";
 import {
   Dialog,
@@ -90,20 +91,18 @@ export function ModalNovoJogador({ aberto, aoMudarAberto }: PropriedadesModalNov
               salvar.
             </DialogDescription>
           </DialogHeader>
-          <dl className="divide-y rounded-lg border text-sm">
-            <div className="flex justify-between p-3">
-              <dt>Valor base</dt>
-              <dd className="font-semibold">{formatarMoeda(cadastrado.base_value)}</dd>
-            </div>
-            <div className="flex justify-between p-3">
-              <dt>Valor de mercado</dt>
-              <dd>{formatarMoeda(cadastrado.market_value)}</dd>
-            </div>
-            <div className="flex justify-between p-3">
-              <dt>Overall</dt>
-              <dd>{cadastrado.overall}</dd>
-            </div>
-          </dl>
+          <ListaDeValores
+            itens={[
+              {
+                rotulo: "Valor base",
+                valor: (
+                  <span className="font-semibold">{formatarMoeda(cadastrado.base_value)}</span>
+                ),
+              },
+              { rotulo: "Valor de mercado", valor: formatarMoeda(cadastrado.market_value) },
+              { rotulo: "Overall", valor: cadastrado.overall },
+            ]}
+          />
           <DialogFooter>
             <Button type="button" onClick={fechar}>
               Fechar
