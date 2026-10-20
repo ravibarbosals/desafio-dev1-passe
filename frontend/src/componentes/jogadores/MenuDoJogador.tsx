@@ -1,4 +1,4 @@
-import { Ellipsis, Pencil, Trash2 } from "lucide-react";
+import { Ellipsis, HeartPulse, Pencil, Trash2 } from "lucide-react";
 
 import type { Jogador } from "@/api/jogadores";
 import { Button } from "@/componentes/ui/button";
@@ -13,6 +13,7 @@ import {
 
 export interface AcoesDoJogador {
   aoEditar: (jogador: Jogador) => void;
+  aoAlterarCondicao: (jogador: Jogador) => void;
   aoExcluir: (jogador: Jogador) => void;
 }
 
@@ -21,7 +22,12 @@ interface PropriedadesMenuDoJogador extends AcoesDoJogador {
 }
 
 // Menu ⋯ de cada linha (J08); Alterar condição entra no próximo passo, Comprar na TASK-050
-export function MenuDoJogador({ jogador, aoEditar, aoExcluir }: PropriedadesMenuDoJogador) {
+export function MenuDoJogador({
+  jogador,
+  aoEditar,
+  aoAlterarCondicao,
+  aoExcluir,
+}: PropriedadesMenuDoJogador) {
   // FLX-003: Excluir só aparece para jogador livre; com clube, a API responde 409
   const podeExcluir = jogador.club_id === null;
 
@@ -42,6 +48,10 @@ export function MenuDoJogador({ jogador, aoEditar, aoExcluir }: PropriedadesMenu
         <DropdownMenuItem onSelect={() => aoEditar(jogador)}>
           <Pencil />
           Editar
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => aoAlterarCondicao(jogador)}>
+          <HeartPulse />
+          Alterar condição
         </DropdownMenuItem>
         {podeExcluir && (
           <>

@@ -15,6 +15,7 @@ import {
 import { BarraDeFiltros } from "@/componentes/jogadores/BarraDeFiltros";
 import { listarFiltrosAtivos } from "@/componentes/jogadores/filtros-ativos";
 import { FiltrosAtivos } from "@/componentes/jogadores/FiltrosAtivos";
+import { ModalAlterarCondicao } from "@/componentes/jogadores/ModalAlterarCondicao";
 import { ModalEditarJogador } from "@/componentes/jogadores/ModalEditarJogador";
 import { ModalExcluirJogador } from "@/componentes/jogadores/ModalExcluirJogador";
 import { ModalNovoJogador } from "@/componentes/jogadores/ModalNovoJogador";
@@ -63,6 +64,7 @@ function PaginaJogadores() {
   const [novoJogadorAberto, setNovoJogadorAberto] = useState(false);
   const [jogadorParaExcluir, setJogadorParaExcluir] = useState<Jogador>();
   const [jogadorParaEditar, setJogadorParaEditar] = useState<Jogador>();
+  const [jogadorParaAlterarCondicao, setJogadorParaAlterarCondicao] = useState<Jogador>();
 
   // Filtro novo volta para a página 1: a página atual pode não existir no resultado novo
   function mudarFiltros(novos: Partial<FiltrosDosJogadores>) {
@@ -102,6 +104,13 @@ function PaginaJogadores() {
           key={jogadorParaEditar.id}
           jogador={jogadorParaEditar}
           aoFechar={() => setJogadorParaEditar(undefined)}
+        />
+      )}
+      {jogadorParaAlterarCondicao && (
+        <ModalAlterarCondicao
+          key={jogadorParaAlterarCondicao.id}
+          jogador={jogadorParaAlterarCondicao}
+          aoFechar={() => setJogadorParaAlterarCondicao(undefined)}
         />
       )}
       <ModalExcluirJogador
@@ -169,7 +178,11 @@ function PaginaJogadores() {
           )
         }
         aoMudarPagina={mudarPagina}
-        acoes={{ aoEditar: setJogadorParaEditar, aoExcluir: setJogadorParaExcluir }}
+        acoes={{
+          aoEditar: setJogadorParaEditar,
+          aoAlterarCondicao: setJogadorParaAlterarCondicao,
+          aoExcluir: setJogadorParaExcluir,
+        }}
       />
 
       <p className="mt-3 text-xs text-muted-foreground">

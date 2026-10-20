@@ -142,3 +142,8 @@ export type EdicaoDoJogador = Pick<Jogador, "name" | "position" | "age" | "agili
 export async function editarJogador(id: number, edicao: EdicaoDoJogador): Promise<Jogador> {
   return (await api.put<Jogador>(`/players/${id}`, edicao)).data;
 }
+
+// PATCH /players/{id}/condition (API.md, Jogadores 5.5); a resposta traz o novo valor de mercado
+export async function alterarCondicao(id: number, condicao: Condicao): Promise<Jogador> {
+  return (await api.patch<Jogador>(`/players/${id}/condition`, { condition: condicao })).data;
+}

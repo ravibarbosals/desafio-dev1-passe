@@ -7,15 +7,10 @@ import { Paginacao } from "@/componentes/tabela/Paginacao";
 import { TabelaComEstados, type ColunaDaTabela } from "@/componentes/tabela/TabelaComEstados";
 import { Badge } from "@/componentes/ui/badge";
 import { formatarMoeda } from "@/lib/formatacao";
-import { nomesDasCondicoes, nomesDasPosicoes } from "@/lib/rotulos";
+import { nomesDasPosicoes } from "@/lib/rotulos";
 
 import { MenuDoJogador, type AcoesDoJogador } from "./MenuDoJogador";
-
-const coresDasCondicoes: Record<Jogador["condition"], string> = {
-  APTO: "border-green-200 bg-green-50 text-green-700",
-  MAL_CONDICIONADO: "border-amber-200 bg-amber-50 text-amber-700",
-  DOENTE: "border-red-200 bg-red-50 text-red-700",
-};
+import { SeloDeCondicao } from "./SeloDeCondicao";
 
 function montarColunas(
   clubesPorId: Map<number, ResumoDoClube>,
@@ -44,11 +39,7 @@ function montarColunas(
     { titulo: "Idade", celula: (jogador) => jogador.age, alinharADireita: true },
     {
       titulo: "Condição",
-      celula: (jogador) => (
-        <Badge variant="outline" className={coresDasCondicoes[jogador.condition]}>
-          {nomesDasCondicoes[jogador.condition]}
-        </Badge>
-      ),
+      celula: (jogador) => <SeloDeCondicao condicao={jogador.condition} />,
     },
     {
       titulo: "Valor base",
