@@ -1,5 +1,6 @@
 import type { Formacao, NovaEscalacao } from "@/api/clube";
 import type { Jogador, Posicao } from "@/api/jogadores";
+import { nomesDosAtributos } from "@/lib/rotulos";
 
 export type Setor = "GOL" | "DEFESA" | "MEIO" | "ATAQUE";
 
@@ -90,16 +91,16 @@ export function montarEscalacao(
 export function listarAtributosUsados(jogador: Jogador): { nome: string; valor: number }[] {
   switch (jogador.position) {
     case "GOL":
-      return [{ nome: "Defesa", valor: jogador.defending }];
+      return [{ nome: nomesDosAtributos.defending, valor: jogador.defending }];
     case "ZAG":
     case "LAT":
       return [
-        { nome: "Drible", valor: jogador.dribbling },
-        { nome: "Defesa", valor: jogador.defending },
+        { nome: nomesDosAtributos.dribbling, valor: jogador.dribbling },
+        { nome: nomesDosAtributos.defending, valor: jogador.defending },
       ];
     case "MEI":
-      return [{ nome: "Passe", valor: jogador.passing }];
+      return [{ nome: nomesDosAtributos.passing, valor: jogador.passing }];
     case "ATA":
-      return [{ nome: "Finalização", valor: jogador.shooting }];
+      return [{ nome: nomesDosAtributos.shooting, valor: jogador.shooting }];
   }
 }

@@ -1,5 +1,6 @@
 import type { OrdemDosClubes } from "@/api/clube";
 import type { Condicao, OrdemDosJogadores, Posicao } from "@/api/jogadores";
+import type { AtributoDoDuelo, ResultadoDaPartida } from "@/api/partidas";
 
 export const nomesDasPosicoes: Record<Posicao, string> = {
   GOL: "Goleiro",
@@ -30,4 +31,18 @@ export const nomesDasOrdensDosClubes: Record<OrdemDosClubes, string> = {
   name: "Nome",
   net_worth_desc: "Patrimônio (maior para o menor)",
   net_worth_asc: "Patrimônio (menor para o maior)",
+};
+
+export const nomesDosResultados: Record<ResultadoDaPartida, string> = {
+  MANDANTE: "Vitória do mandante",
+  VISITANTE: "Vitória do visitante",
+  EMPATE: "Empate",
+};
+
+// O atributo que cada duelo usou (RN20): ataque pela posição, defesa sempre pelo defending
+export const nomesDosAtributos: Record<AtributoDoDuelo, string> = {
+  shooting: "Finalização",
+  passing: "Passe",
+  dribbling: "Drible",
+  defending: "Defesa",
 };
