@@ -4,15 +4,7 @@ import { Controller, useForm } from "react-hook-form";
 
 import { editarJogador, type EdicaoDoJogador, type Jogador } from "@/api/jogadores";
 import { CampoFormulario } from "@/componentes/formulario/CampoFormulario";
-import { Button } from "@/componentes/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/componentes/ui/dialog";
+import { ModalFormulario } from "@/componentes/formulario/ModalFormulario";
 import { Input } from "@/componentes/ui/input";
 import { useEnvio } from "@/hooks/useEnvio";
 import { formatarMoeda } from "@/lib/formatacao";
@@ -48,81 +40,65 @@ export function ModalEditarJogador({ jogador, aoFechar }: PropriedadesModalEdita
   const comClube = jogador.club_id !== null;
 
   return (
-    <Dialog open onOpenChange={(aberto) => !aberto && !edicao.isPending && aoFechar()}>
-      <DialogContent>
-        <form
-          noValidate
-          className="flex flex-col gap-4"
-          onSubmit={formulario.handleSubmit((dados) => edicao.mutate(dados))}
-        >
-          <DialogHeader>
-            <DialogTitle>Editar jogador</DialogTitle>
-            <DialogDescription>
-              Edite nome, posição, idade e agilidade. Os demais dados não mudam.
-            </DialogDescription>
-          </DialogHeader>
+    <ModalFormulario
+      aberto
+      aoFechar={aoFechar}
+      titulo="Editar jogador"
+      descricao="Edite nome, posição, idade e agilidade. Os demais dados não mudam."
+      aoEnviar={formulario.handleSubmit((dados) => edicao.mutate(dados))}
+      enviando={edicao.isPending}
+      textoEnviar="Salvar alterações"
+    >
+      <CampoFormulario id="nome-edicao" rotulo="Nome" erro={erros.name?.message}>
+        <Input
+          id="nome-edicao"
+          maxLength={100}
+          aria-invalid={erros.name !== undefined}
+          {...formulario.register("name")}
+        />
+      </CampoFormulario>
 
-          <CampoFormulario id="nome-edicao" rotulo="Nome" erro={erros.name?.message}>
-            <Input
-              id="nome-edicao"
-              maxLength={100}
-              aria-invalid={erros.name !== undefined}
-              {...formulario.register("name")}
-            />
-          </CampoFormulario>
-
-          <Controller
-            control={formulario.control}
-            name="position"
-            render={({ field }) => (
-              <SeletorDePosicao
-                valor={field.value}
-                aoMudar={field.onChange}
-                erro={erros.position?.message}
-                travada={comClube}
-              />
-            )}
+      <Controller
+        control={formulario.control}
+        name="position"
+        render={({ field }) => (
+          <SeletorDePosicao
+            valor={field.value}
+            aoMudar={field.onChange}
+            erro={erros.position?.message}
+            travada={comClube}
           />
+        )}
+      />
 
-          <div className="grid grid-cols-2 gap-3">
-            <CampoFormulario id="idade-edicao" rotulo="Idade" erro={erros.age?.message}>
-              <Input
-                id="idade-edicao"
-                inputMode="numeric"
-                aria-invalid={erros.age !== undefined}
-                {...formulario.register("age")}
-              />
-            </CampoFormulario>
-            <CampoFormulario id="agilidade-edicao" rotulo="Agilidade" erro={erros.agility?.message}>
-              <Input
-                id="agilidade-edicao"
-                inputMode="numeric"
-                aria-invalid={erros.agility !== undefined}
-                {...formulario.register("agility")}
-              />
-            </CampoFormulario>
-          </div>
-          <p className="-mt-2 text-xs text-muted-foreground">
-            Idade de {jogador.age} a 45, sem diminuir. Agilidade de 1 a 100 (até 85 com 35 anos ou
-            mais).
-          </p>
+      <div className="grid grid-cols-2 gap-3">
+        <CampoFormulario id="idade-edicao" rotulo="Idade" erro={erros.age?.message}>
+          <Input
+            id="idade-edicao"
+            inputMode="numeric"
+            aria-invalid={erros.age !== undefined}
+            {...formulario.register("age")}
+          />
+        </CampoFormulario>
+        <CampoFormulario id="agilidade-edicao" rotulo="Agilidade" erro={erros.agility?.message}>
+          <Input
+            id="agilidade-edicao"
+            inputMode="numeric"
+            aria-invalid={erros.agility !== undefined}
+            {...formulario.register("agility")}
+          />
+        </CampoFormulario>
+      </div>
+      <p className="-mt-2 text-xs text-muted-foreground">
+        Idade de {jogador.age} a 45, sem diminuir. Agilidade de 1 a 100 (até 85 com 35 anos ou
+        mais).
+      </p>
 
-          <p className="flex items-center gap-2 rounded-lg border border-dashed p-3 text-xs text-muted-foreground">
-            <Lock className="size-3.5" />
-            Não mudam depois do cadastro: valor base ({formatarMoeda(jogador.base_value)}),
-            indicadores e potencial.
-          </p>
-
-          <DialogFooter>
-            <Button type="button" variant="outline" disabled={edicao.isPending} onClick={aoFechar}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={edicao.isPending}>
-              {edicao.isPending ? "Salvando…" : "Salvar alterações"}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+      <p className="flex items-center gap-2 rounded-lg border border-dashed p-3 text-xs text-muted-foreground">
+        <Lock className="size-3.5" />
+        Não mudam depois do cadastro: valor base ({formatarMoeda(jogador.base_value)}), indicadores
+        e potencial.
+      </p>
+    </ModalFormulario>
   );
 }

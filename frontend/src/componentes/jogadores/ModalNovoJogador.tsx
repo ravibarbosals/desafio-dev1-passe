@@ -5,6 +5,7 @@ import { Controller, useForm } from "react-hook-form";
 
 import { cadastrarJogador, type Jogador } from "@/api/jogadores";
 import { CampoFormulario } from "@/componentes/formulario/CampoFormulario";
+import { ModalFormulario } from "@/componentes/formulario/ModalFormulario";
 import { Button } from "@/componentes/ui/button";
 import {
   Dialog,
@@ -57,15 +58,10 @@ export function ModalNovoJogador({ aberto, aoMudarAberto }: PropriedadesModalNov
   const erros = formulario.formState.errors;
 
   // Ao fechar, o próximo cadastro começa do zero
-  function mudarAberto(valor: boolean) {
-    if (envio.isPending) {
-      return;
-    }
-    if (!valor) {
-      formulario.reset(formularioVazio);
-      setCadastrado(undefined);
-    }
-    aoMudarAberto(valor);
+  function fechar() {
+    formulario.reset(formularioVazio);
+    setCadastrado(undefined);
+    aoMudarAberto(false);
   }
 
   function campoNumerico(campo: CampoNumerico, rotulo: string) {
@@ -81,111 +77,94 @@ export function ModalNovoJogador({ aberto, aoMudarAberto }: PropriedadesModalNov
     );
   }
 
+  // J07: depois de salvar, o modal troca o formulário pelo resultado calculado pela API
+  if (cadastrado) {
+    return (
+      <Dialog open={aberto} onOpenChange={(valor) => !valor && fechar()}>
+        <DialogContent>
+          <DialogHeader>
+            <CircleCheck className="size-6 text-green-600" />
+            <DialogTitle>Jogador cadastrado</DialogTitle>
+            <DialogDescription>
+              {cadastrado.name} entrou livre e Apto. Valores em moedas, calculados pela API ao
+              salvar.
+            </DialogDescription>
+          </DialogHeader>
+          <dl className="divide-y rounded-lg border text-sm">
+            <div className="flex justify-between p-3">
+              <dt>Valor base</dt>
+              <dd className="font-semibold">{formatarMoeda(cadastrado.base_value)}</dd>
+            </div>
+            <div className="flex justify-between p-3">
+              <dt>Valor de mercado</dt>
+              <dd>{formatarMoeda(cadastrado.market_value)}</dd>
+            </div>
+            <div className="flex justify-between p-3">
+              <dt>Overall</dt>
+              <dd>{cadastrado.overall}</dd>
+            </div>
+          </dl>
+          <DialogFooter>
+            <Button type="button" onClick={fechar}>
+              Fechar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
-    <Dialog open={aberto} onOpenChange={mudarAberto}>
-      <DialogContent className="sm:max-w-2xl">
-        {cadastrado ? (
-          <>
-            <DialogHeader>
-              <CircleCheck className="size-6 text-green-600" />
-              <DialogTitle>Jogador cadastrado</DialogTitle>
-              <DialogDescription>
-                {cadastrado.name} entrou livre e Apto. Valores em moedas, calculados pela API ao
-                salvar.
-              </DialogDescription>
-            </DialogHeader>
-            <dl className="divide-y rounded-lg border text-sm">
-              <div className="flex justify-between p-3">
-                <dt>Valor base</dt>
-                <dd className="font-semibold">{formatarMoeda(cadastrado.base_value)}</dd>
-              </div>
-              <div className="flex justify-between p-3">
-                <dt>Valor de mercado</dt>
-                <dd>{formatarMoeda(cadastrado.market_value)}</dd>
-              </div>
-              <div className="flex justify-between p-3">
-                <dt>Overall</dt>
-                <dd>{cadastrado.overall}</dd>
-              </div>
-            </dl>
-            <DialogFooter>
-              <Button type="button" onClick={() => mudarAberto(false)}>
-                Fechar
-              </Button>
-            </DialogFooter>
-          </>
-        ) : (
-          <form
-            noValidate
-            className="flex flex-col gap-4"
-            onSubmit={formulario.handleSubmit((novoJogador) => envio.mutate(novoJogador))}
-          >
-            <DialogHeader>
-              <DialogTitle>Novo jogador</DialogTitle>
-              <DialogDescription>
-                O valor base, o overall e o valor de mercado são calculados ao salvar.
-              </DialogDescription>
-            </DialogHeader>
+    <ModalFormulario
+      aberto={aberto}
+      aoFechar={fechar}
+      titulo="Novo jogador"
+      descricao="O valor base, o overall e o valor de mercado são calculados ao salvar."
+      aoEnviar={formulario.handleSubmit((novoJogador) => envio.mutate(novoJogador))}
+      enviando={envio.isPending}
+      textoEnviar="Salvar jogador"
+      observacao="O jogador começa livre e Apto."
+      className="sm:max-w-2xl"
+    >
+      <CampoFormulario id="name" rotulo="Nome" erro={erros.name?.message}>
+        <Input
+          id="name"
+          maxLength={100}
+          aria-invalid={erros.name !== undefined}
+          {...formulario.register("name")}
+        />
+      </CampoFormulario>
+      <p className="-mt-3 text-xs text-muted-foreground">
+        De 3 a 100 caracteres, com pelo menos duas palavras e sem números.
+      </p>
 
-            <CampoFormulario id="name" rotulo="Nome" erro={erros.name?.message}>
-              <Input
-                id="name"
-                maxLength={100}
-                aria-invalid={erros.name !== undefined}
-                {...formulario.register("name")}
-              />
-            </CampoFormulario>
-            <p className="-mt-3 text-xs text-muted-foreground">
-              De 3 a 100 caracteres, com pelo menos duas palavras e sem números.
-            </p>
-
-            <Controller
-              control={formulario.control}
-              name="position"
-              render={({ field }) => (
-                <SeletorDePosicao
-                  valor={field.value}
-                  aoMudar={field.onChange}
-                  erro={erros.position?.message}
-                />
-              )}
-            />
-
-            <div className="grid grid-cols-2 gap-3">
-              {campoNumerico("age", "Idade")}
-              {campoNumerico("agility", "Agilidade")}
-            </div>
-
-            <div>
-              <p className="text-sm font-medium">Indicadores técnicos</p>
-              <p className="text-xs text-muted-foreground">
-                De 1 a 99; não mudam depois do cadastro. A soma dos seis atributos não pode passar
-                de 480, e o potencial não pode ser menor que o maior deles.
-              </p>
-            </div>
-            <div className="grid grid-cols-4 gap-3">
-              {atributos.map(({ campo, rotulo }) => campoNumerico(campo, rotulo))}
-            </div>
-
-            <DialogFooter className="items-center sm:justify-between">
-              <p className="text-xs text-muted-foreground">O jogador começa livre e Apto.</p>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={envio.isPending}
-                  onClick={() => mudarAberto(false)}
-                >
-                  Cancelar
-                </Button>
-                <Button type="submit" disabled={envio.isPending}>
-                  {envio.isPending ? "Salvando…" : "Salvar jogador"}
-                </Button>
-              </div>
-            </DialogFooter>
-          </form>
+      <Controller
+        control={formulario.control}
+        name="position"
+        render={({ field }) => (
+          <SeletorDePosicao
+            valor={field.value}
+            aoMudar={field.onChange}
+            erro={erros.position?.message}
+          />
         )}
-      </DialogContent>
-    </Dialog>
+      />
+
+      <div className="grid grid-cols-2 gap-3">
+        {campoNumerico("age", "Idade")}
+        {campoNumerico("agility", "Agilidade")}
+      </div>
+
+      <div>
+        <p className="text-sm font-medium">Indicadores técnicos</p>
+        <p className="text-xs text-muted-foreground">
+          De 1 a 99; não mudam depois do cadastro. A soma dos seis atributos não pode passar de 480,
+          e o potencial não pode ser menor que o maior deles.
+        </p>
+      </div>
+      <div className="grid grid-cols-4 gap-3">
+        {atributos.map(({ campo, rotulo }) => campoNumerico(campo, rotulo))}
+      </div>
+    </ModalFormulario>
   );
 }
