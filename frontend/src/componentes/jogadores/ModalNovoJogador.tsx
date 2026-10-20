@@ -17,13 +17,13 @@ import {
 import { Input } from "@/componentes/ui/input";
 import { useEnvio } from "@/hooks/useEnvio";
 import { formatarMoeda } from "@/lib/formatacao";
-import { nomesDasPosicoes } from "@/lib/rotulos";
 
 import {
   esquemaDoNovoJogador,
   formularioVazio,
   type FormularioDoNovoJogador,
 } from "./esquema-do-jogador";
+import { SeletorDePosicao } from "./SeletorDePosicao";
 
 type CampoNumerico = Exclude<keyof FormularioDoNovoJogador, "name" | "position">;
 
@@ -143,25 +143,11 @@ export function ModalNovoJogador({ aberto, aoMudarAberto }: PropriedadesModalNov
               control={formulario.control}
               name="position"
               render={({ field }) => (
-                <fieldset className="flex flex-col gap-1.5">
-                  <legend className="mb-1.5 text-sm font-medium">Posição</legend>
-                  <div className="grid grid-cols-5 gap-2">
-                    {Object.entries(nomesDasPosicoes).map(([sigla, nome]) => (
-                      <Button
-                        key={sigla}
-                        type="button"
-                        variant={field.value === sigla ? "default" : "outline"}
-                        aria-pressed={field.value === sigla}
-                        onClick={() => field.onChange(sigla)}
-                      >
-                        {sigla} · {nome}
-                      </Button>
-                    ))}
-                  </div>
-                  {erros.position && (
-                    <p className="text-sm text-destructive">{erros.position.message}</p>
-                  )}
-                </fieldset>
+                <SeletorDePosicao
+                  valor={field.value}
+                  aoMudar={field.onChange}
+                  erro={erros.position?.message}
+                />
               )}
             />
 

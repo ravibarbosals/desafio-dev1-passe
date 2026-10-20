@@ -1,4 +1,4 @@
-import { esquemaDoNovoJogador, formularioVazio } from "../esquema-do-jogador";
+import { criarEsquemaDaEdicao, esquemaDoNovoJogador, formularioVazio } from "../esquema-do-jogador";
 
 // Exemplo 2.1.3 do enunciado, como o formulário guarda (texto)
 const davi = {
@@ -95,5 +95,29 @@ describe("esquemaDoNovoJogador", () => {
         defending: "85",
       }),
     ).toEqual({});
+  });
+});
+
+describe("criarEsquemaDaEdicao", () => {
+  const edicao = { name: "Danilo Freitas", position: "ZAG", age: "30", agility: "25" };
+
+  it("converte o que foi digitado no corpo do PUT /players/{id}", () => {
+    expect(criarEsquemaDaEdicao(30).parse({ ...edicao, age: "31" })).toEqual({
+      name: "Danilo Freitas",
+      position: "ZAG",
+      age: 31,
+      agility: 25,
+    });
+  });
+
+  it.each(["30", "45"])("idade %o: igual à atual ou maior é aceita", (idade) => {
+    expect(criarEsquemaDaEdicao(30).safeParse({ ...edicao, age: idade }).success).toBe(true);
+  });
+
+  it.each(["29", "46"])("idade %o: fora de atual a 45 é recusada", (idade) => {
+    const resultado = criarEsquemaDaEdicao(30).safeParse({ ...edicao, age: idade });
+    expect(resultado.error?.issues[0].message).toBe(
+      "Use uma idade de 30 a 45 anos: a idade não pode diminuir.",
+    );
   });
 });

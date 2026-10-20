@@ -20,15 +20,19 @@ function atributo(nome: string) {
 }
 
 // As chaves são os campos do POST /players (exceção da DEC-034): o formulário monta esse corpo
+const nome = z
+  .string()
+  .trim()
+  .min(3, "Use de 3 a 100 caracteres.")
+  .max(100, "Use de 3 a 100 caracteres.");
+const posicao = z.enum(["GOL", "ZAG", "LAT", "MEI", "ATA"], { error: "Escolha a posição." });
+const agilidade = inteiro("Informe a agilidade.", 1, 100, "Use um valor de 1 a 100.");
+
 export const esquemaDoNovoJogador = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(3, "Use de 3 a 100 caracteres.")
-    .max(100, "Use de 3 a 100 caracteres."),
-  position: z.enum(["GOL", "ZAG", "LAT", "MEI", "ATA"], { error: "Escolha a posição." }),
+  name: nome,
+  position: posicao,
   age: inteiro("Informe a idade.", 16, 45, "Use uma idade de 16 a 45 anos."),
-  agility: inteiro("Informe a agilidade.", 1, 100, "Use um valor de 1 a 100."),
+  agility: agilidade,
   pace: atributo("a velocidade"),
   shooting: atributo("a finalização"),
   passing: atributo("o passe"),
@@ -54,3 +58,18 @@ export const formularioVazio: FormularioDoNovoJogador = {
   physical: "",
   potential: "",
 };
+
+// PUT /players/{id}: a idade não pode diminuir (RN08), então o mínimo é a idade atual (J09)
+export function criarEsquemaDaEdicao(idadeAtual: number) {
+  return z.object({
+    name: nome,
+    position: posicao,
+    age: inteiro(
+      "Informe a idade.",
+      idadeAtual,
+      45,
+      `Use uma idade de ${idadeAtual} a 45 anos: a idade não pode diminuir.`,
+    ),
+    agility: agilidade,
+  });
+}

@@ -135,3 +135,10 @@ export async function cadastrarJogador(novoJogador: NovoJogador): Promise<Jogado
 export async function excluirJogador(id: number): Promise<void> {
   await api.delete(`/players/${id}`);
 }
+
+// Corpo do PUT /players/{id} (API.md, Jogadores 5.4); os indicadores não mudam depois do cadastro
+export type EdicaoDoJogador = Pick<Jogador, "name" | "position" | "age" | "agility">;
+
+export async function editarJogador(id: number, edicao: EdicaoDoJogador): Promise<Jogador> {
+  return (await api.put<Jogador>(`/players/${id}`, edicao)).data;
+}
