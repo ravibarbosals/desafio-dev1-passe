@@ -16,6 +16,7 @@ import { BarraDeFiltros } from "@/componentes/jogadores/BarraDeFiltros";
 import { listarFiltrosAtivos } from "@/componentes/jogadores/filtros-ativos";
 import { FiltrosAtivos } from "@/componentes/jogadores/FiltrosAtivos";
 import { ModalAlterarCondicao } from "@/componentes/jogadores/ModalAlterarCondicao";
+import { ModalComprarJogador } from "@/componentes/jogadores/ModalComprarJogador";
 import { ModalEditarJogador } from "@/componentes/jogadores/ModalEditarJogador";
 import { ModalExcluirJogador } from "@/componentes/jogadores/ModalExcluirJogador";
 import { ModalNovoJogador } from "@/componentes/jogadores/ModalNovoJogador";
@@ -65,6 +66,7 @@ function PaginaJogadores() {
   const [jogadorParaExcluir, setJogadorParaExcluir] = useState<Jogador>();
   const [jogadorParaEditar, setJogadorParaEditar] = useState<Jogador>();
   const [jogadorParaAlterarCondicao, setJogadorParaAlterarCondicao] = useState<Jogador>();
+  const [jogadorParaComprar, setJogadorParaComprar] = useState<Jogador>();
 
   // Filtro novo volta para a página 1: a página atual pode não existir no resultado novo
   function mudarFiltros(novos: Partial<FiltrosDosJogadores>) {
@@ -111,6 +113,16 @@ function PaginaJogadores() {
           key={jogadorParaAlterarCondicao.id}
           jogador={jogadorParaAlterarCondicao}
           aoFechar={() => setJogadorParaAlterarCondicao(undefined)}
+        />
+      )}
+      {jogadorParaComprar && (
+        <ModalComprarJogador
+          key={jogadorParaComprar.id}
+          jogador={jogadorParaComprar}
+          aoFechar={() => setJogadorParaComprar(undefined)}
+          aoVerClube={(clubeId) =>
+            void navegar({ to: "/clubes/$id", params: { id: String(clubeId) } })
+          }
         />
       )}
       <ModalExcluirJogador
@@ -182,6 +194,7 @@ function PaginaJogadores() {
           aoEditar: setJogadorParaEditar,
           aoAlterarCondicao: setJogadorParaAlterarCondicao,
           aoExcluir: setJogadorParaExcluir,
+          aoComprar: setJogadorParaComprar,
         }}
       />
 

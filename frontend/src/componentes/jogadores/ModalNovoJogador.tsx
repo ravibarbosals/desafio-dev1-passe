@@ -1,21 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CircleCheck } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 import { cadastrarJogador, type Jogador } from "@/api/jogadores";
 import { CampoFormulario } from "@/componentes/formulario/CampoFormulario";
 import { ModalFormulario } from "@/componentes/formulario/ModalFormulario";
-import { ListaDeValores } from "@/componentes/ListaDeValores";
-import { Button } from "@/componentes/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/componentes/ui/dialog";
+import { ModalResultado } from "@/componentes/ModalResultado";
 import { Input } from "@/componentes/ui/input";
 import { useEnvio } from "@/hooks/useEnvio";
 import { formatarMoeda } from "@/lib/formatacao";
@@ -81,35 +71,19 @@ export function ModalNovoJogador({ aberto, aoMudarAberto }: PropriedadesModalNov
   // J07: depois de salvar, o modal troca o formulário pelo resultado calculado pela API
   if (cadastrado) {
     return (
-      <Dialog open={aberto} onOpenChange={(valor) => !valor && fechar()}>
-        <DialogContent>
-          <DialogHeader>
-            <CircleCheck className="size-6 text-green-600" />
-            <DialogTitle>Jogador cadastrado</DialogTitle>
-            <DialogDescription>
-              {cadastrado.name} entrou livre e Apto. Valores em moedas, calculados pela API ao
-              salvar.
-            </DialogDescription>
-          </DialogHeader>
-          <ListaDeValores
-            itens={[
-              {
-                rotulo: "Valor base",
-                valor: (
-                  <span className="font-semibold">{formatarMoeda(cadastrado.base_value)}</span>
-                ),
-              },
-              { rotulo: "Valor de mercado", valor: formatarMoeda(cadastrado.market_value) },
-              { rotulo: "Overall", valor: cadastrado.overall },
-            ]}
-          />
-          <DialogFooter>
-            <Button type="button" onClick={fechar}>
-              Fechar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ModalResultado
+        titulo="Jogador cadastrado"
+        descricao={`${cadastrado.name} entrou livre e Apto. Valores em moedas, calculados pela API ao salvar.`}
+        itens={[
+          {
+            rotulo: "Valor base",
+            valor: <span className="font-semibold">{formatarMoeda(cadastrado.base_value)}</span>,
+          },
+          { rotulo: "Valor de mercado", valor: formatarMoeda(cadastrado.market_value) },
+          { rotulo: "Overall", valor: cadastrado.overall },
+        ]}
+        aoFechar={fechar}
+      />
     );
   }
 

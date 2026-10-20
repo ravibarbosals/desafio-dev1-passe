@@ -29,3 +29,8 @@ export function extrairMensagemErro(erro: unknown): string {
 export function NaoEncontrado(erro: unknown): boolean {
   return isAxiosError(erro) && erro.response?.status === 404;
 }
+
+// Sem resposta do servidor (rede): a tela diz que a ação não foi confirmada e deixa tentar de novo (M03)
+export function semResposta(erro: unknown): boolean {
+  return isAxiosError(erro) && !erro.response;
+}

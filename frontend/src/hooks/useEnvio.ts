@@ -10,6 +10,7 @@ interface OpcoesEnvio<TDados, TResposta> {
   // Listas que mudam com o envio e precisam ser buscadas de novo
   invalidar?: QueryKey[];
   aoConcluir?: (resposta: TResposta) => void;
+  avisarErro?: boolean;
 }
 
 // REQ-042: sucesso com aviso, erro com o message da API; isPending desabilita o botão
@@ -18,6 +19,7 @@ export function useEnvio<TDados, TResposta>({
   mensagemSucesso,
   invalidar = [],
   aoConcluir,
+  avisarErro = true,
 }: OpcoesEnvio<TDados, TResposta>) {
   const clienteQuery = useQueryClient();
 
@@ -35,7 +37,9 @@ export function useEnvio<TDados, TResposta>({
       aoConcluir?.(resposta);
     },
     onError: (erro) => {
-      toast.error(extrairMensagemErro(erro));
+      if (avisarErro) {
+        toast.error(extrairMensagemErro(erro));
+      }
     },
   });
 }

@@ -15,13 +15,14 @@ export interface AcoesDoJogador {
   aoEditar: (jogador: Jogador) => void;
   aoAlterarCondicao: (jogador: Jogador) => void;
   aoExcluir: (jogador: Jogador) => void;
+  aoComprar: (jogador: Jogador) => void;
 }
 
-interface PropriedadesMenuDoJogador extends AcoesDoJogador {
+interface PropriedadesMenuDoJogador extends Omit<AcoesDoJogador, "aoComprar"> {
   jogador: Jogador;
 }
 
-// Menu ⋯ de cada linha (J08); Alterar condição entra no próximo passo, Comprar na TASK-050
+// Menu ⋯ de cada linha (J08); o Comprar fica ao lado dele, como botão (M01)
 export function MenuDoJogador({
   jogador,
   aoEditar,

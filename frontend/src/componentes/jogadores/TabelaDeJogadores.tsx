@@ -1,4 +1,5 @@
 import type { UseQueryResult } from "@tanstack/react-query";
+import { ShoppingCart } from "lucide-react";
 import type { ReactNode } from "react";
 
 import type { ResumoDoClube } from "@/api/clube";
@@ -6,6 +7,7 @@ import type { Jogador, PaginaDeJogadores } from "@/api/jogadores";
 import { Paginacao } from "@/componentes/tabela/Paginacao";
 import { TabelaComEstados, type ColunaDaTabela } from "@/componentes/tabela/TabelaComEstados";
 import { Badge } from "@/componentes/ui/badge";
+import { Button } from "@/componentes/ui/button";
 import { formatarMoeda } from "@/lib/formatacao";
 import { nomesDasPosicoes } from "@/lib/rotulos";
 
@@ -59,7 +61,23 @@ function montarColunas(
     },
     {
       titulo: "Ações",
-      celula: (jogador) => <MenuDoJogador jogador={jogador} {...acoes} />,
+      celula: (jogador) => (
+        <div className="flex items-center justify-end gap-1">
+          {/* Só jogador livre pode ser comprado (RN12) */}
+          {jogador.club_id === null && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => acoes.aoComprar(jogador)}
+            >
+              <ShoppingCart />
+              Comprar
+            </Button>
+          )}
+          <MenuDoJogador jogador={jogador} {...acoes} />
+        </div>
+      ),
       alinharADireita: true,
     },
   ];

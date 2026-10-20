@@ -10,7 +10,7 @@ import { Button } from "@/componentes/ui/button";
 import { formatarDataHora, formatarMoeda } from "@/lib/formatacao";
 import { nomesDasPosicoes } from "@/lib/rotulos";
 
-import { SeloDaMulta } from "./SeloDaMuta";
+import { SeloDaMulta } from "./SeloDaMulta";
 
 interface PropriedadesTabelaDoElenco {
   jogadores: JogadorDoElenco[];

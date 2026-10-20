@@ -8,6 +8,7 @@ import {
   extrairMensagemErro,
   mensagemErroPadrao,
   mensagemSemConexao,
+  semResposta,
 } from "../erro-api";
 
 async function capturarErro(caminho: string): Promise<unknown> {
@@ -70,5 +71,20 @@ describe("ehNaoEncontrado", () => {
     expect(NaoEncontrado(await capturarErro("/clubs/99"))).toBe(true);
     expect(NaoEncontrado(await capturarErro("/clubs/1"))).toBe(false);
     expect(NaoEncontrado(new Error("outro"))).toBe(false);
+  });
+});
+
+describe("semResposta", () => {
+  it("é verdade só quando o servidor não respondeu", async () => {
+    servidor.use(
+      http.get("http://localhost:3000/api/v1/clubs", () => HttpResponse.error()),
+      http.get("http://localhost:3000/api/v1/clubs/1", () =>
+        HttpResponse.json({ message: "Erro." }, { status: 409 }),
+      ),
+    );
+
+    expect(semResposta(await capturarErro("/clubs"))).toBe(true);
+    expect(semResposta(await capturarErro("/clubs/1"))).toBe(false);
+    expect(semResposta(new Error("outro"))).toBe(false);
   });
 });
