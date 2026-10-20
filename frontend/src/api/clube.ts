@@ -21,6 +21,26 @@ export interface EscalacaoDoClube {
   players: Jogador[];
 }
 
+// Contrato do jogador no elenco (API.md, Clubes 5.3): dias e % de multa para uma venda agora
+export interface ContratoDoJogador {
+  purchase_value: number;
+  loyalty_until: string;
+  remaining_days: number;
+  penalty_rate: number;
+}
+
+// RN14: no máximo 12 jogadores no elenco
+export const limiteDoElenco = 12;
+
+export interface JogadorDoElenco extends Jogador {
+  contract: ContratoDoJogador;
+}
+
+// GET /clubs/{id} (API.md, Clubes 5.3); o elenco vem na ordem da RN11
+export interface ClubeDetalhado extends ResumoDoClube {
+  players: JogadorDoElenco[];
+}
+
 export type OrdemDosClubes = "name" | "net_worth_asc" | "net_worth_desc";
 
 export function consultaDosClubes(ordem: OrdemDosClubes = "name") {
@@ -28,6 +48,14 @@ export function consultaDosClubes(ordem: OrdemDosClubes = "name") {
   return queryOptions({
     queryKey: ["clubes", parametros],
     queryFn: async () => (await api.get<ResumoDoClube[]>("/clubs", { params: parametros })).data,
+  });
+}
+
+// A chave começa com "clubes": quem invalida ["clubes"] (compra, venda, edição) recarrega a página
+export function consultaDoClube(id: number) {
+  return queryOptions({
+    queryKey: ["clubes", id],
+    queryFn: async () => (await api.get<ClubeDetalhado>(`/clubs/${id}`)).data,
   });
 }
 

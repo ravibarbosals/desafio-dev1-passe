@@ -1,12 +1,14 @@
 import type { UseQueryResult } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
+import { ChevronRight } from "lucide-react";
 import type { ReactNode } from "react";
 
 import type { ResumoDoClube } from "@/api/clube";
 import { TabelaComEstados, type ColunaDaTabela } from "@/componentes/tabela/TabelaComEstados";
 import { Badge } from "@/componentes/ui/badge";
+import { Button } from "@/componentes/ui/button";
 import { formatarMoeda } from "@/lib/formatacao";
 
-// "Ver clube" entra com a página do clube (TASK-049)
 const colunas: ColunaDaTabela<ResumoDoClube>[] = [
   { titulo: "Clube", celula: (clube) => <span className="font-medium">{clube.name}</span> },
   { titulo: "Sigla", celula: (clube) => <Badge variant="outline">{clube.acronym}</Badge> },
@@ -19,6 +21,18 @@ const colunas: ColunaDaTabela<ResumoDoClube>[] = [
   {
     titulo: "Patrimônio",
     celula: (clube) => <span className="font-semibold">{formatarMoeda(clube.net_worth)}</span>,
+    alinharADireita: true,
+  },
+  {
+    titulo: "Ações",
+    celula: (clube) => (
+      <Button asChild variant="ghost" size="sm">
+        <Link to="/clubes/$id" params={{ id: String(clube.id) }}>
+          Ver clube
+          <ChevronRight />
+        </Link>
+      </Button>
+    ),
     alinharADireita: true,
   },
 ];

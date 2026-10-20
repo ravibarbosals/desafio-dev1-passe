@@ -2,6 +2,7 @@ import type { UseQueryResult } from "@tanstack/react-query";
 import { CloudOff, LoaderCircle, RotateCw, SearchX } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { Aviso } from "@/componentes/Aviso";
 import { Button } from "@/componentes/ui/button";
 import { Skeleton } from "@/componentes/ui/skeleton";
 import {
@@ -120,26 +121,6 @@ export function TabelaComEstados<T>({
         </TableBody>
       </Table>
       {rodape}
-    </div>
-  );
-}
-
-interface PropriedadesAviso {
-  icone: ReactNode;
-  titulo: string;
-  descricao?: string;
-  acao?: ReactNode;
-}
-
-function Aviso({ icone, titulo, descricao, acao }: PropriedadesAviso) {
-  return (
-    <div className="flex flex-col items-center gap-3 rounded-xl border px-6 py-12 text-center">
-      <span className="flex size-10 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-        {icone}
-      </span>
-      <p className="font-semibold">{titulo}</p>
-      {descricao && <p className="max-w-md text-sm text-muted-foreground">{descricao}</p>}
-      {acao}
     </div>
   );
 }

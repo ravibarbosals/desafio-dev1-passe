@@ -3,7 +3,12 @@ import { http, HttpResponse } from "msw";
 import { servidor } from "@/testes/servidor";
 
 import { api } from "../api";
-import { extrairMensagemErro, mensagemErroPadrao, mensagemSemConexao } from "../erro-api";
+import {
+  NaoEncontrado,
+  extrairMensagemErro,
+  mensagemErroPadrao,
+  mensagemSemConexao,
+} from "../erro-api";
 
 async function capturarErro(caminho: string): Promise<unknown> {
   try {
@@ -48,5 +53,22 @@ describe("extrairMensagemErro", () => {
 
   it("usa a mensagem padrão para erro que não veio da API", () => {
     expect(extrairMensagemErro(new Error("falha qualquer"))).toBe(mensagemErroPadrao);
+  });
+});
+
+describe("ehNaoEncontrado", () => {
+  it("é verdade só para o 404 da API", async () => {
+    servidor.use(
+      http.get("http://localhost:3000/api/v1/clubs/99", () =>
+        HttpResponse.json({ message: "Clube não encontrado." }, { status: 404 }),
+      ),
+      http.get("http://localhost:3000/api/v1/clubs/1", () =>
+        HttpResponse.json({ message: "Erro." }, { status: 500 }),
+      ),
+    );
+
+    expect(NaoEncontrado(await capturarErro("/clubs/99"))).toBe(true);
+    expect(NaoEncontrado(await capturarErro("/clubs/1"))).toBe(false);
+    expect(NaoEncontrado(new Error("outro"))).toBe(false);
   });
 });
