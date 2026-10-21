@@ -20,7 +20,7 @@ export function SeletorDePosicao({
   return (
     <fieldset className="flex flex-col gap-1.5">
       <legend className="mb-1.5 text-sm font-medium">Posição</legend>
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
         {(Object.entries(nomesDasPosicoes) as [Posicao, string][]).map(([sigla, nome]) => (
           <Button
             key={sigla}
