@@ -1,5 +1,6 @@
 import {
   formatarDataHora,
+  formatarInteiroComSinal,
   formatarMoeda,
   formatarMoedaComSinal,
   montarDataHoraBrasilia,
@@ -43,5 +44,15 @@ describe("formatarDataHora", () => {
 describe("montarDataHoraBrasilia", () => {
   it("junta data e hora com o fuso de Brasília", () => {
     expect(montarDataHoraBrasilia("2027-12-31", "18:30")).toBe("2027-12-31T18:30-03:00");
+  });
+});
+
+describe("formatarInteiroComSinal", () => {
+  it.each([
+    [2, "+2"],
+    [0, "0"],
+    [-2, "-2"],
+  ])("%s → %s", (valor, esperado) => {
+    expect(formatarInteiroComSinal(valor)).toBe(esperado);
   });
 });

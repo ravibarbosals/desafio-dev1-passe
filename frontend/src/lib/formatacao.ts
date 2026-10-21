@@ -24,6 +24,11 @@ export function formatarMoedaComSinal(valor: number): string {
   return valor > 0 ? `+${formatarMoeda(valor)}` : formatarMoeda(valor);
 }
 
+// Inteiro com sinal, como o saldo de gols da classificação: 2 → "+2"; -2 → "-2"; 0 → "0"
+export function formatarInteiroComSinal(valor: number): string {
+  return valor > 0 ? `+${valor}` : String(valor);
+}
+
 // "2026-11-12T15:00:00-03:00" → "12/11/2026 15:00", sempre no horário de Brasília (RN01)
 export function formatarDataHora(dataHora: string): string {
   return formatoDataHora.format(new Date(dataHora)).replace(", ", " ");

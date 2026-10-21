@@ -47,6 +47,21 @@ export interface Partida extends ResumoDaPartida {
   duels: Duelo[];
 }
 
+// GET /standings (API.md, Liga 5.6): todos os clubes, já ordenados e com a posição (RN21)
+export interface LinhaDaClassificacao {
+  position: number;
+  club_id: number;
+  club_name: string;
+  played: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  goals_for: number;
+  goals_against: number;
+  goal_difference: number;
+  points: number;
+}
+
 export interface NovaPartida {
   home_club_id: number;
   away_club_id: number;
@@ -66,6 +81,14 @@ export function consultaDaPartida(id: number) {
   return queryOptions({
     queryKey: ["partidas", id],
     queryFn: async () => (await api.get<Partida>(`/matches/${id}`)).data,
+  });
+}
+
+// Calculada a cada consulta, nunca gravada (RN21); a nova partida invalida ["classificacao"]
+export function consultaDaClassificacao() {
+  return queryOptions({
+    queryKey: ["classificacao"],
+    queryFn: async () => (await api.get<LinhaDaClassificacao[]>("/standings")).data,
   });
 }
 
