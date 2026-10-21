@@ -87,14 +87,14 @@ function PaginaDoClube() {
 
   return (
     <>
-      <div className="mb-6 flex items-start justify-between gap-4">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-start gap-4">
           <span className="flex size-11 shrink-0 items-center justify-center rounded-lg border bg-muted text-sm font-semibold">
             {acronym}
           </span>
           <div>
             <h1 className="text-2xl font-semibold">{name}</h1>
-            <div className="mt-1 flex gap-2">
+            <div className="mt-1 flex flex-wrap gap-2">
               <Badge variant="outline">Sigla {acronym}</Badge>
               <Badge variant="outline">
                 {players.length} de {limiteDoElenco} jogadores
@@ -131,7 +131,7 @@ function PaginaDoClube() {
           void navegar({ search: { aba: valor === "elenco" ? undefined : (valor as Aba) } })
         }
       >
-        <TabsList>
+        <TabsList className="max-w-full overflow-x-auto">
           <TabsTrigger value="elenco">
             Elenco <Badge variant="secondary">{players.length}</Badge>
           </TabsTrigger>

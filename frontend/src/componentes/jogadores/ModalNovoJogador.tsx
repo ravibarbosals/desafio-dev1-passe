@@ -135,7 +135,7 @@ export function ModalNovoJogador({ aberto, aoMudarAberto }: PropriedadesModalNov
           e o potencial não pode ser menor que o maior deles.
         </p>
       </div>
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {atributos.map(({ campo, rotulo }) => campoNumerico(campo, rotulo))}
       </div>
     </ModalFormulario>

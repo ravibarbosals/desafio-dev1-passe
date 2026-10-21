@@ -6,13 +6,27 @@ import { consultaDosClubes } from "@/api/clube";
 
 import { secoesDoMenu } from "./navegacao";
 
+interface PropriedadesConteudoDoMenu {
+  // O menu móvel fecha ao escolher um destino
+  aoNavegar?: () => void;
+}
+
+// Menu fixo à esquerda a partir de 768 px; abaixo disso, o mesmo conteúdo abre pelo MenuMovel
 export function MenuLateral() {
+  return (
+    <aside className="hidden w-60 shrink-0 flex-col gap-6 p-4 md:flex">
+      <ConteudoDoMenu />
+    </aside>
+  );
+}
+
+export function ConteudoDoMenu({ aoNavegar }: PropriedadesConteudoDoMenu) {
   // DEC-055: os clubes no menu levam à página de cada um; mesma consulta da tela de clubes
   const clubes = useQuery(consultaDosClubes());
 
   return (
-    <aside className="flex w-60 shrink-0 flex-col gap-6 p-4">
-      <Link to="/" className="flex items-center gap-2 px-2">
+    <>
+      <Link to="/" className="flex items-center gap-2 px-2" onClick={aoNavegar}>
         <span className="flex size-8 items-center justify-center rounded-md bg-primary font-bold text-primary-foreground">
           P
         </span>
@@ -32,6 +46,7 @@ export function MenuLateral() {
                   <Link
                     to="/clubes/$id"
                     params={{ id: String(clube.id) }}
+                    onClick={aoNavegar}
                     className="flex items-center gap-2 rounded-md border border-transparent px-2 py-1.5 text-sm hover:bg-accent"
                     activeProps={{ className: "border-border bg-background font-medium shadow-xs" }}
                   >
@@ -53,6 +68,7 @@ export function MenuLateral() {
                 <li key={caminho}>
                   <Link
                     to={caminho}
+                    onClick={aoNavegar}
                     className="flex items-center gap-2 rounded-md border border-transparent px-2 py-1.5 text-sm hover:bg-accent"
                     activeProps={{ className: "border-border bg-background font-medium shadow-xs" }}
                   >
@@ -70,6 +86,6 @@ export function MenuLateral() {
         <Clock className="size-3.5" />
         Horário de Brasília (UTC−3)
       </p>
-    </aside>
+    </>
   );
 }

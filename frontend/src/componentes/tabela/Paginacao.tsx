@@ -27,12 +27,12 @@ export function Paginacao({
   return (
     <nav
       aria-label="Paginação"
-      className="flex items-center justify-between gap-4 border-t px-4 py-3 text-sm"
+      className="flex flex-wrap items-center justify-between gap-2 border-t px-4 py-3 text-sm"
     >
       <p className="text-muted-foreground">
         Mostrando {inicio}–{fim} de {totalItens} {rotuloItens}
       </p>
-      <div className="flex items-center gap-1">
+      <div className="flex flex-wrap items-center gap-1">
         <Button
           type="button"
           variant="ghost"
@@ -41,7 +41,7 @@ export function Paginacao({
           onClick={() => aoMudarPagina(pagina - 1)}
         >
           <ChevronLeft />
-          Anterior
+          <span className="sr-only sm:not-sr-only">Anterior</span>
         </Button>
         {listarPaginasVisiveis(pagina, totalPaginas).map((numero, indice) =>
           numero === "reticencias" ? (
@@ -68,7 +68,7 @@ export function Paginacao({
           disabled={pagina >= totalPaginas}
           onClick={() => aoMudarPagina(pagina + 1)}
         >
-          Próxima
+          <span className="sr-only sm:not-sr-only">Próxima</span>
           <ChevronRight />
         </Button>
       </div>

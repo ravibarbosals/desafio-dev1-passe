@@ -12,15 +12,16 @@ export const Route = createRootRoute({
   errorComponent: PaginaErro,
 });
 
-// Menu lateral à esquerda e a página num painel com a trilha no topo, como no mockup
+// Menu lateral à esquerda e a página num painel com a trilha no topo, como no mockup. Abaixo de
+// 768 px o menu lateral some e abre pelo botão do cabeçalho (F5)
 function LayoutRaiz() {
   return (
     <div className="flex min-h-screen bg-muted/40 text-foreground">
       <MenuLateral />
-      <div className="flex min-w-0 flex-1 flex-col py-2 pr-2">
+      <div className="flex min-w-0 flex-1 flex-col p-2 md:pl-0">
         <div className="flex flex-1 flex-col rounded-xl border bg-background">
           <Cabecalho />
-          <main className="flex-1 p-6">
+          <main className="flex-1 p-4 md:p-6">
             <Outlet />
           </main>
         </div>

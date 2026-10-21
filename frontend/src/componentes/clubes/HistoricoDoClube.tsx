@@ -95,7 +95,7 @@ export function HistoricoDoClube({ clubeId }: PropriedadesHistoricoDoClube) {
           </label>
         ))}
         <Select value={jogador} onValueChange={setJogador} disabled={!semFiltros.data}>
-          <SelectTrigger size="sm" aria-label="Jogador">
+          <SelectTrigger size="sm" aria-label="Jogador" className="max-w-full">
             <User />
             <span className="text-muted-foreground">Jogador:</span>
             <SelectValue />

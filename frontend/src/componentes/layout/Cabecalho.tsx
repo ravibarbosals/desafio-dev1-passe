@@ -1,6 +1,7 @@
 import { useRouterState } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 
+import { MenuMovel } from "./MenuMovel";
 import { encontrarItemAtivo } from "./navegacao";
 
 export function Cabecalho() {
@@ -8,7 +9,8 @@ export function Cabecalho() {
   const ativo = encontrarItemAtivo(caminhoAtual);
 
   return (
-    <header className="flex h-14 items-center border-b px-6">
+    <header className="flex h-14 items-center gap-2 border-b px-4 md:px-6">
+      <MenuMovel />
       {ativo && (
         <nav
           aria-label="Trilha"
