@@ -26,7 +26,7 @@ export function extrairMensagemErro(erro: unknown): string {
 }
 
 // 404 da API: a tela mostra "não encontrado" com o caminho de volta (E04), em vez do erro genérico
-export function NaoEncontrado(erro: unknown): boolean {
+export function ehNaoEncontrado(erro: unknown): boolean {
   return isAxiosError(erro) && erro.response?.status === 404;
 }
 

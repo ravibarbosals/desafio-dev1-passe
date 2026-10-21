@@ -8,7 +8,7 @@ import { Placar } from "@/componentes/partidas/Placar";
 import { TabelaDosDuelos } from "@/componentes/partidas/TabelaDosDuelos";
 import { Button } from "@/componentes/ui/button";
 import { Skeleton } from "@/componentes/ui/skeleton";
-import { NaoEncontrado, extrairMensagemErro } from "@/lib/erro-api";
+import { ehNaoEncontrado, extrairMensagemErro } from "@/lib/erro-api";
 
 export const Route = createFileRoute("/partidas/$id")({
   component: PaginaDaPartida,
@@ -21,7 +21,7 @@ function PaginaDaPartida() {
   const partida = useQuery(consultaDaPartida(Number(id)));
 
   if (partida.isError) {
-    return NaoEncontrado(partida.error) ? (
+    return ehNaoEncontrado(partida.error) ? (
       <Aviso
         icone={<SearchX className="size-5" />}
         titulo="Partida não encontrada"

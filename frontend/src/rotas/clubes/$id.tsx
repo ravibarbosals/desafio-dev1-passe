@@ -16,7 +16,7 @@ import { Badge } from "@/componentes/ui/badge";
 import { Button } from "@/componentes/ui/button";
 import { Skeleton } from "@/componentes/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/componentes/ui/tabs";
-import { NaoEncontrado, extrairMensagemErro } from "@/lib/erro-api";
+import { ehNaoEncontrado, extrairMensagemErro } from "@/lib/erro-api";
 
 type Aba = "elenco" | "escalacao" | "historico";
 
@@ -41,7 +41,7 @@ function PaginaDoClube() {
   const [jogadorParaVender, setJogadorParaVender] = useState<JogadorDoElenco>();
 
   if (clube.isError) {
-    return NaoEncontrado(clube.error) ? (
+    return ehNaoEncontrado(clube.error) ? (
       <Aviso
         icone={<SearchX className="size-5" />}
         titulo="Clube não encontrado"

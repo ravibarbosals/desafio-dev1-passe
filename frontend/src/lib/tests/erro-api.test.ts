@@ -4,7 +4,7 @@ import { servidor } from "@/testes/servidor";
 
 import { api } from "../api";
 import {
-  NaoEncontrado,
+  ehNaoEncontrado,
   extrairMensagemErro,
   mensagemErroPadrao,
   mensagemSemConexao,
@@ -69,9 +69,9 @@ describe("ehNaoEncontrado", () => {
       ),
     );
 
-    expect(NaoEncontrado(await capturarErro("/clubs/99"))).toBe(true);
-    expect(NaoEncontrado(await capturarErro("/clubs/1"))).toBe(false);
-    expect(NaoEncontrado(new Error("outro"))).toBe(false);
+    expect(ehNaoEncontrado(await capturarErro("/clubs/99"))).toBe(true);
+    expect(ehNaoEncontrado(await capturarErro("/clubs/1"))).toBe(false);
+    expect(ehNaoEncontrado(new Error("outro"))).toBe(false);
   });
 });
 
