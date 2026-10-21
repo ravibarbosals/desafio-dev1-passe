@@ -1,4 +1,4 @@
-import { createRootRoute, Outlet } from "@tanstack/react-router";
+import { createRootRoute, Outlet, useRouterState } from "@tanstack/react-router";
 
 import { Cabecalho } from "@/componentes/layout/Cabecalho";
 import { MenuLateral } from "@/componentes/layout/MenuLateral";
@@ -15,6 +15,16 @@ export const Route = createRootRoute({
 // Menu lateral à esquerda e a página num painel com a trilha no topo, como no mockup. Abaixo de
 // 768 px o menu lateral some e abre pelo botão do cabeçalho (F5)
 function LayoutRaiz() {
+  const caminhoAtual = useRouterState({ select: (estado) => estado.location.pathname });
+
+  if (caminhoAtual === "/") {
+    return (
+      <>
+        <Outlet />
+        <Toaster theme="light" position="top-right" />
+      </>
+    );
+  }
   return (
     <div className="flex min-h-screen bg-muted/40 text-foreground">
       <MenuLateral />

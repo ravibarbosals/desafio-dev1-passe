@@ -1,6 +1,7 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { createMemoryHistory, RouterProvider } from "@tanstack/react-router";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 
 import { servidor } from "../../testes/servidor";
@@ -17,23 +18,42 @@ function abrir(caminho: string) {
   );
 }
 
-const clubes = "http://localhost:3000/api/v1/clubs";
+const base = "http://localhost:3000/api/v1";
+const clubes = `${base}/clubs`;
 
-describe("criarRoteador", () => {
-  // O menu lateral lista os clubes em todas as páginas
+describe("página inicial", () => {
+  // Contadores da tela inicial: total de jogadores, livres (free=true) e partidas
   beforeEach(() => {
     servidor.use(
-      http.get(clubes, () =>
-        HttpResponse.json([
-          { id: 1, name: "Águias FC", acronym: "AGU", cash: 300, squad_value: 0, net_worth: 300 },
-        ]),
-      ),
+      http.get(`${base}/players`, ({ request }) => {
+        const livres = new URL(request.url).searchParams.get("free") === "true";
+        return HttpResponse.json({
+          data: [],
+          meta: { page: 1, limit: 10, total_items: livres ? 7 : 23, total_pages: 3 },
+        });
+      }),
+      http.get(`${base}/matches`, () => HttpResponse.json([])),
     );
   });
-  it("abre a página inicial em /", async () => {
+
+  it("abre em / sem o menu, com os números da API", async () => {
     abrir("/");
 
     expect(await screen.findByRole("heading", { name: /gestão da liga/i })).toBeInTheDocument();
+    expect(await screen.findByText("23")).toBeInTheDocument();
+    expect(screen.getByText("7")).toBeInTheDocument();
+    expect(screen.getByText("1")).toBeInTheDocument();
+    expect(screen.getByText(/nenhuma partida ainda/)).toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "Menu principal" })).not.toBeInTheDocument();
+  });
+
+  it("vai para os jogadores pelo Enter", async () => {
+    abrir("/");
+    await screen.findByRole("heading", { name: /gestão da liga/i });
+
+    await userEvent.keyboard("{Enter}");
+
+    expect(await screen.findByRole("heading", { name: "Jogadores" })).toBeInTheDocument();
   });
 
   it("mostra a página de não encontrado num caminho inexistente", async () => {

@@ -247,5 +247,3 @@ Todas as funcionalidades foram implementadas.
 - Alterei a organização dos testes: a proposta deixava cada teste ao lado do arquivo testado. Passei a guardá-los numa pasta `tests/`: no backend, dentro de `dto/` e `helpers/`; no frontend, em cada pasta, ao lado do código.
 - Descartei manter o React 18. Os componentes atuais do shadcn/ui esperam o React 19, e no 18 cada componente que recebe `ref` precisaria ser reescrito com `forwardRef`. Mudei para o React 19.
 - Na adaptação para 375 px, troquei por conta própria algumas classes `flex` por `flex-wrap`. A revisão mostrou que isso desfazia o alinhamento em linha, e corrigi para `flex flex-wrap`.
-
-A preencher.
