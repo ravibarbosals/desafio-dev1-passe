@@ -6,7 +6,7 @@ import {
   CircleCheck,
   Clock,
   HandCoins,
-  RotateCcw,
+  History,
   Shield,
   ShoppingCart,
   Swords,
@@ -59,7 +59,7 @@ const etapas: Etapa[] = [
   {
     titulo: "Histórico",
     texto: "Toda compra e venda fica registrada, com totais e CSV.",
-    icone: RotateCcw,
+    icone: History,
   },
   {
     titulo: "Liga",
@@ -135,19 +135,19 @@ function PaginaInicial() {
             </span>
           </div>
 
-          <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
+          <ul className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm text-muted-foreground">
             <Contador icone={Users} valor={jogadores.data?.meta.total_items} rotulo="jogadores" />
             <Contador icone={User} valor={livres.data?.meta.total_items} rotulo="livres" />
             <Contador icone={Shield} valor={clubes.data?.length} rotulo="clubes" />
             <Contador icone={Swords} valor={totalDePartidas} rotulo="partidas" />
-            <li className="flex items-center gap-1.5">
+            <li className="flex items-center gap-1.5 before:text-border not-first:before:mr-1.5 not-first:before:content-['•']">
               <CircleCheck className="size-4" />
               Não precisa de login
             </li>
           </ul>
         </div>
 
-        <ol className="relative mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-[repeat(6,minmax(0,1fr))]">
+        <ol className="relative mt-10 grid gap-3 sm:grid-cols-2 lg:gap-6 lg:grid-cols-[repeat(6,minmax(0,1fr))]">
           {etapas.map(({ titulo, texto, icone: Icone }, indice) => (
             <li
               key={titulo}
@@ -161,12 +161,12 @@ function PaginaInicial() {
                   {String(indice + 1).padStart(2, "0")}
                 </span>
               </div>
-              <p className="font-medium">{titulo}</p>
-              <p className="text-sm text-muted-foreground">{texto}</p>
+              <p className="text-sm font-medium">{titulo}</p>
+              <p className="text-xs text-muted-foreground">{texto}</p>
               {indice < etapas.length - 1 && (
                 <ChevronRight
                   aria-hidden
-                  className="absolute top-1/2 -right-4 hidden size-4 -translate-y-1/2 text-muted-foreground lg:block"
+                  className="absolute top-1/2 -right-5 hidden size-4 -translate-y-1/2 text-muted-foreground lg:block"
                 />
               )}
             </li>
@@ -185,7 +185,7 @@ function PaginaInicial() {
 // Enquanto a API não responde (ou se falhar), o número fica como "–"
 function Contador({ icone: Icone, valor, rotulo }: PropriedadesContador) {
   return (
-    <li className="flex items-center gap-1.5">
+    <li className="flex items-center gap-1.5 before:text-border not-first:before:mr-1.5 not-first:before:content-['•']">
       <Icone className="size-4" />
       <span className="font-semibold text-foreground">{valor ?? "–"}</span>
       {rotulo}
@@ -210,6 +210,13 @@ function Campo() {
       <rect x="0" y="200" width="50" height="160" />
       <rect x="870" y="120" width="130" height="320" />
       <rect x="950" y="200" width="50" height="160" />
+      <path d="M 130 225 A 65 65 0 0 1 130 335" />
+      <path d="M 870 225 A 65 65 0 0 0 870 335" />
+      <g fill="currentColor" stroke="none">
+        <circle cx="500" cy="280" r="3" />
+        <circle cx="95" cy="280" r="3" />
+        <circle cx="905" cy="280" r="3" />
+      </g>
     </svg>
   );
 }
