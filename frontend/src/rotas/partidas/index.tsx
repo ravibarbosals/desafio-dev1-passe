@@ -94,7 +94,12 @@ function PaginaPartidas() {
       <TabelaDePartidas
         consulta={partidas}
         filtrado={clubeId !== undefined}
-        acaoVazio={botaoNovaPartida}
+        acaoVazio={
+          <Button type="button" variant="outline" onClick={() => setNovaPartidaAberta(true)}>
+            <Plus />
+            Nova partida
+          </Button>
+        }
       />
       <p className="mt-3 text-xs text-muted-foreground">
         Com filtro, entram as partidas em que o clube foi mandante ou visitante. "Ver duelos" abre a

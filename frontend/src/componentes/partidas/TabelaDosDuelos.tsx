@@ -2,6 +2,7 @@ import { CircleCheck } from "lucide-react";
 import { Fragment } from "react";
 
 import type { JogadorDoDuelo, Partida } from "@/api/partidas";
+import { AvatarDoJogador } from "@/componentes/jogadores/AvatarDoJogador";
 import { Badge } from "@/componentes/ui/badge";
 import {
   Table,
@@ -11,7 +12,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/componentes/ui/table";
+import { useSiglasDosClubes } from "@/hooks/useSiglasDosClubes";
 import { nomesDosAtributos } from "@/lib/rotulos";
+
+interface PropriedadesTabelaDosDuelos {
+  partida: Partida;
+}
 
 interface PropriedadesJogador {
   jogador: JogadorDoDuelo;
@@ -20,29 +26,29 @@ interface PropriedadesJogador {
 
 function JogadorDoDueloNaTabela({ jogador, clube }: PropriedadesJogador) {
   return (
-    <div>
-      <p className="font-medium">
-        {jogador.player_name}
-        {jogador.condition === "MAL_CONDICIONADO" && (
-          <Badge variant="outline" className="ml-2 border-amber-200 bg-amber-50 text-amber-700">
-            Mal condicionado
-          </Badge>
-        )}
-      </p>
-      <p className="text-xs text-muted-foreground">
-        {jogador.position} · {clube}
-      </p>
+    <div className="flex items-center gap-3">
+      <AvatarDoJogador id={jogador.player_id} nome={jogador.player_name} />
+      <div>
+        <p className="font-medium">
+          {jogador.player_name}
+          {jogador.condition === "MAL_CONDICIONADO" && (
+            <Badge variant="outline" className="ml-2 border-amber-200 bg-amber-50 text-amber-700">
+              Mal condicionado
+            </Badge>
+          )}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {jogador.position} · {clube}
+        </p>
+      </div>
     </div>
   );
-}
-
-interface PropriedadesTabelaDosDuelos {
-  partida: Partida;
 }
 
 // F13, L03: os 6 duelos como a API gravou (nomes, condições, atributos e valores do momento)
 export function TabelaDosDuelos({ partida }: PropriedadesTabelaDosDuelos) {
   const { home, away } = partida;
+  const siglas = useSiglasDosClubes();
   // Duelos 1 a 3: ataques do mandante; 4 a 6: do visitante (RN20)
   const grupos = [
     { atacante: home, defensor: away, papel: "mandante" },
@@ -50,7 +56,7 @@ export function TabelaDosDuelos({ partida }: PropriedadesTabelaDosDuelos) {
   ];
 
   return (
-    <div className="rounded-xl border">
+    <div>
       <Table>
         <TableHeader className="bg-muted/50">
           <TableRow>
@@ -66,8 +72,12 @@ export function TabelaDosDuelos({ partida }: PropriedadesTabelaDosDuelos) {
           {grupos.map(({ atacante, defensor, papel }) => (
             <Fragment key={papel}>
               <TableRow className="bg-muted/30">
-                <TableCell colSpan={6} className="text-xs font-medium">
-                  Ataques do {atacante.club_name} ({papel}) ·{" "}
+                <TableCell colSpan={5} className="text-xs font-medium">
+                  <span className="mr-2 text-muted-foreground">{siglas.get(atacante.club_id)}</span>
+                  Ataques do {atacante.club_name} ({papel})
+                </TableCell>
+                {/* L03: os gols do lado, à direita da faixa */}
+                <TableCell className="text-right text-xs text-muted-foreground">
                   {atacante.goals === 1 ? "1 gol" : `${atacante.goals} gols`}
                 </TableCell>
               </TableRow>

@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { Shield } from "lucide-react";
+import { LoaderCircle, Shield, Swords } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 
 import { consultaDosClubes } from "@/api/clube";
@@ -38,8 +38,10 @@ export function ModalNovaPartida({ aberto, aoMudarAberto }: PropriedadesModalNov
   });
   const envio = useEnvio({
     enviar: (dados: NovaPartida) => jogarPartida(dados),
-    mensagemSucesso: ({ home, away }) =>
-      `Partida jogada: ${home.club_name} ${home.goals} × ${away.goals} ${away.club_name}.`,
+    mensagemSucesso: ({ home, away }) => ({
+      titulo: "Partida jogada",
+      descricao: `${home.club_name} ${home.goals} × ${away.goals} ${away.club_name}. Placar e duelos devolvidos pela API.`,
+    }),
     // O histórico e a classificação mudam (RN21)
     invalidar: [["partidas"], ["classificacao"]],
     aoConcluir: abrirPartida,
@@ -64,32 +66,27 @@ export function ModalNovaPartida({ aberto, aoMudarAberto }: PropriedadesModalNov
   function campoDoClube(nome: "mandante" | "visitante", rotulo: string, dica: string) {
     const id = `${nome}-partida`;
     return (
-      <>
-        <CampoFormulario id={id} rotulo={rotulo} erro={erros[nome]?.message}>
-          <Controller
-            control={formulario.control}
-            name={nome}
-            render={({ field }) => (
-              <Select value={field.value} onValueChange={field.onChange} disabled={!clubes.data}>
-                <SelectTrigger id={id} className="w-full" aria-invalid={erros[nome] !== undefined}>
-                  <Shield />
-                  <SelectValue
-                    placeholder={clubes.data ? "Escolha o clube" : "Carregando clubes…"}
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {clubes.data?.map((clube) => (
-                    <SelectItem key={clube.id} value={String(clube.id)}>
-                      {clube.name} ({clube.acronym})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          />
-        </CampoFormulario>
-        <p className="-mt-3 text-xs text-muted-foreground">{dica}</p>
-      </>
+      <CampoFormulario id={id} rotulo={rotulo} erro={erros[nome]?.message} ajuda={dica}>
+        <Controller
+          control={formulario.control}
+          name={nome}
+          render={({ field }) => (
+            <Select value={field.value} onValueChange={field.onChange} disabled={!clubes.data}>
+              <SelectTrigger id={id} className="w-full" aria-invalid={erros[nome] !== undefined}>
+                <Shield />
+                <SelectValue placeholder={clubes.data ? "Escolha o clube" : "Carregando clubes…"} />
+              </SelectTrigger>
+              <SelectContent>
+                {clubes.data?.map((clube) => (
+                  <SelectItem key={clube.id} value={String(clube.id)}>
+                    {clube.name} ({clube.acronym})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
+      </CampoFormulario>
     );
   }
 
@@ -101,8 +98,18 @@ export function ModalNovaPartida({ aberto, aoMudarAberto }: PropriedadesModalNov
       descricao="Escolha o mandante e o visitante. O placar sai dos atributos dos titulares, sem sorteio."
       aoEnviar={formulario.handleSubmit((dados) => envio.mutate(montarPartida(dados)))}
       enviando={envio.isPending}
-      textoEnviar="Jogar partida"
-      textoEnviando="Jogando…"
+      textoEnviar={
+        <>
+          <Swords />
+          Jogar partida
+        </>
+      }
+      textoEnviando={
+        <>
+          <LoaderCircle className="animate-spin" />
+          Jogando…
+        </>
+      }
     >
       {envio.error && (
         <ErroDoEnvio
@@ -114,11 +121,15 @@ export function ModalNovaPartida({ aberto, aoMudarAberto }: PropriedadesModalNov
       {campoDoClube("mandante", "Mandante", "Faz os 3 primeiros ataques.")}
       {campoDoClube("visitante", "Visitante", "Precisa ser um clube diferente do mandante.")}
       <Nota>
+        <span className="mb-1 block text-sm font-medium text-foreground">Como sai o placar</span>
         Cada time faz 3 ataques. Pela ordem do elenco, os jogadores de linha vão do 1º (o mais
         recuado) ao 4º (o mais avançado): o 4º enfrenta o goleiro, o 3º enfrenta o 1º e o 2º
         enfrenta o 2º do adversário. O atacante usa finalização (ATA), passe (MEI) ou drible (ZAG e
         LAT), e quem defende usa defesa. É gol só quando o ataque é maior; mal condicionado joga com
-        15% a menos. Os dois clubes precisam ter os 5 titulares escalados.
+        15% a menos.
+        <span className="mt-2 block">
+          Os dois clubes precisam ter os 5 titulares escalados. A partida não mexe no caixa.
+        </span>
       </Nota>
     </ModalFormulario>
   );

@@ -164,6 +164,10 @@ export function ModalVenderJogador({
             },
           ]}
         />
+        <Nota>
+          A venda é pelo valor de mercado do momento. Multa (teto de 10,00), lucro, comissão e
+          crédito são calculados ao confirmar.
+        </Nota>
         {venda.isPending && (
           <Nota icone={LoaderCircle}>
             Enviando a venda. Os botões ficam desabilitados até a resposta.

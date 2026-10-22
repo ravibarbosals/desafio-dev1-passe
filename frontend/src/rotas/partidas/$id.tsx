@@ -69,12 +69,14 @@ function PaginaDaPartida() {
       </Button>
       <Placar partida={partida.data} />
 
-      <section className="mt-6">
-        <h2 className="font-semibold">Duelos</h2>
-        <p className="mb-3 text-xs text-muted-foreground">
-          Os 3 ataques do mandante e depois os 3 do visitante. Os valores e a condição de cada
-          titular são os gravados na partida: mal condicionado joga com 15% a menos (RN20).
-        </p>
+      <section className="mt-6 overflow-hidden rounded-xl border">
+        <div className="border-b px-4 py-3">
+          <h2 className="font-semibold">Duelos</h2>
+          <p className="text-xs text-muted-foreground">
+            Os 3 ataques do mandante e depois os 3 do visitante. Os valores e a condição de cada
+            titular são os gravados na partida: mal condicionado joga com 15% a menos (RN20).
+          </p>
+        </div>
         <TabelaDosDuelos partida={partida.data} />
       </section>
     </>

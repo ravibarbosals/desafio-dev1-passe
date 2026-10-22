@@ -49,7 +49,7 @@ export function ModalConfirmacao({
           <AlertDialogDescription>{descricao}</AlertDialogDescription>
         </AlertDialogHeader>
         {children}
-        <AlertDialogFooter className="border-t" pt-4>
+        <AlertDialogFooter className="border-t pt-4">
           <AlertDialogCancel disabled={enviando}>Cancelar</AlertDialogCancel>
           <Button
             type="button"
