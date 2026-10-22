@@ -21,10 +21,14 @@ function abrir(caminho: string) {
 const base = "http://localhost:3000/api/v1";
 const clubes = `${base}/clubs`;
 
-describe("página inicial", () => {
-  // Contadores da tela inicial: total de jogadores, livres (free=true) e partidas
+describe("criarRoteador", () => {
   beforeEach(() => {
     servidor.use(
+      http.get(clubes, () =>
+        HttpResponse.json([
+          { id: 1, name: "Águias FC", acronym: "AGU", cash: 300, squad_value: 0, net_worth: 300 },
+        ]),
+      ),
       http.get(`${base}/players`, ({ request }) => {
         const livres = new URL(request.url).searchParams.get("free") === "true";
         return HttpResponse.json({
