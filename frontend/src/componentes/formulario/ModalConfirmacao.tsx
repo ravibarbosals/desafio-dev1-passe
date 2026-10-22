@@ -18,7 +18,7 @@ interface PropriedadesModalConfirmacao {
   descricao: ReactNode;
   // Texto ou ícone + texto (ex.: a lixeira do "Excluir jogador", J13)
   textoConfirmar: ReactNode;
-  textoEnviando?: string;
+  textoEnviando?: ReactNode;
   // Enquanto envia, os botões ficam desabilitados: um clique, um pedido (REQ-042)
   enviando: boolean;
   aoConfirmar: () => void;
@@ -49,7 +49,7 @@ export function ModalConfirmacao({
           <AlertDialogDescription>{descricao}</AlertDialogDescription>
         </AlertDialogHeader>
         {children}
-        <AlertDialogFooter>
+        <AlertDialogFooter className="border-t" pt-4>
           <AlertDialogCancel disabled={enviando}>Cancelar</AlertDialogCancel>
           <Button
             type="button"

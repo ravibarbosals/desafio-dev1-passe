@@ -1,5 +1,5 @@
 import type { UseQueryResult } from "@tanstack/react-query";
-import { HandCoins, ShoppingCart } from "lucide-react";
+import { HandCoins, History, ShoppingCart } from "lucide-react";
 
 import type { Transacao } from "@/api/mercado";
 import { TabelaComEstados, type ColunaDaTabela } from "@/componentes/tabela/TabelaComEstados";
@@ -7,9 +7,22 @@ import { Badge } from "@/componentes/ui/badge";
 import { ValorComSinal } from "@/componentes/ValorComSinal";
 import { formatarDataHora, formatarMoeda } from "@/lib/formatacao";
 
+import { AvatarDoJogador } from "../jogadores/AvatarDoJogador";
+
 // Valores e nome do momento de cada operação, como a API devolve (RN17)
 const colunas: ColunaDaTabela<Transacao>[] = [
-  { titulo: "Data e hora", celula: (transacao) => formatarDataHora(transacao.created_at) },
+  {
+    titulo: "Data e hora",
+    celula: (transacao) => {
+      // H01: a hora mais apagada, ao lado da data
+      const [data, hora] = formatarDataHora(transacao.created_at).split(" ");
+      return (
+        <span className="whitespace-nowrap">
+          {data} <span className="ml-1 text-muted-foreground">{hora}</span>
+        </span>
+      );
+    },
+  },
   {
     titulo: "Tipo",
     celula: (transacao) => (
@@ -21,7 +34,12 @@ const colunas: ColunaDaTabela<Transacao>[] = [
   },
   {
     titulo: "Jogador",
-    celula: (transacao) => <span className="font-medium">{transacao.player_name}</span>,
+    celula: (transacao) => (
+      <span className="flex items-center gap-3">
+        <AvatarDoJogador id={transacao.player_id} nome={transacao.player_name} />
+        <span className="font-medium">{transacao.player_name}</span>
+      </span>
+    ),
   },
   {
     titulo: "Valor",
@@ -85,6 +103,7 @@ export function TabelaDoHistorico({
           ? "Mude ou limpe os filtros para ver as outras transações do clube."
           : "As compras e vendas do clube aparecem aqui, com os totais logo abaixo.",
       }}
+      iconeVazio={<History className="size-5" />}
     />
   );
 }

@@ -12,7 +12,6 @@ import { ErroDoEnvio } from "@/componentes/formulario/ErroDoEnvio";
 import { ModalFormulario } from "@/componentes/formulario/ModalFormulario";
 import { ModalResultado } from "@/componentes/ModalResultado";
 import { Nota } from "@/componentes/Nota";
-import { Badge } from "@/componentes/ui/badge";
 import { Button } from "@/componentes/ui/button";
 import { Input } from "@/componentes/ui/input";
 import {
@@ -26,6 +25,7 @@ import { useEnvio } from "@/hooks/useEnvio";
 import { semResposta } from "@/lib/erro-api";
 import { formatarDataHora, formatarMoeda } from "@/lib/formatacao";
 
+import { SeloDoContrato } from "../SeloDeContrato";
 import { CartaoDoJogador, ValorDeMercado } from "./CartaoDoJogador";
 import { calcularCustoTotal, explicarTaxa } from "./compra";
 import { compraVazia, esquemaDaCompra, montarCompra } from "./esquema-da-compra";
@@ -85,11 +85,7 @@ export function ModalComprarJogador({
           },
           {
             rotulo: "Contrato",
-            valor: (
-              <Badge variant="outline" className="border-green-200 bg-green-50 text-green-700">
-                {resultado.contract.status}
-              </Badge>
-            ),
+            valor: <SeloDoContrato status={resultado.contract.status} />,
           },
           {
             rotulo: `Novo caixa do ${comprador?.name ?? "clube"}`,

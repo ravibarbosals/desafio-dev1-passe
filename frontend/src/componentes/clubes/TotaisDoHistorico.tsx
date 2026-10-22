@@ -2,6 +2,7 @@ import {
   HandCoins,
   Percent,
   ShoppingCart,
+  TrendingDown,
   TrendingUp,
   TriangleAlert,
   type LucideIcon,
@@ -52,7 +53,7 @@ export function TotaisDoHistorico({ resumo }: PropriedadesTotaisDoHistorico) {
     },
     {
       titulo: "Lucro total",
-      icone: TrendingUp,
+      icone: resumo.total_profit < 0 ? TrendingDown : TrendingUp,
       valor: <ValorComSinal valor={resumo.total_profit} />,
       nota: "Soma dos lucros, com sinal",
     },

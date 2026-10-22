@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { History } from "lucide-react";
+import { HandCoins, History, LoaderCircle, RefreshCw } from "lucide-react";
 import { useState } from "react";
 
 import { consultaDaEscalacao, type JogadorDoElenco, type ResumoDoClube } from "@/api/clube";
@@ -10,13 +10,13 @@ import { CartaoDoJogador, ValorDeMercado } from "@/componentes/jogadores/CartaoD
 import { ListaDeValores } from "@/componentes/ListaDeValores";
 import { ModalResultado } from "@/componentes/ModalResultado";
 import { Nota } from "@/componentes/Nota";
-import { Badge } from "@/componentes/ui/badge";
 import { Button } from "@/componentes/ui/button";
 import { ValorComSinal } from "@/componentes/ValorComSinal";
 import { useEnvio } from "@/hooks/useEnvio";
 import { semResposta } from "@/lib/erro-api";
 import { formatarDataHora, formatarMoeda, formatarMoedaComSinal } from "@/lib/formatacao";
 
+import { SeloDoContrato } from "../SeloDeContrato";
 import { AvisoDeTitular } from "./AvisoDeTitular";
 import { SeloDaMulta } from "./SeloDaMulta";
 import { descreverVenda, explicarComissao, explicarMulta } from "./venda";
@@ -88,7 +88,7 @@ export function ModalVenderJogador({
           },
           {
             rotulo: "Contrato",
-            valor: <Badge variant="outline">{resultado.contract_status}</Badge>,
+            valor: <SeloDoContrato status={resultado.contract_status} />,
           },
           {
             rotulo: `Novo caixa do ${clube.name}`,
@@ -113,8 +113,25 @@ export function ModalVenderJogador({
       aoMudarAberto={(aberto) => !aberto && aoFechar()}
       titulo={`Vender ${jogador.name}?`}
       descricao={`O jogador sai do elenco do ${clube.name} e volta a ficar livre.`}
-      textoConfirmar={semResposta(venda.error) ? "Tentar de novo" : "Confirmar venda"}
-      textoEnviando="Vendendo…"
+      textoConfirmar={
+        semResposta(venda.error) ? (
+          <>
+            <RefreshCw />
+            Tentar de novo
+          </>
+        ) : (
+          <>
+            <HandCoins />
+            Confirmar venda
+          </>
+        )
+      }
+      textoEnviando={
+        <>
+          <LoaderCircle className="animate-spin" />
+          Vendendo…
+        </>
+      }
       enviando={venda.isPending}
       aoConfirmar={confirmar}
     >
@@ -147,10 +164,11 @@ export function ModalVenderJogador({
             },
           ]}
         />
-        <Nota>
-          A venda é pelo valor de mercado do momento. Multa (teto de 10,00), lucro, comissão e
-          crédito são calculados ao confirmar.
-        </Nota>
+        {venda.isPending && (
+          <Nota icone={LoaderCircle}>
+            Enviando a venda. Os botões ficam desabilitados até a resposta.
+          </Nota>
+        )}
       </div>
     </ModalConfirmacao>
   );

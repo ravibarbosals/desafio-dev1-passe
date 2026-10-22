@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Download, User, X } from "lucide-react";
+import { Download, User } from "lucide-react";
 import { useState } from "react";
 
 import { consultaDoHistorico, exportarHistorico, type TipoDeTransacao } from "@/api/mercado";
@@ -46,9 +46,26 @@ export function HistoricoDoClube({ clubeId }: PropriedadesHistoricoDoClube) {
   const filtroRecusado = historico.isError && recusadoPelaApi(historico.error);
   const exportacao = useEnvio({
     enviar: () => exportarHistorico(clubeId, filtro),
-    mensagemSucesso: (arquivo) => `CSV baixado: ${arquivo.nome}`,
+    mensagemSucesso: (arquivo) => ({
+      titulo: "CSV baixado",
+      descricao: descreverCsv(arquivo.nome),
+    }),
     aoConcluir: (arquivo) => baixarArquivo(arquivo.nome, arquivo.conteudo, "text/csv"),
   });
+
+  function descreverCsv(nomeDoArquivo: string): string {
+    const filtros = [];
+    if (tipos.length === 1) {
+      filtros.push(`tipo ${nomesDosTipos[tipos[0]]}`);
+    }
+    const nomeDoJogador = jogadores.find(({ id }) => String(id) === jogador)?.nome;
+    if (nomeDoJogador) {
+      filtros.push(`jogador ${nomeDoJogador}`);
+    }
+    return filtros.length > 0
+      ? `${nomeDoArquivo}, com o filtro de ${filtros.join(" e ")} aplicado.`
+      : `${nomeDoArquivo}, com todas as transações do clube.`;
+  }
 
   function limparFiltros() {
     setTipos(todosOsTipos);
@@ -110,8 +127,7 @@ export function HistoricoDoClube({ clubeId }: PropriedadesHistoricoDoClube) {
           </SelectContent>
         </Select>
         {filtrado && (
-          <Button type="button" variant="ghost" size="sm" onClick={limparFiltros}>
-            <X />
+          <Button type="button" variant="link" size="sm" onClick={limparFiltros}>
             Limpar filtros
           </Button>
         )}

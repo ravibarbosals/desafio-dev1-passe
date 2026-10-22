@@ -108,7 +108,10 @@ describe("HistoricoDoClube", () => {
       expect(baixarArquivo).toHaveBeenCalledWith("historico-aguias.csv", "data;tipo\n", "text/csv"),
     );
     expect(tipoExportado).toBe("COMPRA");
-    expect(await screen.findByText("CSV baixado: historico-aguias.csv")).toBeInTheDocument();
+    expect(await screen.findByText("CSV baixado")).toBeInTheDocument();
+    expect(
+      screen.getByText("historico-aguias.csv, com o filtro de tipo Compra aplicado."),
+    ).toBeInTheDocument();
   });
 
   it("mostra o message quando a API recusa o filtro (H05)", async () => {
