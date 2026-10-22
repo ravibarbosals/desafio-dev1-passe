@@ -18,10 +18,10 @@ describe('DataHoraBrasilia', () => {
   });
 
   it.each(['2027-03-02T10:15', '2027-02-30T10:15-03:00', '2027-03-02T24:00-03:00', 1803986100000])('recusa %j', async (valor) => {
-    await expect(validar({ loyalty_until: valor })).rejects.toThrow('loyalty_until deve ser uma data e hora válida no formato AAAA-MM-DDTHH:MM-03:00.');
+    await expect(validar({ loyalty_until: valor })).rejects.toThrow('Fim da fidelidade deve ser uma data e hora válida no formato AAAA-MM-DDTHH:MM-03:00.');
   });
 
   it('recusa ausente', async () => {
-    await expect(validar({})).rejects.toThrow('loyalty_until deve ser uma data e hora válida');
+    await expect(validar({})).rejects.toThrow('Fim da fidelidade deve ser uma data e hora válida');
   });
 });

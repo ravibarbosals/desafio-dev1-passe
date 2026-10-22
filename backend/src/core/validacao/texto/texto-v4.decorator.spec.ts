@@ -20,7 +20,7 @@ describe('TextoV4', () => {
 
   it('mede o tamanho depois da normalização', async () => {
     await expect(validar({ name: '  Ana  ' })).resolves.toEqual({ name: 'Ana' });
-    await expect(validar({ name: '  Al  ' })).rejects.toThrow('name deve ter de 3 a 10 caracteres.');
+    await expect(validar({ name: '  Al  ' })).rejects.toThrow('Nome deve ter de 3 a 10 caracteres.');
   });
 
   it('conta emoji como um caractere', async () => {
@@ -28,7 +28,7 @@ describe('TextoV4', () => {
   });
 
   it.each(['Meia\tZeta', 'Meia\nZeta'])('recusa caractere de controle em %j', async (nome) => {
-    await expect(validar({ name: nome })).rejects.toThrow('name não pode ter caracteres de controle');
+    await expect(validar({ name: nome })).rejects.toThrow('Nome não pode ter caracteres de controle');
   });
 
   it.each([{ name: '   ' }, {}, { name: null }])('recusa nome vazio ou ausente: %j', async (corpo) => {
@@ -36,6 +36,6 @@ describe('TextoV4', () => {
   });
 
   it('recusa número no lugar de texto (V2)', async () => {
-    await expect(validar({ name: 123 })).rejects.toThrow('name deve ser um texto.');
+    await expect(validar({ name: 123 })).rejects.toThrow('Nome deve ser um texto.');
   });
 });

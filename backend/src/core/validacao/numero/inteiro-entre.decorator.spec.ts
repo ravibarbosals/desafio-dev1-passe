@@ -17,7 +17,7 @@ describe('InteiroEntre', () => {
   });
 
   it.each([15, 46])('recusa %d, fora dos limites', async (idade) => {
-    await expect(validar({ age: idade })).rejects.toThrow('age deve ser um inteiro de 16 a 45.');
+    await expect(validar({ age: idade })).rejects.toThrow('Idade deve ser um inteiro de 16 a 45.');
   });
 
   it.each([['15'], [20.5], [null], [true]])('recusa %j, que não é inteiro (V2)', async (idade) => {
@@ -25,6 +25,6 @@ describe('InteiroEntre', () => {
   });
 
   it('recusa o campo ausente (V6)', async () => {
-    await expect(validar({})).rejects.toThrow('age deve ser um inteiro de 16 a 45.');
+    await expect(validar({})).rejects.toThrow('Idade deve ser um inteiro de 16 a 45.');
   });
 });

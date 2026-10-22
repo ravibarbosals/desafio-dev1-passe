@@ -99,7 +99,7 @@ describe('decorators de query', () => {
   });
 
   it('explica o formato na mensagem', async () => {
-    await expect(validar({ min_age: '15' })).rejects.toThrow('Dados inválidos: min_age deve ser um inteiro de 16 a 45.');
-    await expect(validar({ club_id: '0' })).rejects.toThrow('Dados inválidos: club_id deve ser um inteiro de 1 ou mais.');
+    await expect(validar({ min_age: '15' })).rejects.toThrow('Dados inválidos: Idade mínima deve ser um inteiro de 16 a 45.');
+    await expect(validar({ club_id: '0' })).rejects.toThrow('Dados inválidos: Clube deve ser um inteiro de 1 ou mais.');
   });
 });

@@ -12,10 +12,10 @@ describe('criarErroValidacao', () => {
 
     expect(excecao.getStatus()).toBe(400);
     expect(excecao.codigo).toBe('DADOS_INVALIDOS');
-    expect(excecao.message).toBe('Dados inválidos: agility deve ser um inteiro de 1 a 100. player_ids deve ter ids positivos.');
+    expect(excecao.message).toBe('Dados inválidos: Agilidade deve ser um inteiro de 1 a 100. Lista de titulares deve ter ids positivos.');
     expect(excecao.detalhes).toEqual([
-      { campo: 'agility', mensagem: 'agility deve ser um inteiro de 1 a 100.' },
-      { campo: 'player_ids.0', mensagem: 'player_ids deve ter ids positivos.' },
+      { campo: 'agility', mensagem: 'Agilidade deve ser um inteiro de 1 a 100.' },
+      { campo: 'player_ids.0', mensagem: 'Lista de titulares deve ter ids positivos.' },
     ]);
   });
 });

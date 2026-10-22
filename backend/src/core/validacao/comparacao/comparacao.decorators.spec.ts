@@ -33,13 +33,13 @@ describe('MenorOuIgualA', () => {
   });
 
   it('recusa faixa invertida', async () => {
-    await expect(validar({ min_age: '30', max_age: '20' })).rejects.toThrow('min_age não pode ser maior que max_age.');
+    await expect(validar({ min_age: '30', max_age: '20' })).rejects.toThrow('Idade mínima não pode ser maior que idade máxima.');
   });
 });
 
 describe('ProibidoJuntoCom', () => {
   it('recusa free=true com club_id', async () => {
-    await expect(validar({ free: 'true', club_id: '1' })).rejects.toThrow('free não pode ser combinado com club_id.');
+    await expect(validar({ free: 'true', club_id: '1' })).rejects.toThrow('Só livres não pode ser combinado com clube.');
   });
 
   it.each([{ free: 'false', club_id: '1' }, { free: 'true' }, { club_id: '1' }])('aceita %j', async (query) => {

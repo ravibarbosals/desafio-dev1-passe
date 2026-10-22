@@ -33,6 +33,6 @@ describe('ListaDeIds', () => {
   ])('recusa player_ids %s', async (_caso, player_ids) => {
     const erro = await validar({ player_ids }).catch((excecao: unknown) => excecao);
     expect(erro).toBeInstanceOf(RegraNegocioException);
-    expect((erro as RegraNegocioException).detalhes).toEqual([{ campo: 'player_ids', mensagem: 'player_ids deve ser uma lista de 5 ids distintos, inteiros de 1 a 2147483647.' }]);
+    expect((erro as RegraNegocioException).detalhes).toEqual([{ campo: 'player_ids', mensagem: 'Lista de titulares deve ser uma lista de 5 ids distintos, inteiros de 1 a 2147483647.' }]);
   });
 });

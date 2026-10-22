@@ -1,10 +1,11 @@
 import { HttpStatus, ValidationError } from '@nestjs/common';
 import { DetalheErro, RegraNegocioException } from '@/core/erros/regra-negocio.exception';
+import { traduzirCampoDaMensagem } from '../validacao/nomes-dos-campos';
 
 function listarDetalhes(erros: ValidationError[], caminhoPai = ''): DetalheErro[] {
   return erros.flatMap((erro) => {
     const campo = caminhoPai ? `${caminhoPai}.${erro.property}` : erro.property;
-    const proprios = Object.values(erro.constraints ?? {}).map((mensagem) => ({ campo, mensagem }));
+    const proprios = Object.values(erro.constraints ?? {}).map((mensagem) => ({ campo, mensagem: traduzirCampoDaMensagem(mensagem) }));
     return [...proprios, ...listarDetalhes(erro.children ?? [], campo)];
   });
 }
