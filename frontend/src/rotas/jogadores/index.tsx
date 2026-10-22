@@ -151,14 +151,14 @@ function PaginaJogadores() {
           onValueChange={(valor) =>
             mudarFiltros({
               situacao: valor === "todos" ? undefined : (valor as SituacaoDosJogadores),
-              // "Livres" desabilita o filtro de clube (J04)
-              ...(valor === "livres" && { clubeId: undefined }),
             })
           }
         >
           <TabsList>
             <TabsTrigger value="todos">Todos</TabsTrigger>
-            <TabsTrigger value="livres">Livres</TabsTrigger>
+            <TabsTrigger value="livres" disabled={filtros.clubeId !== undefined}>
+              Livres
+            </TabsTrigger>
             <TabsTrigger value="em-clubes">Em clubes</TabsTrigger>
           </TabsList>
         </Tabs>

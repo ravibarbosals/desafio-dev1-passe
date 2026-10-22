@@ -19,8 +19,8 @@ interface PropriedadesModalFormulario {
   // Com o react-hook-form: formulario.handleSubmit(...)
   aoEnviar: () => void;
   enviando: boolean;
-  textoEnviar: string;
-  textoEnviando?: string;
+  textoEnviar: ReactNode;
+  textoEnviando?: ReactNode;
   // Ex.: a condição escolhida é a atual (J10)
   podeEnviar?: boolean;
   // Texto à esquerda dos botões (ex.: "O jogador começa livre e Apto.")

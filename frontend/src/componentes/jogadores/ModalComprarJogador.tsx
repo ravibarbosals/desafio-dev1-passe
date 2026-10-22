@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, LoaderCircle, Shield } from "lucide-react";
+import { ArrowRight, LoaderCircle, RefreshCw, Shield, ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 
@@ -85,7 +85,11 @@ export function ModalComprarJogador({
           },
           {
             rotulo: "Contrato",
-            valor: <Badge variant="outline">{resultado.contract.status}</Badge>,
+            valor: (
+              <Badge variant="outline" className="border-green-200 bg-green-50 text-green-700">
+                {resultado.contract.status}
+              </Badge>
+            ),
           },
           {
             rotulo: `Novo caixa do ${comprador?.name ?? "clube"}`,
@@ -113,8 +117,25 @@ export function ModalComprarJogador({
       aoEnviar={formulario.handleSubmit((dados) => compra.mutate(montarCompra(dados)))}
       enviando={compra.isPending}
       // M03: sem resposta, a compra não foi confirmada, e o mesmo botão tenta de novo
-      textoEnviar={semResposta(compra.error) ? "Tentar de novo" : "Confirmar compra"}
-      textoEnviando="Comprando…"
+      textoEnviar={
+        semResposta(compra.error) ? (
+          <>
+            <RefreshCw />
+            Tentar de novo
+          </>
+        ) : (
+          <>
+            <ShoppingCart />
+            Confirmar compra
+          </>
+        )
+      }
+      textoEnviando={
+        <>
+          <LoaderCircle className="animate-spin" />
+          Comprando…
+        </>
+      }
     >
       {compra.error && (
         <ErroDoEnvio
@@ -129,7 +150,12 @@ export function ModalComprarJogador({
         lateral={<ValorDeMercado valor={jogador.market_value} />}
       />
 
-      <CampoFormulario id="clube-compra" rotulo="Clube comprador" erro={erros.clube?.message}>
+      <CampoFormulario
+        id="clube-compra"
+        rotulo="Clube comprador"
+        erro={erros.clube?.message}
+        ajuda={`${clubeEscolhido ? `Caixa atual: ${formatarMoeda(clubeEscolhido.cash)}. ` : ""}O custo total (valor + taxa) pode ir até 50% do caixa.`}
+      >
         <Controller
           control={formulario.control}
           name="clube"
@@ -154,10 +180,6 @@ export function ModalComprarJogador({
           )}
         />
       </CampoFormulario>
-      <p className="-mt-3 text-xs text-muted-foreground">
-        {clubeEscolhido && `Caixa atual: ${formatarMoeda(clubeEscolhido.cash)}. `}O custo total
-        (valor + taxa) pode ir até 50% do caixa.
-      </p>
 
       <fieldset className="flex flex-col gap-1.5">
         <legend className="mb-1.5 text-sm font-medium">Fim da fidelidade</legend>
