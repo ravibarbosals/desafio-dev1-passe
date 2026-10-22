@@ -80,6 +80,9 @@ describe("criarRoteador", () => {
       http.get(`${clubes}/99`, () =>
         HttpResponse.json({ message: "Clube não encontrado." }, { status: 404 }),
       ),
+      http.get(`${clubes}/99/transactions`, () =>
+        HttpResponse.json({ message: "Clube não encontrado." }, { status: 404 }),
+      ),
     );
     abrir("/clubes/99");
 
