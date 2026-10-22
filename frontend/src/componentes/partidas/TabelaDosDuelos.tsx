@@ -15,16 +15,19 @@ import {
 import { useSiglasDosClubes } from "@/hooks/useSiglasDosClubes";
 import { nomesDosAtributos } from "@/lib/rotulos";
 
+import { descreverOrdem, ordemDoAtacante, ordemDoDefensor } from "./titulares-da-partida";
+
 interface PropriedadesTabelaDosDuelos {
   partida: Partida;
 }
 
 interface PropriedadesJogador {
   jogador: JogadorDoDuelo;
+  ordem: number;
   clube: string;
 }
 
-function JogadorDoDueloNaTabela({ jogador, clube }: PropriedadesJogador) {
+function JogadorDoDueloNaTabela({ jogador, ordem, clube }: PropriedadesJogador) {
   return (
     <div className="flex items-center gap-3">
       <AvatarDoJogador id={jogador.player_id} nome={jogador.player_name} />
@@ -38,7 +41,7 @@ function JogadorDoDueloNaTabela({ jogador, clube }: PropriedadesJogador) {
           )}
         </p>
         <p className="text-xs text-muted-foreground">
-          {jogador.position} · {clube}
+          {descreverOrdem(ordem, jogador.position)} · {clube}
         </p>
       </div>
     </div>
@@ -83,18 +86,26 @@ export function TabelaDosDuelos({ partida }: PropriedadesTabelaDosDuelos) {
               </TableRow>
               {partida.duels
                 .filter((duelo) => duelo.attacking_club_id === atacante.club_id)
-                .map((duelo) => (
+                .map((duelo, indice) => (
                   <TableRow key={duelo.order}>
                     <TableCell>{duelo.order}</TableCell>
                     <TableCell>
-                      <JogadorDoDueloNaTabela jogador={duelo.attacker} clube={atacante.club_name} />
+                      <JogadorDoDueloNaTabela
+                        jogador={duelo.attacker}
+                        ordem={ordemDoAtacante[indice]}
+                        clube={atacante.club_name}
+                      />
                     </TableCell>
                     <TableCell>
                       {nomesDosAtributos[duelo.attacker.attribute]}{" "}
                       <span className="font-semibold">{duelo.attacker.value}</span>
                     </TableCell>
                     <TableCell>
-                      <JogadorDoDueloNaTabela jogador={duelo.defender} clube={defensor.club_name} />
+                      <JogadorDoDueloNaTabela
+                        jogador={duelo.defender}
+                        ordem={ordemDoDefensor[indice]}
+                        clube={defensor.club_name}
+                      />
                     </TableCell>
                     <TableCell>
                       {nomesDosAtributos[duelo.defender.attribute]}{" "}

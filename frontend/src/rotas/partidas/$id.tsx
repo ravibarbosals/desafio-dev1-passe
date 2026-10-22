@@ -4,6 +4,7 @@ import { ArrowLeft, CloudOff, RotateCw, SearchX } from "lucide-react";
 
 import { consultaDaPartida } from "@/api/partidas";
 import { Aviso } from "@/componentes/Aviso";
+import { EmCampoDaPartida } from "@/componentes/partidas/EmCampoDaPartida";
 import { Placar } from "@/componentes/partidas/Placar";
 import { TabelaDosDuelos } from "@/componentes/partidas/TabelaDosDuelos";
 import { Button } from "@/componentes/ui/button";
@@ -68,6 +69,9 @@ function PaginaDaPartida() {
         </Link>
       </Button>
       <Placar partida={partida.data} />
+      <div className="mt-6">
+        <EmCampoDaPartida partida={partida.data} />
+      </div>
 
       <section className="mt-6 overflow-hidden rounded-xl border">
         <div className="border-b px-4 py-3">

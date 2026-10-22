@@ -11,6 +11,11 @@ export interface SecaoDoMenu {
   itens: ItemDoMenu[];
 }
 
+export interface PaginaInterna {
+  tipo: "clube" | "partida";
+  id: string;
+}
+
 // Menu lateral do mockup (requisitos.md §5.1, Layout); a trilha do cabeçalho sai da mesma lista
 export const secoesDoMenu: SecaoDoMenu[] = [
   {
@@ -42,4 +47,14 @@ export function encontrarItemAtivo(
     }
   }
   return undefined;
+}
+
+// /clubes/3 e /partidas/7 ganham um terceiro nível na trilha (C04, L03)
+export function encontrarPaginaInterna(caminhoAtual: string): PaginaInterna | undefined {
+  const clube = /^\/clubes\/([^/]+)$/.exec(caminhoAtual);
+  if (clube) {
+    return { tipo: "clube", id: clube[1] };
+  }
+  const partida = /^\/partidas\/([^/]+)$/.exec(caminhoAtual);
+  return partida ? { tipo: "partida", id: partida[1] } : undefined;
 }

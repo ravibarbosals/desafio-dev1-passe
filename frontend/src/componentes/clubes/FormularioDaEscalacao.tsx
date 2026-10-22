@@ -12,6 +12,7 @@ import {
 } from "@/api/clube";
 import type { Jogador } from "@/api/jogadores";
 import { Alerta } from "@/componentes/Alerta";
+import { EmCampo } from "@/componentes/clubes/EmCampo";
 import { ErroDoEnvio } from "@/componentes/formulario/ErroDoEnvio";
 import { AvatarDoJogador } from "@/componentes/jogadores/AvatarDoJogador";
 import { SeloDeCondicao } from "@/componentes/jogadores/SeloDeCondicao";
@@ -298,7 +299,10 @@ export function FormularioDaEscalacao({ clube, escalacao }: PropriedadesFormular
           </div>
         </div>
       </section>
-      <Reservas reservas={reservas} tamanhoDoElenco={tamanhoDoElenco} />
+      <div className="flex flex-col gap-4">
+        <EmCampo formacao={formacao} titulares={titulares} elenco={clube.players} />
+        <Reservas reservas={reservas} tamanhoDoElenco={tamanhoDoElenco} />
+      </div>
     </div>
   );
 }

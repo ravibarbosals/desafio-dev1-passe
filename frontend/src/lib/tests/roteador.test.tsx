@@ -1,6 +1,6 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { createMemoryHistory, RouterProvider } from "@tanstack/react-router";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 
@@ -88,5 +88,8 @@ describe("criarRoteador", () => {
       "href",
       "/clubes",
     );
+    const trilha = screen.getByRole("navigation", { name: "Trilha" });
+    expect(within(trilha).getByText("Clube 99")).toBeInTheDocument();
+    expect(within(trilha).getByRole("link", { name: "Clubes" })).toHaveAttribute("href", "/clubes");
   });
 });

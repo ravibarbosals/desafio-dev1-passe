@@ -1,10 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Clock } from "lucide-react";
 
 import { consultaDosClubes } from "@/api/clube";
-
-import { secoesDoMenu } from "./navegacao";
+import { secoesDoMenu } from "@/componentes/layout/navegacao";
+import { RodapeDaLiga } from "@/componentes/layout/RodapeDaLiga";
 
 interface PropriedadesConteudoDoMenu {
   // O menu móvel fecha ao escolher um destino
@@ -85,10 +84,7 @@ export function ConteudoDoMenu({ aoNavegar }: PropriedadesConteudoDoMenu) {
         )}
       </nav>
 
-      <p className="mt-auto flex items-center gap-2 px-2 text-xs text-muted-foreground">
-        <Clock className="size-3.5" />
-        Horário de Brasília (UTC−3)
-      </p>
+      <RodapeDaLiga />
     </>
   );
 }
