@@ -4,8 +4,10 @@ import type { Jogador } from "@/api/jogadores";
 import { formatarMoeda } from "@/lib/formatacao";
 import { nomesDasPosicoes } from "@/lib/rotulos";
 
+import { AvatarDoJogador } from "./AvatarDoJogador";
+
 interface PropriedadesCartaoDoJogador {
-  jogador: Pick<Jogador, "name" | "position" | "age">;
+  jogador: Pick<Jogador, "id" | "name" | "position" | "age">;
   // À direita: a condição (J10) ou o valor de mercado (V01)
   lateral: ReactNode;
 }
@@ -18,11 +20,14 @@ interface PropriedadesValorDeMercado {
 export function CartaoDoJogador({ jogador, lateral }: PropriedadesCartaoDoJogador) {
   return (
     <div className="flex items-center justify-between gap-3 rounded-lg border bg-muted/40 p-3">
-      <div>
-        <p className="font-medium">{jogador.name}</p>
-        <p className="text-xs text-muted-foreground">
-          {jogador.position} · {nomesDasPosicoes[jogador.position]} · {jogador.age} anos
-        </p>
+      <div className="flex items-center gap-3">
+        <AvatarDoJogador id={jogador.id} nome={jogador.name} />
+        <div>
+          <p className="font-medium">{jogador.name}</p>
+          <p className="text-xs text-muted-foreground">
+            {jogador.position} · {nomesDasPosicoes[jogador.position]} · {jogador.age} anos
+          </p>
+        </div>
       </div>
       {lateral}
     </div>

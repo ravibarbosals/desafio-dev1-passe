@@ -3,10 +3,13 @@ import { toast } from "sonner";
 
 import { extrairMensagemErro } from "@/lib/erro-api";
 
+// Só o texto, ou título e descrição (J11: "Condição alterada" e o valor novo embaixo)
+type MensagemSucesso = string | { titulo: string; descricao: string };
+
 interface OpcoesEnvio<TDados, TResposta> {
   enviar: (dados: TDados) => Promise<TResposta>;
   // Aviso de sucesso; sem ele, a tela mostra o resultado do seu jeito (ex.: o modal da compra)
-  mensagemSucesso?: string | ((resposta: TResposta) => string);
+  mensagemSucesso?: MensagemSucesso | ((resposta: TResposta) => MensagemSucesso);
   // Listas que mudam com o envio e precisam ser buscadas de novo
   invalidar?: QueryKey[];
   aoConcluir?: (resposta: TResposta) => void;
@@ -30,9 +33,13 @@ export function useEnvio<TDados, TResposta>({
         invalidar.map((chave) => clienteQuery.invalidateQueries({ queryKey: chave })),
       );
       if (mensagemSucesso) {
-        toast.success(
-          typeof mensagemSucesso === "function" ? mensagemSucesso(resposta) : mensagemSucesso,
-        );
+        const mensagem =
+          typeof mensagemSucesso === "function" ? mensagemSucesso(resposta) : mensagemSucesso;
+        if (typeof mensagem === "string") {
+          toast.success(mensagem);
+        } else {
+          toast.success(mensagem.titulo, { description: mensagem.descricao });
+        }
       }
       aoConcluir?.(resposta);
     },

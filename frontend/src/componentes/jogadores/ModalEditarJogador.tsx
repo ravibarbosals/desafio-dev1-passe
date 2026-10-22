@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Lock } from "lucide-react";
+import { Lock, User } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 
 import { editarJogador, type EdicaoDoJogador, type Jogador } from "@/api/jogadores";
@@ -49,13 +49,22 @@ export function ModalEditarJogador({ jogador, aoFechar }: PropriedadesModalEdita
       enviando={edicao.isPending}
       textoEnviar="Salvar alterações"
     >
-      <CampoFormulario id="nome-edicao" rotulo="Nome" erro={erros.name?.message}>
-        <Input
-          id="nome-edicao"
-          maxLength={100}
-          aria-invalid={erros.name !== undefined}
-          {...formulario.register("name")}
-        />
+      <CampoFormulario
+        id="nome-edicao"
+        rotulo="Nome"
+        erro={erros.name?.message}
+        ajuda="De 3 a 100 caracteres, com pelo menos duas palavras e sem números."
+      >
+        <div className="relative">
+          <User className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            id="nome-edicao"
+            maxLength={100}
+            className="pl-8"
+            aria-invalid={erros.name !== undefined}
+            {...formulario.register("name")}
+          />
+        </div>
       </CampoFormulario>
 
       <Controller
@@ -72,7 +81,12 @@ export function ModalEditarJogador({ jogador, aoFechar }: PropriedadesModalEdita
       />
 
       <div className="grid grid-cols-2 gap-3">
-        <CampoFormulario id="idade-edicao" rotulo="Idade" erro={erros.age?.message}>
+        <CampoFormulario
+          id="idade-edicao"
+          rotulo="Idade"
+          erro={erros.age?.message}
+          ajuda={`De 16 a 45, sem diminuir (atual: ${jogador.age}).`}
+        >
           <Input
             id="idade-edicao"
             inputMode="numeric"
@@ -80,7 +94,12 @@ export function ModalEditarJogador({ jogador, aoFechar }: PropriedadesModalEdita
             {...formulario.register("age")}
           />
         </CampoFormulario>
-        <CampoFormulario id="agilidade-edicao" rotulo="Agilidade" erro={erros.agility?.message}>
+        <CampoFormulario
+          id="agilidade-edicao"
+          rotulo="Agilidade"
+          erro={erros.agility?.message}
+          ajuda="De 1 a 100 (até 85 com 35 anos ou mais)."
+        >
           <Input
             id="agilidade-edicao"
             inputMode="numeric"
@@ -89,10 +108,6 @@ export function ModalEditarJogador({ jogador, aoFechar }: PropriedadesModalEdita
           />
         </CampoFormulario>
       </div>
-      <p className="-mt-2 text-xs text-muted-foreground">
-        Idade de {jogador.age} a 45, sem diminuir. Agilidade de 1 a 100 (até 85 com 35 anos ou
-        mais).
-      </p>
 
       <p className="flex items-center gap-2 rounded-lg border border-dashed p-3 text-xs text-muted-foreground">
         <Lock className="size-3.5" />

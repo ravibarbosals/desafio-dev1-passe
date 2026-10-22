@@ -1,4 +1,4 @@
-import { Ellipsis, HeartPulse, Pencil, Trash2 } from "lucide-react";
+import { Ellipsis, HeartPulse, Pencil, ShoppingCart, Trash2 } from "lucide-react";
 
 import type { Jogador } from "@/api/jogadores";
 import { Button } from "@/componentes/ui/button";
@@ -18,19 +18,20 @@ export interface AcoesDoJogador {
   aoComprar: (jogador: Jogador) => void;
 }
 
-interface PropriedadesMenuDoJogador extends Omit<AcoesDoJogador, "aoComprar"> {
+interface PropriedadesMenuDoJogador extends AcoesDoJogador {
   jogador: Jogador;
 }
 
-// Menu ⋯ de cada linha (J08); o Comprar fica ao lado dele, como botão (M01)
+// Menu ⋯ de cada linha (J08); o Comprar também fica ao lado dele, como botão (M01)
 export function MenuDoJogador({
   jogador,
   aoEditar,
   aoAlterarCondicao,
   aoExcluir,
+  aoComprar,
 }: PropriedadesMenuDoJogador) {
-  // FLX-003: Excluir só aparece para jogador livre; com clube, a API responde 409
-  const podeExcluir = jogador.club_id === null;
+  // FLX-003 e RN12: Excluir e Comprar só aparecem para jogador livre; com clube, a API recusa
+  const livre = jogador.club_id === null;
 
   return (
     <DropdownMenu>
@@ -54,12 +55,25 @@ export function MenuDoJogador({
           <HeartPulse />
           Alterar condição
         </DropdownMenuItem>
-        {podeExcluir && (
+        {livre && (
           <>
+            <DropdownMenuItem onSelect={() => aoComprar(jogador)}>
+              <ShoppingCart />
+              Comprar
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive" onSelect={() => aoExcluir(jogador)}>
-              <Trash2 />
-              Excluir
+            <DropdownMenuItem
+              variant="destructive"
+              className="flex-col items-start gap-0.5"
+              onSelect={() => aoExcluir(jogador)}
+            >
+              <span className="flex items-center gap-2">
+                <Trash2 />
+                Excluir
+              </span>
+              <span className="text-xs text-muted-foreground">
+                Disponível porque o jogador está livre.
+              </span>
             </DropdownMenuItem>
           </>
         )}

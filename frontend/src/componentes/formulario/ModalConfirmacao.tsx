@@ -16,7 +16,8 @@ interface PropriedadesModalConfirmacao {
   aoMudarAberto: (aberto: boolean) => void;
   titulo: string;
   descricao: ReactNode;
-  textoConfirmar: string;
+  // Texto ou ícone + texto (ex.: a lixeira do "Excluir jogador", J13)
+  textoConfirmar: ReactNode;
   textoEnviando?: string;
   // Enquanto envia, os botões ficam desabilitados: um clique, um pedido (REQ-042)
   enviando: boolean;

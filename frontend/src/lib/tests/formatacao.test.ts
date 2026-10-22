@@ -3,6 +3,7 @@ import {
   formatarInteiroComSinal,
   formatarMoeda,
   formatarMoedaComSinal,
+  minusculaInicial,
   montarDataHoraBrasilia,
 } from "../formatacao";
 
@@ -54,5 +55,12 @@ describe("formatarInteiroComSinal", () => {
     [-2, "-2"],
   ])("%s → %s", (valor, esperado) => {
     expect(formatarInteiroComSinal(valor)).toBe(esperado);
+  });
+});
+
+describe("minusculaInicial", () => {
+  it("baixa só a primeira letra, para o nome entrar no meio da frase", () => {
+    expect(minusculaInicial("Maior valor de mercado")).toBe("maior valor de mercado");
+    expect(minusculaInicial("Posição (GOL a ATA)")).toBe("posição (GOL a ATA)");
   });
 });

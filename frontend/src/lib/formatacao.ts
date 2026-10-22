@@ -5,6 +5,12 @@ const formatoMoeda = new Intl.NumberFormat("pt-BR", {
   maximumFractionDigits: 2,
 });
 
+// Nome de opção no meio de uma frase: "Maior idade" → "maior idade"; "Posição (GOL a ATA)" mantém
+// a sigla (J15: "Ordenar: maior idade")
+export function minusculaInicial(texto: string): string {
+  return texto.charAt(0).toLowerCase() + texto.slice(1);
+}
+
 const formatoDataHora = new Intl.DateTimeFormat("pt-BR", {
   timeZone: "America/Sao_Paulo",
   day: "2-digit",

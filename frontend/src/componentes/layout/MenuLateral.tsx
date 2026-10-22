@@ -37,29 +37,6 @@ export function ConteudoDoMenu({ aoNavegar }: PropriedadesConteudoDoMenu) {
       </Link>
 
       <nav aria-label="Menu principal" className="flex flex-col gap-5">
-        {clubes.data && clubes.data.length > 0 && (
-          <div>
-            <p className="mb-1 px-2 text-xs text-muted-foreground">Clubes</p>
-            <ul className="flex flex-col gap-0.5">
-              {clubes.data.map((clube) => (
-                <li key={clube.id}>
-                  <Link
-                    to="/clubes/$id"
-                    params={{ id: String(clube.id) }}
-                    onClick={aoNavegar}
-                    className="flex items-center gap-2 rounded-md border border-transparent px-2 py-1.5 text-sm hover:bg-accent"
-                    activeProps={{ className: "border-border bg-background font-medium shadow-xs" }}
-                  >
-                    <span className="flex size-5 items-center justify-center rounded border bg-muted text-xs">
-                      {clube.acronym[0]}
-                    </span>
-                    {clube.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
         {secoesDoMenu.map((secao) => (
           <div key={secao.titulo}>
             <p className="mb-1 px-2 text-xs text-muted-foreground">{secao.titulo}</p>
@@ -80,6 +57,32 @@ export function ConteudoDoMenu({ aoNavegar }: PropriedadesConteudoDoMenu) {
             </ul>
           </div>
         ))}
+        {clubes.data && (
+          <div>
+            <p className="mb-1 px-2 text-xs text-muted-foreground">Clubes</p>
+            {clubes.data.length === 0 && (
+              <p className="px-2 text-xs text-muted-foreground">Nenhum clube ainda.</p>
+            )}
+            <ul className="flex flex-col gap-0.5">
+              {clubes.data.map((clube) => (
+                <li key={clube.id}>
+                  <Link
+                    to="/clubes/$id"
+                    params={{ id: String(clube.id) }}
+                    onClick={aoNavegar}
+                    className="flex items-center gap-2 rounded-md border border-transparent px-2 py-1.5 text-sm hover:bg-accent"
+                    activeProps={{ className: "border-border bg-background font-medium shadow-xs" }}
+                  >
+                    <span className="flex size-5 items-center justify-center rounded border bg-muted text-xs">
+                      {clube.acronym[0]}
+                    </span>
+                    {clube.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </nav>
 
       <p className="mt-auto flex items-center gap-2 px-2 text-xs text-muted-foreground">

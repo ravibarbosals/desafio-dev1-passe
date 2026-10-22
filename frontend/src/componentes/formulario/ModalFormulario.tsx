@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/componentes/ui/dialog";
+import { cn } from "@/lib/utils";
 
 interface PropriedadesModalFormulario {
   aberto: boolean;
@@ -60,7 +61,9 @@ export function ModalFormulario({
 
           {children}
 
-          <DialogFooter className={observacao ? "items-center sm:justify-between" : undefined}>
+          <DialogFooter
+            className={cn("border-t pt-4", observacao && "items-center sm:justify-between")}
+          >
             {observacao && <p className="text-xs text-muted-foreground">{observacao}</p>}
             <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" disabled={enviando} onClick={aoFechar}>

@@ -1,6 +1,6 @@
 import type { UseQueryResult } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Shield } from "lucide-react";
 import type { ReactNode } from "react";
 
 import type { ResumoDoClube } from "@/api/clube";
@@ -9,8 +9,24 @@ import { Badge } from "@/componentes/ui/badge";
 import { Button } from "@/componentes/ui/button";
 import { formatarMoeda } from "@/lib/formatacao";
 
+interface PropriedadesTabelaDeClubes {
+  consulta: UseQueryResult<ResumoDoClube[]>;
+  cabecalho?: ReactNode;
+  acaoVazio?: ReactNode;
+}
+
 const colunas: ColunaDaTabela<ResumoDoClube>[] = [
-  { titulo: "Clube", celula: (clube) => <span className="font-medium">{clube.name}</span> },
+  {
+    titulo: "Clube",
+    celula: (clube) => (
+      <span className="flex items-center gap-3">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-md border bg-muted text-[0.625rem] font-semibold">
+          {clube.acronym}
+        </span>
+        <span className="font-medium">{clube.name}</span>
+      </span>
+    ),
+  },
   { titulo: "Sigla", celula: (clube) => <Badge variant="outline">{clube.acronym}</Badge> },
   { titulo: "Caixa", celula: (clube) => formatarMoeda(clube.cash), alinharADireita: true },
   {
@@ -25,6 +41,7 @@ const colunas: ColunaDaTabela<ResumoDoClube>[] = [
   },
   {
     titulo: "Ações",
+    tituloOculto: true,
     celula: (clube) => (
       <Button asChild variant="ghost" size="sm">
         <Link to="/clubes/$id" params={{ id: String(clube.id) }}>
@@ -37,13 +54,8 @@ const colunas: ColunaDaTabela<ResumoDoClube>[] = [
   },
 ];
 
-interface PropriedadesTabelaDeClubes {
-  consulta: UseQueryResult<ResumoDoClube[]>;
-  acaoVazio?: ReactNode;
-}
-
 // F05: as linhas na ordem devolvida pela API; a tela não reordena
-export function TabelaDeClubes({ consulta, acaoVazio }: PropriedadesTabelaDeClubes) {
+export function TabelaDeClubes({ consulta, cabecalho, acaoVazio }: PropriedadesTabelaDeClubes) {
   return (
     <TabelaComEstados
       colunas={colunas}
@@ -54,8 +66,11 @@ export function TabelaDeClubes({ consulta, acaoVazio }: PropriedadesTabelaDeClub
         carregando: "Carregando clubes…",
         erro: "Não foi possível carregar os clubes",
         vazio: "Nenhum clube cadastrado",
-        vazioDescricao: "Crie o primeiro clube para começar a montar a liga.",
+        vazioDescricao:
+          "Crie o primeiro clube com nome e sigla. Ele começa com 300,00 em caixa e sem jogadores.",
       }}
+      cabecalho={cabecalho}
+      iconeVazio={<Shield className="size-5" />}
       acaoVazio={acaoVazio}
     />
   );

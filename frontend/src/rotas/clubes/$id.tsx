@@ -1,6 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, CloudOff, RotateCw, SearchX, ShoppingCart } from "lucide-react";
+import {
+  ArrowLeft,
+  ClipboardList,
+  CloudOff,
+  History,
+  RotateCw,
+  SearchX,
+  Shirt,
+  ShoppingCart,
+} from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
 
@@ -97,7 +106,7 @@ function PaginaDoClube() {
             <div className="mt-1 flex flex-wrap gap-2">
               <Badge variant="outline">Sigla {acronym}</Badge>
               <Badge variant="outline">
-                {players.length} de {limiteDoElenco} jogadores
+                <Shirt /> {players.length} de {limiteDoElenco} jogadores
               </Badge>
             </div>
           </div>
@@ -131,12 +140,17 @@ function PaginaDoClube() {
           void navegar({ search: { aba: valor === "elenco" ? undefined : (valor as Aba) } })
         }
       >
-        <TabsList className="max-w-full overflow-x-auto">
+        <TabsList variant="line" className="max-w-full overflow-x-auto">
           <TabsTrigger value="elenco">
+            <Shirt />
             Elenco <Badge variant="secondary">{players.length}</Badge>
           </TabsTrigger>
-          <TabsTrigger value="escalacao">Escalação</TabsTrigger>
+          <TabsTrigger value="escalacao">
+            <ClipboardList />
+            Escalação
+          </TabsTrigger>
           <TabsTrigger value="historico">
+            <History />
             Histórico
             {historico.data && <Badge variant="secondary">{historico.data.data.length}</Badge>}
           </TabsTrigger>
@@ -144,9 +158,8 @@ function PaginaDoClube() {
         <TabsContent value="elenco" className="mt-4">
           <TabelaDoElenco jogadores={players} consulta={clube} aoVender={setJogadorParaVender} />
           <p className="mt-3 text-xs text-muted-foreground">
-            Ordem por posição (GOL, ZAG, LAT, MEI, ATA), depois pelo nome. Valor de mercado, dias
-            restantes e % de multa calculados pela API para uma venda agora; a multa tem teto de
-            10,00.
+            Valor de mercado, dias restantes e % de multa calculados pela API para uma venda agora;
+            a multa tem teto de 10,00.
           </p>
         </TabsContent>
         <TabsContent value="escalacao" className="mt-4">

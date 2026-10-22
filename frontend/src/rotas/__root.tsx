@@ -21,7 +21,7 @@ function LayoutRaiz() {
     return (
       <>
         <Outlet />
-        <Toaster theme="light" position="top-right" />
+        <Toaster theme="light" position="bottom-right" closeButton />
       </>
     );
   }
@@ -36,7 +36,7 @@ function LayoutRaiz() {
           </main>
         </div>
       </div>
-      <Toaster theme="light" position="top-right" />
+      <Toaster theme="light" position="bottom-right" closeButton />
     </div>
   );
 }

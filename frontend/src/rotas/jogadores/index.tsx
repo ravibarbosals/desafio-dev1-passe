@@ -26,11 +26,14 @@ import { Button } from "@/componentes/ui/button";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/componentes/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/componentes/ui/tabs";
+import { minusculaInicial } from "@/lib/formatacao";
 import { nomesDasOrdens } from "@/lib/rotulos";
 
 // Os filtros ficam na URL (?situacao=livres&pagina=2): sobrevivem ao recarregar e ao voltar.
@@ -132,6 +135,11 @@ function PaginaJogadores() {
 
       <BarraDeFiltros filtros={filtros} clubes={clubes.data} aoMudar={mudarFiltros} />
       <FiltrosAtivos
+        titulo={
+          filtrosAtivos.length === 1 && filtros.busca !== undefined
+            ? "Resultado para a busca:"
+            : "Filtros ativos:"
+        }
         filtros={filtrosAtivos}
         aoRemover={(filtro) => mudarFiltros(filtro.limpar)}
         aoLimparTodos={limparFiltros}
@@ -163,14 +171,20 @@ function PaginaJogadores() {
         >
           <SelectTrigger aria-label="Ordenar">
             <ArrowUpDown />
-            <SelectValue />
+            {/* J15: "Ordenar: maior valor de mercado"; a sigla da posição fica em maiúsculas */}
+            <SelectValue>
+              Ordenar: {minusculaInicial(nomesDasOrdens[filtros.ordem ?? "name"])}
+            </SelectValue>
           </SelectTrigger>
-          <SelectContent>
-            {Object.entries(nomesDasOrdens).map(([valor, nome]) => (
-              <SelectItem key={valor} value={valor}>
-                {nome}
-              </SelectItem>
-            ))}
+          <SelectContent align="end">
+            <SelectGroup>
+              <SelectLabel>Ordenar por</SelectLabel>
+              {Object.entries(nomesDasOrdens).map(([valor, nome]) => (
+                <SelectItem key={valor} value={valor}>
+                  {nome}
+                </SelectItem>
+              ))}
+            </SelectGroup>
           </SelectContent>
         </Select>
       </div>

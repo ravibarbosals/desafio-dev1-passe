@@ -1,7 +1,11 @@
+import { Trash2 } from "lucide-react";
+
 import { excluirJogador, type Jogador } from "@/api/jogadores";
 import { ModalConfirmacao } from "@/componentes/formulario/ModalConfirmacao";
+import { Badge } from "@/componentes/ui/badge";
 import { useEnvio } from "@/hooks/useEnvio";
-import { nomesDasPosicoes } from "@/lib/rotulos";
+
+import { CartaoDoJogador } from "./CartaoDoJogador";
 
 interface PropriedadesModalExcluirJogador {
   // undefined: modal fechado
@@ -13,7 +17,10 @@ interface PropriedadesModalExcluirJogador {
 export function ModalExcluirJogador({ jogador, aoFechar }: PropriedadesModalExcluirJogador) {
   const exclusao = useEnvio({
     enviar: (id: number) => excluirJogador(id),
-    mensagemSucesso: `${jogador?.name ?? "Jogador"} foi excluído.`,
+    mensagemSucesso: {
+      titulo: "Jogador excluído",
+      descricao: `${jogador?.name ?? "O jogador"} saiu da lista. Transações e partidas antigas dele continuam gravadas.`,
+    },
     invalidar: [["jogadores"]],
     aoConcluir: aoFechar,
   });
@@ -23,22 +30,21 @@ export function ModalExcluirJogador({ jogador, aoFechar }: PropriedadesModalExcl
       aberto={jogador !== undefined}
       aoMudarAberto={(aberto) => !aberto && aoFechar()}
       titulo={`Excluir ${jogador?.name ?? ""}?`}
-      descricao={
+      descricao="O jogador sai da lista e da busca, mas as transações e as partidas antigas dele continuam como foram gravadas."
+      textoConfirmar={
         <>
-          O jogador sai da lista e da busca, mas as transações e as partidas antigas dele continuam
-          como foram gravadas.
-          {jogador && (
-            <span className="mt-3 block rounded-lg border p-3 text-foreground">
-              {jogador.name} · {jogador.position} · {nomesDasPosicoes[jogador.position]} ·{" "}
-              {jogador.age} anos
-            </span>
-          )}
+          <Trash2 />
+          Excluir jogador
         </>
       }
-      textoConfirmar="Excluir jogador"
       destrutivo
       enviando={exclusao.isPending}
       aoConfirmar={() => jogador && exclusao.mutate(jogador.id)}
-    />
+    >
+      {/* Só jogador livre chega aqui (FLX-003) */}
+      {jogador && (
+        <CartaoDoJogador jogador={jogador} lateral={<Badge variant="secondary">Livre</Badge>} />
+      )}
+    </ModalConfirmacao>
   );
 }

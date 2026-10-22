@@ -1,3 +1,5 @@
+import { Check } from "lucide-react";
+
 import { Badge } from "@/componentes/ui/badge";
 
 // RN15: 0% (fidelidade cumprida), 5% e 10% no meio, 20% com mais de 180 dias
@@ -19,6 +21,7 @@ interface PropriedadesSeloDaMulta {
 export function SeloDaMulta({ percentual }: PropriedadesSeloDaMulta) {
   return (
     <Badge variant="outline" className={corDaMulta(percentual)}>
+      {percentual === 0 && <Check />}
       {percentual}%
     </Badge>
   );

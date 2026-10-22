@@ -34,7 +34,9 @@ export function ModalResultado({
     <Dialog open onOpenChange={(aberto) => !aberto && aoFechar()}>
       <DialogContent>
         <DialogHeader>
-          <CircleCheck className="size-6 text-green-600" />
+          <span className="flex size-9 items-center justify-center rounded-full bg-green-50">
+            <CircleCheck className="size-5 text-green-600" />
+          </span>
           <DialogTitle>{titulo}</DialogTitle>
           <DialogDescription>{descricao}</DialogDescription>
         </DialogHeader>

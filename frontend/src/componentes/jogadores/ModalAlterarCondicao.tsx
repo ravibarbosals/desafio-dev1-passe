@@ -33,8 +33,10 @@ export function ModalAlterarCondicao({ jogador, aoFechar }: PropriedadesModalAlt
   const alteracao = useEnvio({
     enviar: (condicao: Condicao) => alterarCondicao(jogador.id, condicao),
     // J11: o aviso mostra o valor de mercado novo, que a API recalculou
-    mensagemSucesso: (alterado) =>
-      `${alterado.name} agora está ${nomesDasCondicoes[alterado.condition]}. Valor de mercado: ${formatarMoeda(alterado.market_value)}.`,
+    mensagemSucesso: (alterado) => ({
+      titulo: "Condição alterada",
+      descricao: `${alterado.name} agora está ${nomesDasCondicoes[alterado.condition]}. Valor de mercado: ${formatarMoeda(alterado.market_value)}.`,
+    }),
     // O valor de mercado muda o elenco e o patrimônio do clube; Doente tira da escalação (RN19.5)
     invalidar: [["jogadores"], ["clubes"], ["escalacao"]],
     aoConcluir: aoFechar,

@@ -20,6 +20,7 @@ export interface ColunaDaTabela<T> {
   celula: (linha: T) => ReactNode;
   // Valores e números à direita, como no mockup
   alinharADireita?: boolean;
+  tituloOculto?: boolean;
 }
 
 interface PropriedadesTabelaComEstados<T> {
@@ -33,6 +34,10 @@ interface PropriedadesTabelaComEstados<T> {
   acaoVazio?: ReactNode;
   // Ex.: a paginação, abaixo das linhas
   rodape?: ReactNode;
+  // Ex.: título e ordenação no alto do quadro (C01, C05); some junto com a tabela no vazio e no erro
+  cabecalho?: ReactNode;
+  // Ícone do vazio (ex.: o escudo dos clubes, C09); sem ele, a lupa
+  iconeVazio?: ReactNode;
 }
 
 const linhasEsqueleto = 10;
@@ -46,6 +51,8 @@ export function TabelaComEstados<T>({
   textos,
   acaoVazio,
   rodape,
+  cabecalho,
+  iconeVazio,
 }: PropriedadesTabelaComEstados<T>) {
   if (consulta.isError) {
     return (
@@ -66,7 +73,7 @@ export function TabelaComEstados<T>({
   if (!consulta.isPending && linhas?.length === 0) {
     return (
       <Aviso
-        icone={<SearchX className="size-5" />}
+        icone={iconeVazio ?? <SearchX className="size-5" />}
         titulo={textos.vazio}
         descricao={textos.vazioDescricao}
         acao={acaoVazio}
@@ -76,6 +83,7 @@ export function TabelaComEstados<T>({
 
   return (
     <div className="rounded-xl border">
+      {cabecalho && <div className="border-b px-4 py-3">{cabecalho}</div>}
       {consulta.isPending && (
         <p className="flex items-center gap-2 border-b px-4 py-3 text-sm text-muted-foreground">
           <LoaderCircle className="size-4 animate-spin" />
@@ -90,7 +98,11 @@ export function TabelaComEstados<T>({
                 key={coluna.titulo}
                 className={coluna.alinharADireita ? "text-right" : undefined}
               >
-                {coluna.titulo}
+                {coluna.tituloOculto ? (
+                  <span className="sr-only">{coluna.titulo}</span>
+                ) : (
+                  coluna.titulo
+                )}
               </TableHead>
             ))}
           </TableRow>

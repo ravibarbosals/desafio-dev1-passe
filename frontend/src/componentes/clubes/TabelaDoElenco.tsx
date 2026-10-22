@@ -1,14 +1,14 @@
 import type { UseQueryResult } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { HandCoins, Users } from "lucide-react";
+import { HandCoins, Shirt, Users } from "lucide-react";
 
 import type { JogadorDoElenco } from "@/api/clube";
+import { AvatarDoJogador } from "@/componentes/jogadores/AvatarDoJogador";
 import { SeloDeCondicao } from "@/componentes/jogadores/SeloDeCondicao";
 import { TabelaComEstados, type ColunaDaTabela } from "@/componentes/tabela/TabelaComEstados";
 import { Badge } from "@/componentes/ui/badge";
 import { Button } from "@/componentes/ui/button";
 import { formatarDataHora, formatarMoeda } from "@/lib/formatacao";
-import { nomesDasPosicoes } from "@/lib/rotulos";
 
 import { SeloDaMulta } from "./SeloDaMulta";
 
@@ -26,9 +26,9 @@ function montarColunas(
     {
       titulo: "Jogador",
       celula: (jogador) => (
-        <div>
-          <p className="font-medium">{jogador.name}</p>
-          <p className="text-xs text-muted-foreground">{nomesDasPosicoes[jogador.position]}</p>
+        <div className="flex items-center gap-3">
+          <AvatarDoJogador id={jogador.id} nome={jogador.name} />
+          <span className="font-medium">{jogador.name}</span>
         </div>
       ),
     },
@@ -48,12 +48,25 @@ function montarColunas(
     },
     {
       titulo: "Valor de compra",
-      celula: (jogador) => formatarMoeda(jogador.contract.purchase_value),
+      celula: (jogador) => (
+        <span className="text-muted-foreground">
+          {formatarMoeda(jogador.contract.purchase_value)}
+        </span>
+      ),
       alinharADireita: true,
     },
     {
       titulo: "Fim da fidelidade",
-      celula: (jogador) => formatarDataHora(jogador.contract.loyalty_until),
+      celula: (jogador) => {
+        // C05: a data em cima e a hora embaixo
+        const [data, hora] = formatarDataHora(jogador.contract.loyalty_until).split(" ");
+        return (
+          <span>
+            {data}
+            <span className="block text-xs text-muted-foreground">{hora}</span>
+          </span>
+        );
+      },
     },
     {
       titulo: "Dias restantes",
@@ -67,6 +80,7 @@ function montarColunas(
     },
     {
       titulo: "Ações",
+      tituloOculto: true,
       celula: (jogador) => (
         <Button type="button" variant="outline" size="sm" onClick={() => aoVender(jogador)}>
           <HandCoins />
@@ -93,6 +107,16 @@ export function TabelaDoElenco({ jogadores, consulta, aoVender }: PropriedadesTa
         vazioDescricao:
           "Compre jogadores livres para montar o elenco. O limite é de 12 jogadores, e o custo de cada compra não pode passar de 50% do caixa.",
       }}
+      cabecalho={
+        <div>
+          <h2 className="font-semibold">Elenco</h2>
+          <p className="text-xs text-muted-foreground">
+            Ordem por posição (GOL, ZAG, LAT, MEI, ATA), depois pelo nome. Contrato calculado para
+            uma venda agora.
+          </p>
+        </div>
+      }
+      iconeVazio={<Shirt className="size-5" />}
       acaoVazio={
         <Button asChild variant="outline">
           <Link to="/jogadores" search={{ situacao: "livres" }}>

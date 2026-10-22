@@ -1,4 +1,4 @@
-import { Coins, Search, User } from "lucide-react";
+import { Coins, HeartPulse, Search, Shield, Shirt, User } from "lucide-react";
 import { useRef, useState } from "react";
 
 import type { ResumoDoClube } from "@/api/clube";
@@ -59,6 +59,7 @@ interface PropriedadesBarraDeFiltros {
 
 export function BarraDeFiltros({ filtros, clubes, aoMudar }: PropriedadesBarraDeFiltros) {
   const clubeDesabilitado = filtros.situacao === "livres";
+  const nomeDoClubeEscolhido = clubes?.find((clube) => clube.id === filtros.clubeId)?.name;
 
   return (
     <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border p-2">
@@ -70,8 +71,12 @@ export function BarraDeFiltros({ filtros, clubes, aoMudar }: PropriedadesBarraDe
           aoMudar({ posicao: valor === semFiltro ? undefined : (valor as Posicao) })
         }
       >
-        <SelectTrigger aria-label="Posição" className="w-40">
-          <SelectValue />
+        <SelectTrigger aria-label="Posição">
+          <Shirt />
+          {/* J01/J02: fechado, mostra só o nome do filtro ou "Filtro: escolha" */}
+          <SelectValue>
+            {filtros.posicao ? `Posição: ${nomesDasPosicoes[filtros.posicao]}` : "Posição"}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value={semFiltro}>Todas as posições</SelectItem>
@@ -89,8 +94,11 @@ export function BarraDeFiltros({ filtros, clubes, aoMudar }: PropriedadesBarraDe
           aoMudar({ condicao: valor === semFiltro ? undefined : (valor as Condicao) })
         }
       >
-        <SelectTrigger aria-label="Condição" className="w-44">
-          <SelectValue />
+        <SelectTrigger aria-label="Condição">
+          <HeartPulse />
+          <SelectValue>
+            {filtros.condicao ? `Condição: ${nomesDasCondicoes[filtros.condicao]}` : "Condição"}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value={semFiltro}>Todas as condições</SelectItem>
@@ -111,8 +119,11 @@ export function BarraDeFiltros({ filtros, clubes, aoMudar }: PropriedadesBarraDe
             aoMudar({ clubeId: valor === semFiltro ? undefined : Number(valor) })
           }
         >
-          <SelectTrigger aria-label="Clube" className="w-44">
-            <SelectValue />
+          <SelectTrigger aria-label="Clube">
+            <Shield />
+            <SelectValue>
+              {nomeDoClubeEscolhido ? `Clube: ${nomeDoClubeEscolhido}` : "Clube"}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={semFiltro}>Todos os clubes</SelectItem>

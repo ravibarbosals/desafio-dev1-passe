@@ -1,4 +1,5 @@
 import type { UseQueryResult } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { ShoppingCart } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -10,9 +11,20 @@ import { Badge } from "@/componentes/ui/badge";
 import { Button } from "@/componentes/ui/button";
 import { formatarMoeda } from "@/lib/formatacao";
 import { nomesDasPosicoes } from "@/lib/rotulos";
+import { cn } from "@/lib/utils";
 
+import { AvatarDoJogador } from "./AvatarDoJogador";
 import { MenuDoJogador, type AcoesDoJogador } from "./MenuDoJogador";
 import { SeloDeCondicao } from "./SeloDeCondicao";
+
+interface PropriedadesTabelaDeJogadores {
+  consulta: UseQueryResult<PaginaDeJogadores>;
+  clubes: ResumoDoClube[] | undefined;
+  textoVazio: string;
+  acaoVazio?: ReactNode;
+  aoMudarPagina: (pagina: number) => void;
+  acoes: AcoesDoJogador;
+}
 
 function montarColunas(
   clubesPorId: Map<number, ResumoDoClube>,
@@ -22,9 +34,12 @@ function montarColunas(
     {
       titulo: "Jogador",
       celula: (jogador) => (
-        <div>
-          <p className="font-medium">{jogador.name}</p>
-          <p className="text-xs text-muted-foreground">{nomesDasPosicoes[jogador.position]}</p>
+        <div className="flex items-center gap-3">
+          <AvatarDoJogador id={jogador.id} nome={jogador.name} />
+          <div>
+            <p className="font-medium">{jogador.name}</p>
+            <p className="text-xs text-muted-foreground">{nomesDasPosicoes[jogador.position]}</p>
+          </div>
         </div>
       ),
     },
@@ -37,7 +52,10 @@ function montarColunas(
       celula: (jogador) => <span className="font-semibold">{jogador.overall}</span>,
       alinharADireita: true,
     },
-    { titulo: "Agilidade", celula: (jogador) => jogador.agility, alinharADireita: true },
+    {
+      titulo: "Agilidade",
+      celula: (jogador) => <BarraDeAgilidade agilidade={jogador.agility} />,
+    },
     { titulo: "Idade", celula: (jogador) => jogador.age, alinharADireita: true },
     {
       titulo: "Condição",
@@ -61,6 +79,7 @@ function montarColunas(
     },
     {
       titulo: "Ações",
+      tituloOculto: true,
       celula: (jogador) => (
         <div className="flex items-center justify-end gap-1">
           {/* Só jogador livre pode ser comprado (RN12) */}
@@ -83,6 +102,20 @@ function montarColunas(
   ];
 }
 
+// RN do valor de mercado: de 1 a 30 e de 80 a 100 a agilidade muda o desconto da condição
+function BarraDeAgilidade({ agilidade }: { agilidade: number }) {
+  const cor =
+    agilidade <= 30 ? "bg-red-500" : agilidade >= 80 ? "bg-green-600" : "bg-muted-foreground";
+  return (
+    <span className="flex items-center gap-2">
+      <span className="w-6 text-right">{agilidade}</span>
+      <span aria-hidden className="h-1.5 w-8 overflow-hidden rounded-full bg-muted">
+        <span className={cn("block h-full rounded-full", cor)} style={{ width: `${agilidade}%` }} />
+      </span>
+    </span>
+  );
+}
+
 // O jogador traz só o club_id; a sigla e o nome vêm de GET /clubs
 function celulaDoClube(clubeId: number | null, clubesPorId: Map<number, ResumoDoClube>): ReactNode {
   if (clubeId === null) {
@@ -95,18 +128,15 @@ function celulaDoClube(clubeId: number | null, clubesPorId: Map<number, ResumoDo
   return (
     <span className="flex items-center gap-2">
       <Badge variant="outline">{clube.acronym}</Badge>
-      {clube.name}
+      <Link
+        to="/clubes/$id"
+        params={{ id: String(clube.id) }}
+        className="underline underline-offset-4 hover:text-primary"
+      >
+        {clube.name}
+      </Link>
     </span>
   );
-}
-
-interface PropriedadesTabelaDeJogadores {
-  consulta: UseQueryResult<PaginaDeJogadores>;
-  clubes: ResumoDoClube[] | undefined;
-  textoVazio: string;
-  acaoVazio?: ReactNode;
-  aoMudarPagina: (pagina: number) => void;
-  acoes: AcoesDoJogador;
 }
 
 export function TabelaDeJogadores({

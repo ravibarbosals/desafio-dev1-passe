@@ -6,20 +6,27 @@ import { Button } from "@/componentes/ui/button";
 import type { FiltroAtivo } from "./filtros-ativos";
 
 interface PropriedadesFiltrosAtivos {
+  // "Filtros ativos:" (J02) ou "Resultados para a busca:" (J03)
+  titulo: string;
   filtros: FiltroAtivo[];
   aoRemover: (filtro: FiltroAtivo) => void;
   aoLimparTodos: () => void;
 }
 
-export function FiltrosAtivos({ filtros, aoRemover, aoLimparTodos }: PropriedadesFiltrosAtivos) {
+export function FiltrosAtivos({
+  titulo,
+  filtros,
+  aoRemover,
+  aoLimparTodos,
+}: PropriedadesFiltrosAtivos) {
   if (filtros.length === 0) {
     return null;
   }
   return (
     <div className="mb-3 flex flex-wrap items-center gap-2 text-sm">
-      <span className="text-muted-foreground">Filtros ativos:</span>
+      <span className="text-muted-foreground">{titulo}</span>
       {filtros.map((filtro) => (
-        <Badge key={filtro.rotulo} variant="secondary" className="gap-1 pr-1">
+        <Badge key={filtro.rotulo} variant="outline" className="gap-1 pr-1">
           {filtro.rotulo}
           <button
             type="button"

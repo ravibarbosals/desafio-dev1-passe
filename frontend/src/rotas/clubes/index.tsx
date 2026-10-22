@@ -13,10 +13,13 @@ import { Button } from "@/componentes/ui/button";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/componentes/ui/select";
+import { minusculaInicial } from "@/lib/formatacao";
 import { nomesDasOrdensDosClubes } from "@/lib/rotulos";
 
 // RN10: a liga aceita no máximo 20 clubes
@@ -39,56 +42,69 @@ function PaginaClubes() {
   const [novoClubeAberto, setNovoClubeAberto] = useState(false);
   const quantidade = clubes.data?.length;
 
-  const botaoNovoClube = (
-    <Button type="button" onClick={() => setNovoClubeAberto(true)}>
-      <Plus />
-      Novo clube
-    </Button>
-  );
-
   return (
     <>
       <TituloPagina
         icone={Shield}
         titulo="Clubes"
         descricao="Cada clube começa com 300,00 em caixa e sem jogadores. A liga aceita no máximo 20 clubes."
-        acao={botaoNovoClube}
+        acao={
+          <Button type="button" onClick={() => setNovoClubeAberto(true)}>
+            <Plus />
+            Novo clube
+          </Button>
+        }
       />
       <ModalNovoClube aberto={novoClubeAberto} aoMudarAberto={setNovoClubeAberto} />
 
-      <div className="mb-3 flex items-center justify-between gap-4">
-        <p className="flex items-center gap-2 text-sm font-medium">
-          {quantidade === undefined ? "Clubes" : `${quantidade} clubes`}
-          {quantidade !== undefined && (
-            <Badge variant="secondary">
-              {quantidade} de {limiteDeClubes}
-            </Badge>
-          )}
-        </p>
+      {/* C01: quantidade e ordenação no alto do quadro; no vazio (C09) somem junto com a tabela */}
+      <TabelaDeClubes
+        consulta={clubes}
+        cabecalho={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="flex items-center gap-2 text-sm font-medium">
+              {quantidade === undefined ? "Clubes" : `${quantidade} clubes`}
+              {quantidade !== undefined && (
+                <Badge variant="secondary">
+                  {quantidade} de {limiteDeClubes}
+                </Badge>
+              )}
+            </p>
 
-        <Select
-          value={ordem ?? "name"}
-          onValueChange={(valor) =>
-            void navegar({
-              search: { ordem: valor === "name" ? undefined : (valor as OrdemDosClubes) },
-            })
-          }
-        >
-          <SelectTrigger aria-label="Ordenar">
-            <ArrowUpDown />
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {Object.entries(nomesDasOrdensDosClubes).map(([valor, nome]) => (
-              <SelectItem key={valor} value={valor}>
-                {nome}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <TabelaDeClubes consulta={clubes} acaoVazio={botaoNovoClube} />
+            <Select
+              value={ordem ?? "name"}
+              onValueChange={(valor) =>
+                void navegar({
+                  search: { ordem: valor === "name" ? undefined : (valor as OrdemDosClubes) },
+                })
+              }
+            >
+              <SelectTrigger aria-label="Ordenar">
+                <ArrowUpDown />
+                <SelectValue>
+                  Ordenar: {minusculaInicial(nomesDasOrdensDosClubes[ordem ?? "name"])}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent align="end">
+                <SelectGroup>
+                  <SelectLabel>Ordenar por</SelectLabel>
+                  {Object.entries(nomesDasOrdensDosClubes).map(([valor, nome]) => (
+                    <SelectItem key={valor} value={valor}>
+                      {nome}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+        }
+        acaoVazio={
+          <Button type="button" variant="outline" onClick={() => setNovoClubeAberto(true)}>
+            <Plus />
+            Novo clube
+          </Button>
+        }
+      />
 
       <p className="mt-3 text-xs text-muted-foreground">
         Clubes pelo nome por padrão ou pelo patrimônio, com empate desfeito pelo nome. Caixa, valor

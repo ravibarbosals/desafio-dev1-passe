@@ -1,6 +1,7 @@
 import type { Posicao } from "@/api/jogadores";
 import { Button } from "@/componentes/ui/button";
 import { nomesDasPosicoes } from "@/lib/rotulos";
+import { cn } from "@/lib/utils";
 
 interface PropriedadesSeletorDePosicao {
   valor: Posicao | "";
@@ -25,12 +26,19 @@ export function SeletorDePosicao({
           <Button
             key={sigla}
             type="button"
-            variant={valor === sigla ? "default" : "outline"}
+            variant="outline"
             aria-pressed={valor === sigla}
             disabled={travada && valor !== sigla}
             onClick={() => aoMudar(sigla)}
+            className={cn(
+              "h-auto flex-col gap-0 py-2",
+              valor === sigla && "border-primary bg-primary/5 text-primary hover:bg-primary/10",
+            )}
           >
-            {sigla} · {nome}
+            <span className="font-semibold">{sigla}</span>
+            <span className={cn("text-xs font-normal", valor !== sigla && "text-muted-foreground")}>
+              {nome}
+            </span>
           </Button>
         ))}
       </div>
@@ -39,7 +47,7 @@ export function SeletorDePosicao({
           Jogador com clube não muda de posição: as outras posições ficam desabilitadas.
         </p>
       )}
-      {erro && <p className="text-sm text-destructive">{erro}</p>}
+      {erro && <p className="text-xs text-destructive">{erro}</p>}
     </fieldset>
   );
 }
