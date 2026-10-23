@@ -2,6 +2,18 @@
 
 Estudo de caso SENAI/PE – CÓD. 237 DESENVOLVEDOR I (FULLSTACK).
 
+Sistema web para gerir o mercado de uma liga de futebol fictícia: cadastro e listagem de jogadores com valor de mercado, clubes com caixa e patrimônio, compra e venda com contrato de fidelidade, histórico de transações com exportação em CSV, escalação, partidas e classificação.
+
+| Parte | Endereço |
+|---|---|
+| API (origem, sem `/api/v1`) | `http://localhost:3000` |
+| Interface | `http://localhost:5173` |
+| Swagger | `http://localhost:3000/api-docs` |
+
+O backend usa NestJS com TypeORM e PostgreSQL. O frontend usa React com Vite. Os dois estão em TypeScript.
+
+Detalhes de cada parte (rotas, telas, scripts e estrutura): [backend/README.md](backend/README.md) e [frontend/README.md](frontend/README.md).
+
 ## Pré-requisitos
 
 - Ubuntu 24.04 (amd64)
@@ -61,13 +73,13 @@ A API não precisa ser reiniciada.
 Com os processos dos passos anteriores parados, na raiz do repositório:
 
 ```bash
-docker compose up -d --build --wait
+docker compose up --build
 ```
 
 O comando sobe o banco, aplica as migrations e sobe a API (`http://localhost:3000`) e a interface (`http://localhost:5173`). Nesse modo, as variáveis estão no próprio `docker-compose.yml` e nenhum `.env` é usado.
 
-- Recriar o banco do zero: `docker compose down -v` e depois `docker compose up -d --build --wait`
 - Parar tudo: `docker compose down`
+- Recriar o banco do zero: `docker compose down -v` e, depois, `docker compose up --build` de novo
 
 ## Testes, lint e formatação
 
@@ -98,7 +110,7 @@ npm run format:check
 ## Documentação da API e logs
 
 - Swagger: `http://localhost:3000/api-docs`, com a API no ar (pelo `npm run start:prod` ou pelo Docker).
-- Logs: cada requisição gera uma linha no terminal da API, com data e hora, método, caminho, status e duração, pelo `Logger` do NestJS. No modo Docker, as linhas aparecem em `docker compose logs -f api`.
+- Logs: cada requisição gera uma linha no terminal da API, com data e hora, método, caminho, status e duração, pelo `Logger` do NestJS. No modo Docker, as linhas aparecem no próprio terminal do `docker compose up --build`.
 
 ## Variáveis de ambiente
 
@@ -198,15 +210,14 @@ Bibliotecas do frontend (`frontend/package.json`):
 Decisões sobre detalhes que o enunciado não definiu:
 
 - **Idade:** é o número gravado e só muda pela edição; o jogador não envelhece com o tempo.
-- **Espaço nos nomes:** só o caractere U+0020 conta como espaço. Antes de validar e gravar, o texto é convertido para a forma Unicode NFC, para que "Á" composto e "A" seguido do acento separado sejam o mesmo nome.
-- **Nome do clube:** todo pedaço entre espaços precisa ser uma palavra com pelo menos uma letra (`Águias - FC` é recusado). A sigla começa pela primeira **letra** do nome, comparada sem acento e sem diferenciar maiúsculas.
+- **Acentos nos nomes:** antes de validar e gravar, o texto é convertido para a forma Unicode NFC, para que "Á" composto e "A" seguido do acento separado sejam o mesmo nome.
+- **Nome do clube:** todo pedaço entre espaços precisa ser uma palavra, com pelo menos uma letra; um hífen solto, como em `Águias - FC`, é recusado.
 - **Nome do jogador:** um pedaço sem letra (como `-` ou aspas) é aceito, mas não conta como palavra.
 - **Nome único do clube:** a comparação usa uma coluna normalizada, preenchida pela aplicação, com índice único no banco.
-- **Edição do jogador:** "mudar de posição" é enviar uma posição diferente da atual; reenviar a mesma é aceito. O limite de agilidade a partir de 35 anos vale também na edição (400).
-- **Compra:** "depois do momento da compra" é estritamente depois, e o limite de 1.095 dias é inclusivo, comparado com o instante do servidor.
-- **Pedidos sem corpo** (consultas, exclusão e venda): um corpo enviado é ignorado, mesmo malformado.
+- **Edição do jogador:** "mudar de posição" é enviar uma posição diferente da atual; reenviar a mesma é aceito. O limite de agilidade a partir de 35 anos usa a idade enviada no `PUT`, não a gravada.
+- **Fim da fidelidade:** "depois do momento da compra" e "até 1.095 dias" são comparados com o relógio do servidor no momento do pedido.
 - **Rotas fora do `/api/v1`:** `GET /health` (healthcheck) e `/api-docs` (Swagger). Dentro de `/api/v1`, só as rotas do enunciado.
-- **Dinheiro:** no código, os valores são inteiros em centavos, e cada resultado é arredondado uma única vez, no fim do cálculo; no banco, ficam em `NUMERIC`.
+- **Dinheiro:** no código, os valores são inteiros em centavos, para não haver erro de ponto flutuante; no banco, ficam em `NUMERIC`.
 - **Listagens com valores calculados** (valor de mercado, patrimônio, classificação): o banco aplica os filtros simples, e a busca, a ordenação e a paginação são feitas na aplicação, para seguir a ordem alfabética exata do enunciado.
 - **Concorrência:** compra, venda, escalação e partida travam as linhas com `SELECT … FOR UPDATE`, sempre na mesma ordem (jogadores e depois clubes, por id), para não haver deadlock. A criação de clube usa um bloqueio próprio, para que o limite de 20 clubes não seja ultrapassado por dois pedidos ao mesmo tempo.
 - **Nomes no código:** os identificadores estão em português, sem acento. Ficam em inglês só os nomes impostos pelo framework ou pela API (sufixos como `Controller` e `Service`, campos em `snake_case`).
@@ -221,7 +232,7 @@ Todas as funcionalidades foram implementadas.
 
 ## Uso de inteligência artificial
 
-**Ferramenta:** Claude Code (Anthropic), no terminal. Não usei outra ferramenta de IA.
+**Ferramenta:** Claude Code (Anthropic), no terminal.
 
 **Como:** combinei uma regra no início do projeto e a segui até o fim.
 
@@ -232,7 +243,7 @@ Todas as funcionalidades foram implementadas.
 **Onde:** em todo o projeto, sempre por esse fluxo.
 
 - Backend: estrutura dos módulos, DTOs e validações, funções de cálculo (valor de mercado, taxas, multa, comissão, classificação) e os testes delas, transações e bloqueios, migrations, Docker e Swagger.
-- Frontend: telas, componentes, formulários, chamadas à API, testes de componente e adaptação para 375 px.
+- Frontend: telas, componentes, formulários, chamadas à API e testes de componente.
 
 **Por quê:** para ganhar velocidade num prazo curto sem perder o controle do código. Digitar e executar cada passo me obrigava a entender o que estava entrando, e a revisão depois de cada commit pegava os erros cedo.
 
