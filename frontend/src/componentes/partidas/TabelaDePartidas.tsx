@@ -4,6 +4,7 @@ import { ChevronRight, Swords } from "lucide-react";
 import type { ReactNode } from "react";
 
 import type { ResumoDaPartida } from "@/api/partidas";
+import { EscudoDoClube } from "@/componentes/clubes/EscudoDoClube";
 import { TabelaComEstados, type ColunaDaTabela } from "@/componentes/tabela/TabelaComEstados";
 import { Badge } from "@/componentes/ui/badge";
 import { Button } from "@/componentes/ui/button";
@@ -40,7 +41,9 @@ function montarColunas(siglas: Map<number, string>): ColunaDaTabela<ResumoDaPart
           <span className={cn(partida.result === "MANDANTE" && "font-semibold")}>
             {partida.home.club_name}
           </span>
-          <Badge variant="outline">{siglas.get(partida.home.club_id)}</Badge>
+          <EscudoDoClube sigla={siglas.get(partida.home.club_id)} className="size-5">
+            <Badge variant="outline">{siglas.get(partida.home.club_id)}</Badge>
+          </EscudoDoClube>
         </span>
       ),
       alinharADireita: true,
@@ -57,7 +60,9 @@ function montarColunas(siglas: Map<number, string>): ColunaDaTabela<ResumoDaPart
       titulo: "Visitante",
       celula: (partida) => (
         <span className="flex items-center gap-2">
-          <Badge variant="outline">{siglas.get(partida.away.club_id)}</Badge>
+          <EscudoDoClube sigla={siglas.get(partida.away.club_id)} className="size-5">
+            <Badge variant="outline">{siglas.get(partida.away.club_id)}</Badge>
+          </EscudoDoClube>
           <span className={cn(partida.result === "VISITANTE" && "font-semibold")}>
             {partida.away.club_name}
           </span>

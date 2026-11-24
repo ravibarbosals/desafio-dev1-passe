@@ -28,7 +28,8 @@ const ESCUDOS: Record<string, string> = {
 };
 
 interface PropriedadesEscudoDoClube {
-  sigla: string;
+  // undefined enquanto a lista de clubes carrega (partidas e classificação)
+  sigla: string | undefined;
   // Tamanho do escudo (ex.: "size-5")
   className?: string;
   // O que aparece quando o clube não tem escudo: o selo com a sigla de cada tela
@@ -37,7 +38,7 @@ interface PropriedadesEscudoDoClube {
 
 // O nome do clube sempre aparece ao lado, então a imagem é decorativa (alt vazio)
 export function EscudoDoClube({ sigla, className, children }: PropriedadesEscudoDoClube) {
-  const arquivo = ESCUDOS[sigla];
+  const arquivo = sigla === undefined ? undefined : ESCUDOS[sigla];
   if (!arquivo) {
     return children;
   }

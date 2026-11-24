@@ -27,4 +27,15 @@ describe("EscudoDoClube", () => {
     expect(container.querySelector("img")).toBeNull();
     expect(screen.getByText("A")).toBeInTheDocument();
   });
+
+  it("mostra o selo enquanto a sigla ainda não carregou", () => {
+    const { container } = render(
+      <EscudoDoClube sigla={undefined}>
+        <span>carregando</span>
+      </EscudoDoClube>,
+    );
+
+    expect(container.querySelector("img")).toBeNull();
+    expect(screen.getByText("carregando")).toBeInTheDocument();
+  });
 });

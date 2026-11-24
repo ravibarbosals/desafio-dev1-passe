@@ -4,6 +4,7 @@ import { Shield } from "lucide-react";
 import type { ReactNode } from "react";
 
 import type { LinhaDaClassificacao } from "@/api/partidas";
+import { EscudoDoClube } from "@/componentes/clubes/EscudoDoClube";
 import { TabelaComEstados, type ColunaDaTabela } from "@/componentes/tabela/TabelaComEstados";
 import { Badge } from "@/componentes/ui/badge";
 import { Button } from "@/componentes/ui/button";
@@ -32,7 +33,9 @@ function montarColunas(siglas: Map<number, string>): ColunaDaTabela<LinhaDaClass
       titulo: "Clube",
       celula: (linha) => (
         <span className="flex items-center gap-2">
-          <Badge variant="outline">{siglas.get(linha.club_id)}</Badge>
+          <EscudoDoClube sigla={siglas.get(linha.club_id)} className="size-5">
+            <Badge variant="outline">{siglas.get(linha.club_id)}</Badge>
+          </EscudoDoClube>
           <Link
             to="/clubes/$id"
             params={{ id: String(linha.club_id) }}

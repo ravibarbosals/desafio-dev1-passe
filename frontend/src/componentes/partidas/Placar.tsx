@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import type { LadoDaPartida, ResumoDaPartida } from "@/api/partidas";
+import { EscudoDoClube } from "@/componentes/clubes/EscudoDoClube";
 import { Badge } from "@/componentes/ui/badge";
 import { useSiglasDosClubes } from "@/hooks/useSiglasDosClubes";
 import { formatarDataHora } from "@/lib/formatacao";
@@ -28,9 +29,11 @@ function Lado({ lado, papel, sigla }: PropriedadesLado) {
       )}
     >
       {sigla && (
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border bg-muted text-xs font-semibold">
-          {sigla}
-        </span>
+        <EscudoDoClube sigla={sigla} className="size-10">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border bg-muted text-xs font-semibold">
+            {sigla}
+          </span>
+        </EscudoDoClube>
       )}
       <div>
         <p className="font-semibold">{lado.club_name}</p>
