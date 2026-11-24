@@ -13,7 +13,7 @@ interface PropriedadesConteudoDoMenu {
 // Menu fixo à esquerda a partir de 768 px; abaixo disso, o mesmo conteúdo abre pelo MenuMovel
 export function MenuLateral() {
   return (
-    <aside className="hidden w-60 shrink-0 flex-col gap-6 p-4 md:flex">
+    <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col gap-6 p-4 md:flex">
       <ConteudoDoMenu />
     </aside>
   );
@@ -35,7 +35,8 @@ export function ConteudoDoMenu({ aoNavegar }: PropriedadesConteudoDoMenu) {
         </span>
       </Link>
 
-      <nav aria-label="Menu principal" className="flex flex-col gap-5">
+      <nav aria-label="Menu principal"
+        className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto [scrollbar-width:thin]">
         {secoesDoMenu.map((secao) => (
           <div key={secao.titulo}>
             <p className="mb-1 px-2 text-xs text-muted-foreground">{secao.titulo}</p>
