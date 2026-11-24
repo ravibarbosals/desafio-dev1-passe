@@ -35,8 +35,10 @@ export function ConteudoDoMenu({ aoNavegar }: PropriedadesConteudoDoMenu) {
         </span>
       </Link>
 
-      <nav aria-label="Menu principal"
-        className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto [scrollbar-width:thin]">
+      <nav
+        aria-label="Menu principal"
+        className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto [scrollbar-width:thin]"
+      >
         {secoesDoMenu.map((secao) => (
           <div key={secao.titulo}>
             <p className="mb-1 px-2 text-xs text-muted-foreground">{secao.titulo}</p>
