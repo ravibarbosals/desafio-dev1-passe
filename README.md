@@ -14,6 +14,14 @@ O backend usa NestJS com TypeORM e PostgreSQL. O frontend usa React com Vite. Os
 
 Detalhes de cada parte (rotas, telas, scripts e estrutura): [backend/README.md](backend/README.md) e [frontend/README.md](frontend/README.md).
 
+| Parte | Endereço |
+|---|---|
+| Interface | https://desafio-passe.vercel.app |
+| API (origem, sem `/api/v1`) | https://desafio-dev1-passe.onrender.com |
+| Swagger | https://desafio-dev1-passe.onrender.com/api-docs |
+
+Banco no Supabase, API no Render e interface na Vercel, todos no plano gratuito. A API dorme após 15 minutos sem acesso, então a primeira requisição pode levar cerca de 50 segundos. O banco da demo vem com os 20 clubes da Série B 2026 e jogadores das escalações-base de março de 2026; atributos e idades são fictícios.
+
 ## Pré-requisitos
 
 - Ubuntu 24.04 (amd64)
@@ -27,14 +35,6 @@ Instalados pelos próprios comandos abaixo, sem instalação manual:
 - dbmate 2.36.0, para as migrations (pelo `npm ci` do backend; no Docker, imagem `amacneil/dbmate:2.36.0`)
 
 As portas 3000 (API), 5173 (interface) e 5435 (banco) precisam estar livres.
-
-| Parte | Endereço |
-|---|---|
-| Interface | https://desafio-passe.vercel.app |
-| API (origem, sem `/api/v1`) | https://desafio-dev1-passe.onrender.com |
-| Swagger | https://desafio-dev1-passe.onrender.com/api-docs |
-
-Banco no Supabase, API no Render e interface na Vercel, todos no plano gratuito. A API dorme após 15 minutos sem acesso, então a primeira requisição pode levar cerca de 50 segundos. O banco da demo vem com os 20 clubes da Série B 2026 e jogadores das escalações-base de março de 2026; atributos e idades são fictícios.
 
 ## Instalar e executar
 
