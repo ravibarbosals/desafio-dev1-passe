@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verificar:
+    name: verificar (${{ matrix.parte }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        parte: [backend, frontend]
+    defaults:
+      run:
+        working-directory: ${{ matrix.parte }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: ${{ matrix.parte }}/package-lock.json
+      - run: npm ci
+      - run: npm run verificar
+      
