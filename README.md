@@ -28,6 +28,14 @@ Instalados pelos próprios comandos abaixo, sem instalação manual:
 
 As portas 3000 (API), 5173 (interface) e 5435 (banco) precisam estar livres.
 
+| Parte | Endereço |
+|---|---|
+| Interface | https://desafio-passe.vercel.app |
+| API (origem, sem `/api/v1`) | https://desafio-dev1-passe.onrender.com |
+| Swagger | https://desafio-dev1-passe.onrender.com/api-docs |
+
+Banco no Supabase, API no Render e interface na Vercel, todos no plano gratuito. A API dorme após 15 minutos sem acesso, então a primeira requisição pode levar cerca de 50 segundos. O banco da demo vem com os 20 clubes da Série B 2026 e jogadores das escalações-base de março de 2026; atributos e idades são fictícios.
+
 ## Instalar e executar
 
 Terminal 1, a partir da raiz do repositório (banco e backend):
