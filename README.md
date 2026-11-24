@@ -14,7 +14,7 @@ O backend usa NestJS com TypeORM e PostgreSQL. O frontend usa React com Vite. Os
 
 Detalhes de cada parte (rotas, telas, scripts e estrutura): [backend/README.md](backend/README.md) e [frontend/README.md](frontend/README.md).
 
-# Demo online
+## Demo online
 
 | Parte | Endereço |
 |---|---|
@@ -22,7 +22,7 @@ Detalhes de cada parte (rotas, telas, scripts e estrutura): [backend/README.md](
 | API (origem, sem `/api/v1`) | https://desafio-dev1-passe.onrender.com |
 | Swagger | https://desafio-dev1-passe.onrender.com/api-docs |
 
-Banco no Supabase, API no Render e interface na Vercel, todos no plano gratuito. A API dorme após 15 minutos sem acesso, então a primeira requisição pode levar cerca de 50 segundos. O banco da demo vem com os 20 clubes da Série B 2026 e jogadores das escalações-base de março de 2026; atributos e idades são fictícios.
+Banco no Supabase, API no Render e interface na Vercel, todos no plano gratuito. A API dorme após 15 minutos sem acesso, então a primeira requisição pode levar cerca de 50 segundos. O banco da demo vem com os 20 clubes da Série B 2026 e jogadores das escalações-base de março de 2026; atributos e idades são fictícios. Os escudos são marcas registradas dos respectivos clubes, usados apenas para fins de demonstração, sem fins comerciais; as imagens vêm da Wikipédia.
 
 ## Pré-requisitos
 
