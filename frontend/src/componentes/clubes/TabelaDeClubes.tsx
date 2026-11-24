@@ -4,6 +4,7 @@ import { ChevronRight, Shield } from "lucide-react";
 import type { ReactNode } from "react";
 
 import type { ResumoDoClube } from "@/api/clube";
+import { EscudoDoClube } from "@/componentes/clubes/EscudoDoClube";
 import { TabelaComEstados, type ColunaDaTabela } from "@/componentes/tabela/TabelaComEstados";
 import { Badge } from "@/componentes/ui/badge";
 import { Button } from "@/componentes/ui/button";
@@ -20,9 +21,11 @@ const colunas: ColunaDaTabela<ResumoDoClube>[] = [
     titulo: "Clube",
     celula: (clube) => (
       <span className="flex items-center gap-3">
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-md border bg-muted text-[0.625rem] font-semibold">
-          {clube.acronym}
-        </span>
+        <EscudoDoClube sigla={clube.acronym} className="size-8">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-md border bg-muted text-[0.625rem] font-semibold">
+            {clube.acronym}
+          </span>
+        </EscudoDoClube>
         <span className="font-medium">{clube.name}</span>
       </span>
     ),

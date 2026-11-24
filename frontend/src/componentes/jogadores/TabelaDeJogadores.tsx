@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 
 import type { ResumoDoClube } from "@/api/clube";
 import type { Jogador, PaginaDeJogadores } from "@/api/jogadores";
+import { EscudoDoClube } from "@/componentes/clubes/EscudoDoClube";
 import { Paginacao } from "@/componentes/tabela/Paginacao";
 import { TabelaComEstados, type ColunaDaTabela } from "@/componentes/tabela/TabelaComEstados";
 import { Badge } from "@/componentes/ui/badge";
@@ -127,7 +128,9 @@ function celulaDoClube(clubeId: number | null, clubesPorId: Map<number, ResumoDo
   }
   return (
     <span className="flex items-center gap-2">
-      <Badge variant="outline">{clube.acronym}</Badge>
+      <EscudoDoClube sigla={clube.acronym} className="size-5">
+        <Badge variant="outline">{clube.acronym}</Badge>
+      </EscudoDoClube>
       <Link
         to="/clubes/$id"
         params={{ id: String(clube.id) }}

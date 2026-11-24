@@ -18,6 +18,7 @@ import { consultaDoHistorico } from "@/api/mercado";
 import { Aviso } from "@/componentes/Aviso";
 import { CartoesDoClube } from "@/componentes/clubes/CartoesDoClube";
 import { EscalacaoDoClube } from "@/componentes/clubes/EscalacaoDoClube";
+import { EscudoDoClube } from "@/componentes/clubes/EscudoDoClube";
 import { HistoricoDoClube } from "@/componentes/clubes/HistoricoDoClube";
 import { ModalVenderJogador } from "@/componentes/clubes/ModalVenderJogador";
 import { TabelaDoElenco } from "@/componentes/clubes/TabelaDoElenco";
@@ -98,9 +99,11 @@ function PaginaDoClube() {
     <>
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-start gap-4">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-lg border bg-muted text-sm font-semibold">
-            {acronym}
-          </span>
+          <EscudoDoClube sigla={acronym} className="size-11">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-lg border bg-muted text-sm font-semibold">
+              {acronym}
+            </span>
+          </EscudoDoClube>
           <div>
             <h1 className="text-2xl font-semibold">{name}</h1>
             <div className="mt-1 flex flex-wrap gap-2">

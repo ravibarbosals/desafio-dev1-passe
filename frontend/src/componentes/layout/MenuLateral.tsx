@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 
 import { consultaDosClubes } from "@/api/clube";
+import { EscudoDoClube } from "@/componentes/clubes/EscudoDoClube";
 import { secoesDoMenu } from "@/componentes/layout/navegacao";
 import { RodapeDaLiga } from "@/componentes/layout/RodapeDaLiga";
 
@@ -75,9 +76,11 @@ export function ConteudoDoMenu({ aoNavegar }: PropriedadesConteudoDoMenu) {
                     className="flex items-center gap-2 rounded-md border border-transparent px-2 py-1.5 text-sm hover:bg-accent"
                     activeProps={{ className: "border-border bg-background font-medium shadow-xs" }}
                   >
-                    <span className="flex size-5 items-center justify-center rounded border bg-muted text-xs">
-                      {clube.acronym[0]}
-                    </span>
+                    <EscudoDoClube sigla={clube.acronym} className="size-5">
+                      <span className="flex size-5 items-center justify-center rounded border bg-muted text-xs">
+                        {clube.acronym[0]}
+                      </span>
+                    </EscudoDoClube>
                     {clube.name}
                   </Link>
                 </li>
